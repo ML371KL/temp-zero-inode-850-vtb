@@ -1,0 +1,217 @@
+# Строки эмитента для сборщиков индикаторов (docs/INDICATORS.md, docs/INTERFACES.md).
+# Всё, что называет эмитента (слова поиска новостей, хосты и шаблоны его документов, заголовки,
+# метки таблиц его релиза), живёт здесь, а не в коде `indicators/`. Имя, тикер и регномер —
+# `meta.company` книги. Подстановки: {ticker} — тикер из книги.
+# Ключ, которого здесь нет, читается с умолчанием кода (docs/INDICATORS.md §2); `http.user_agent` —
+# обязателен.
+
+http:
+  user_agent: "tzi-850-vtb/1.0 (fair value research pipeline; +https://github.com/ML371KL/temp-zero-inode-850-vtb)"
+
+iss:
+  board: TQBR
+  indices: [IMOEX, MOEXFN]            # индекс рынка и индекс финансов (плитки «Рынок», «Сектор»)
+  issue_size: true                    # ряд iss.issue_size.<тикер>: число акций по бирже — сверка с фактами (флаг выходов)
+  # Фьючерсы на акцию (FORTS) — за 100 акций, цена в рублях за 100 акций: в ряды не собираются.
+
+tinvest:
+  class_code: TQBR
+  dividends_days: 800                 # окно календаря дивидендов назад
+  dividends_split_adjusted: true      # размер на акцию брокер отдаёт уже в нынешних акциях: сборщик его не делит
+
+dividends:                            # дивиденд годовой: ключ записи реестра — год прибыли (`period_rule` не задаётся)
+  profit_year_lag: 1                  # год прибыли записи брокера = год даты реестра − 1
+  # Второй источник реестра: новость о решении собрания или рекомендации наблюдательного совета.
+  # Вид новости (kind в news/items.json) → слово источника в реестре; засчитывается одна новость.
+  news_kinds: {interfax: "Интерфакс", tass: "ТАСС", kommersant: "Коммерсантъ", vedomosti: "Ведомости"}
+  dps_tolerance: 0.005                # ₽: DPS источников совпадает (копейка)
+
+news:
+  issuer_keywords: ["ВТБ", "VTB", "#VTBR"]
+  ras_require: ["МСФО"]               # тема месячного события — результаты группы по МСФО
+  dividend_require: ["дивиденд"]
+  lookback_days: 1                    # архив дня Интерфакса: сегодня и вчера — каждый такт
+  catchup_days: 7                     # дни до недели назад — если не пройдены после своего окончания
+  interfax_day: "https://www.interfax.ru/business/news/{yyyy}/{mm}/{dd}/"
+  smartlab_news: "https://smart-lab.ru/forum/news/{ticker}/"
+  telegram_channels:                  # публичные превью t.me/s/<канал>; каждый канал — свой вид источника
+    - {name: markettwits, require: ["МСФО"]}                               # лента-агрегатор: заголовок в минуту релиза
+    - {name: cbrstocks, require: ["МСФО"], kind: "telegram:markettwits"}    # запасной агрегатор тех же заголовков — тот же вид
+    - {name: ctrlpack, keywords: any, require: ["МСФО"]}                    # канал эмитента для акционеров: итоги релиза
+  outlets:                            # издания: лента RSS → статья; виды — ключи news_kinds
+    - {name: kommersant, format: rss, listing: "https://www.kommersant.ru/RSS/news.xml", article: '/doc/\d+'}
+    - {name: vedomosti, format: rss, listing: "https://www.vedomosti.ru/rss/news", article: '/(?:investments|finance|business)/news/'}
+    - {name: tass, format: rss, listing: "https://tass.ru/rss/v2.xml", article: 'tass\.ru/', fetch_article: false}
+  pdf_patterns: ['https://www\.vtb\.ru/media-files/vtb\.ru/sitepages/ir/[^\s"''<>]+?\.(?:pdf|xlsx?)']
+
+issuer_docs:
+  # Сертификат хоста выдан удостоверяющим центром Минцифры: без закреплённого корня (indicators/tls) цепочка
+  # не проверяется. Адрес документа и каждый редирект — https на хосте этого списка, иначе не качаем.
+  hosts: [www.vtb.ru]
+  fallback_hosts: []                                      # запасного хоста нет
+  trusted_root_hosts: [www.vtb.ru]
+  ocr: false                                              # месячная книга и отчётность — с текстом; презентация — запись «появился»
+  press_page: "https://www.vtb.ru/ir/statements/results/"  # страница результатов по МСФО: один перечень всех документов
+  listing:                                                 # вёрстка перечня: ссылки на файлы с заголовком и подписью
+    format: links
+    title: "страница результатов эмитента"
+    link: '^/media-files/[^?#]+\.(?:pdf|xlsx?)$'           # адрес файла берётся только со страницы: имена неустойчивы
+    caption_date: '(?P<day>\d{1,2}) (?P<month>[а-яё]+) (?P<year>\d{4})'   # «41.66 Кб, 29 сентября 2026»
+  title_kinds:                                             # вид документа по заголовку; первый совпавший
+    call_transcript: 'расшифровка звонка'
+    databook: 'приложение к презентации'
+    ifrs_presentation: 'презентация по результатам'
+    # месячная книга и отчётность квартала носят один заголовок: различает их число месяцев
+    ifrs_monthly: 'финансов(?:ые результаты|ая информация) по мсфо за (?:2|4|5|7|8|10|11)\s?м\b'
+    ifrs_statements: 'финансов(?:ая отчетность|ая информация|ые результаты) по мсфо за (?:(?:3|6|9|12)\s?м\b|\d{4} год)'
+  title_period_patterns:                                   # период документа из заголовка
+    months: '(?P<months>\d{1,2})\s?м (?P<year>\d{4})'      # «за 8М 2026 года»: месяц — у месячной книги, квартал — у отчётности
+    year: '(?:за|результатам) (?P<fy>\d{4}) год'           # «за 2025 год» — четвёртый квартал
+    by_listing_date: [databook, call_transcript]           # периода в заголовке нет: квартал до дня записи
+  archive_kinds: [ifrs_statements, databook]               # качаются ради момента выхода и sha256; чисел из них не читается
+  monthly_book:                                            # месячная книга XLSX: лист → начало метки строки → метрика
+    flows:                                                 # потоки и коэффициенты: столбцы месяца и нарастающего итога
+      sheet: 'p&l'
+      month_column: "(?P<month_name>[а-яё]+)\\.?\\s*['’]\\s*(?P<year>\\d{4})"        # «август'2026», «апр'2024»
+      ytd_column: "(?P<months>\\d{1,2})\\s*(?:м|мес)\\.?\\s*['’]\\s*(?P<year>\\d{4})"  # «8М'2026», «4 мес'2023»
+      rows:                                                # основа метрики: <основа>_m и <основа>_ytd
+        nii: 'чистые процентные доходы'
+        fee: 'чистые комиссионные доходы'
+        other: 'прочие операционные доходы'
+        opinc: 'чод до резервов'
+        prov: 'создание резервов под кредитные убытки'
+        opex: 'расходы на содержание персонала'
+        pretax: 'прибыль до налогообложения'
+        tax: 'расходы по налогу на прибыль'
+        np: 'чистая прибыль'
+        nim: 'чистая процентная маржа'
+        cor: 'стоимость риска \(cor\)'
+        cir: 'расходы / доходы'
+        roe: 'возврат на капитал'
+    stocks:                                                # остатки и нормативы: столбцы — даты в заголовке
+      sheet: 'балансов'
+      rows:
+        loans_gross: 'кредиты и авансы клиентам \(до резервов\)'
+        loans_ul: '-\s*кредиты юл'
+        loans_fl: '-\s*кредиты фл'
+        funds_total: 'средства клиентов'
+        funds_ul: '-\s*средства клиентов юл'
+        funds_fl: '-\s*средства клиентов фл'
+        assets: 'итого активы'
+        equity: 'итого собственные средства'
+        npl90: 'коэф\. неработающих кредитов'
+        n20_0: 'норматив н20\.0'
+        n20_1: 'норматив н20\.1'
+        n20_2: 'норматив н20\.2'
+
+cbr_group: {forms: ["805", "803", "802"]}                # регномер — meta.company.cbr_regnum
+
+schedule:
+  monthly:                                               # месячные результаты группы по МСФО (книга XLSX)
+    kind: ifrs_monthly                                   # вид события календаря фактов и вид документа
+    title: "Месячные результаты по МСФО: {month}"
+    day: [22, 31]                                        # дни следующего месяца
+    skip_months: [1, 3, 6, 9, 12]                        # отдельного релиза нет: январь — в сумме двух месяцев,
+                                                         #   конец квартала — в отчёте МСФО
+    wakes_release: true                                  # принятый месяц будит пересборку выпуска
+  ifrs_quarter: {month_offset: 1, day: [24, 31]}         # МСФО 1–3 кварталов: месяц после квартала
+  ifrs_q4: {month_offset: 2, day: [20, 26]}              # МСФО года: февраль
+  form102_day: [24, 28]                                  # формы банка (до накопления истории first_seen)
+  form805_days_after_quarter: [41, 73]                   # окно выхода формы 0409805 после конца квартала
+  late_days: 7                                           # дозор ждёт после окна ещё столько дней
+  watch_kinds: [ifrs_monthly, ifrs, dividend_decision]   # дни дозора: месячная книга, МСФО квартала, решение о дивиденде
+  watch_window_msk: ["09:46", "14:00"]                   # такт release-watch (ops/systemd): книга выходит около 10:00
+
+monthly:
+  series_prefix: "ifrs.release."
+  main_metric: np_ytd                                    # по ней месяц считается принятым из релиза
+  basis: ifrs                                            # базис рядов: результаты группы по МСФО (управленческие, неаудированные)
+  table: flows                                           # месячная таблица выпуска — потоки и остатки по месяцам
+  form102: false                                         # форма 0409102 банка релиз группы не подтверждает и не заменяет
+  backfill: true                                         # месяцы без своего релиза — из следующей книги (разность итогов, столбцы сравнения)
+  metrics: [np_ytd, np_m, nii_ytd, nii_m, fee_ytd, fee_m, other_ytd, other_m, opinc_ytd, opinc_m, prov_ytd, prov_m,
+            opex_ytd, opex_m, pretax_ytd, pretax_m, tax_ytd, tax_m, nim_ytd, nim_m, cor_ytd, cor_m, cir_ytd, cir_m,
+            roe_ytd, roe_m, loans_gross, loans_ul, loans_fl, funds_total, funds_ul, funds_fl, assets, equity, npl90,
+            n20_0, n20_1, n20_2]
+
+nowcast:
+  main_benchmark: model
+  estimate: months                                       # оценка квартала — по месяцам МСФО (базис цели): моста нет
+  months:                                                # цель → ряды месяца и нарастающего итога месячного релиза
+    ni_q: {month: np_m, ytd: np_ytd}                     # T1: м1 + м2 + треть ожидания модели (1-й квартал: м1 + м2 — «два месяца»)
+    nim_q: {month: nim_m, ytd: nim_ytd}                  # T3: среднее месячных ЧПМ
+    cor_q: {month: cor_m, ytd: cor_ytd}                  # T4: среднее месячных значений стоимости риска
+  print_horizon: {days: 27, months_known: 2}             # печатный горизонт: вышел второй месячный релиз квартала либо 27-й день до отчёта
+  scoring: model                                         # запись T-90 — ожидание модели без оценки по месяцам
+  guidance:
+    ni_q: {item: net_profit, unit: money}                # эталон «гайденс»: прибыль года числом (млрд ₽) — четверть и остаток года
+
+seed:                                                    # история рядов: листы папки передачи (python -m indicators.seed)
+  layout: sheets
+  books: "primary/M_*_ifrs_results.xlsx"                 # месячные книги: разбираются тем же кодом, что у сборщика
+  sheets: "stage1/ind"                                   # листы истории: дни релизов и отчётов, кварталы, консенсус, гайденс, формы
+
+words:                                                   # слова, которые печатает выпуск
+  monthly_rows: "результаты группы по МСФО по месяцам"
+  monthly_schedule: "расписание месячных результатов по МСФО"
+  series: {"ifrs.release.": "месячные результаты эмитента по МСФО", "cbr.f805.": "ЦБ, форма 0409805",
+           "iss.issue_size.": "Мосбиржа ISS, число акций"}
+  nowcast:
+    equations:
+      ni_q: "прогноз = ожидание модели + w·(напечатанные месяцы квартала по МСФО + доля ожидания модели на остальные месяцы − ожидание)"
+      nim_q: "прогноз = ожидание модели + w·(среднее месячных ЧПМ по месячным результатам МСФО − ожидание)"
+      cor_q: "прогноз = ожидание модели + w·(среднее месячных значений стоимости риска по месячным результатам МСФО − ожидание)"
+    no_estimate:
+      ni_q: "месячных результатов по МСФО за месяцы квартала ещё нет: прогноз = ожидание модели"
+      nim_q: "месячных результатов по МСФО за месяцы квартала ещё нет: прогноз = ожидание модели"
+      cor_q: "месячных результатов по МСФО за месяцы квартала ещё нет: прогноз = ожидание модели"
+
+release_watch:
+  tolerance:
+    money: 0.15                       # млрд ₽: два источника согласны (книга печатает с шагом 0,1)
+    share: 0.0005                     # 0,05 п.п.
+    identity: 0.35                    # нарастающий итог = итог прошлого месяца + месяц
+
+# Плитки индикаторов (П§2 `indicators.tiles`). `unit` — код единицы: share — доля, bn — млрд ₽, price — ₽ (цена),
+# level — уровень индекса, number — число без денежной единицы. `basis` — код базиса: ifrs — месячные результаты
+# группы по МСФО, ras — РСБУ банка, regulatory — нормативы, market — рынок и ставки. Другой код — ошибка
+# реестра, плитки не выпускаются (`indicators/outputs.py`: TILE_UNITS, TILE_BASES).
+# Месячная книга выходит не за каждый месяц (после ноября следующая — за два месяца, в конце марта): срок
+# давности её плиток — 125 дней.
+tiles:
+  groups:
+    - {id: month, title: "Группа по МСФО за месяц"}
+    - {id: forms, title: "Формы ЦБ: банк и банковская группа"}
+    - {id: rates, title: "Ставки и кривая"}
+    - {id: market, title: "Рынок"}
+    - {id: sector, title: "Сектор — справочно"}
+  items:
+    - {id: m_np_m, group: month, title: "Чистая прибыль за месяц", unit: bn, basis: ifrs, series: [ifrs.release.np_m], cadence: month, stale_days: 125, change: previous}
+    - {id: m_np_ytd, group: month, title: "Чистая прибыль с начала года", unit: bn, basis: ifrs, series: [ifrs.release.np_ytd], cadence: month, stale_days: 125, change: previous}
+    - {id: m_nii_m, group: month, title: "Чистые процентные доходы за месяц", unit: bn, basis: ifrs, series: [ifrs.release.nii_m], cadence: month, stale_days: 125, change: previous}
+    - {id: m_nim_m, group: month, title: "ЧПМ за месяц", unit: share, basis: ifrs, series: [ifrs.release.nim_m], cadence: month, stale_days: 125, change: previous}
+    - {id: m_cor_m, group: month, title: "Стоимость риска за месяц", unit: share, basis: ifrs, series: [ifrs.release.cor_m], cadence: month, stale_days: 125, change: previous}
+    - {id: m_cor_ytd, group: month, title: "Стоимость риска с начала года", unit: share, basis: ifrs, series: [ifrs.release.cor_ytd], cadence: month, stale_days: 125, change: previous}
+    - {id: m_roe_ytd, group: month, title: "ROE с начала года", unit: share, basis: ifrs, series: [ifrs.release.roe_ytd], cadence: month, stale_days: 125, change: previous}
+    - {id: m_loans_gross, group: month, title: "Кредиты до резервов", unit: bn, basis: ifrs, series: [ifrs.release.loans_gross], cadence: month, stale_days: 125, change: previous}
+    - {id: m_loans_ul, group: month, title: "Кредиты юрлицам", unit: bn, basis: ifrs, series: [ifrs.release.loans_ul], cadence: month, stale_days: 125, change: previous}
+    - {id: m_loans_fl, group: month, title: "Кредиты физлицам", unit: bn, basis: ifrs, series: [ifrs.release.loans_fl], cadence: month, stale_days: 125, change: previous}
+    - {id: m_funds_total, group: month, title: "Средства клиентов", unit: bn, basis: ifrs, series: [ifrs.release.funds_total], cadence: month, stale_days: 125, change: previous}
+    - {id: m_npl90, group: month, title: "Неработающие кредиты, NPL 90+", unit: share, basis: ifrs, series: [ifrs.release.npl90], cadence: month, stale_days: 125, change: previous}
+    - {id: m_n20_0, group: month, title: "Н20.0 группы по месячным результатам", unit: share, basis: regulatory, series: [ifrs.release.n20_0], cadence: month, stale_days: 125, change: previous, note: "шаг 0,1 п.п."}
+    - {id: m_n20_1, group: month, title: "Н20.1 группы по месячным результатам", unit: share, basis: regulatory, series: [ifrs.release.n20_1], cadence: month, stale_days: 125, change: previous, note: "шаг 0,1 п.п."}
+    - {id: f135_n1_0, group: forms, title: "Н1.0 банка", unit: share, basis: regulatory, series: [cbr.f135.n1_0], cadence: month, stale_days: 75, change: previous}
+    - {id: f135_n1_1, group: forms, title: "Н1.1 банка", unit: share, basis: regulatory, series: [cbr.f135.n1_1], cadence: month, stale_days: 75, change: previous}
+    - {id: f805_n20_0, group: forms, title: "Н20.0 банковской группы", unit: share, basis: regulatory, series: [cbr.f805.n20_0], cadence: quarter, stale_days: 200, change: previous}
+    - {id: f805_n20_1, group: forms, title: "Н20.1 банковской группы", unit: share, basis: regulatory, series: [cbr.f805.n20_1], cadence: quarter, stale_days: 200, change: previous}
+    - {id: f123_capital, group: forms, title: "Собственные средства банка, форма 0409123", unit: bn, basis: ras, series: [cbr.f123.capital_total], cadence: month, stale_days: 75, change: previous}
+    - {id: key_rate, group: rates, title: "Ключевая ставка", unit: share, basis: market, series: [cbr.key_rate], cadence: day, stale_days: 7, change: previous_distinct, since: true}
+    - {id: ruonia, group: rates, title: "RUONIA", unit: share, basis: market, series: [cbr.ruonia], cadence: day, stale_days: 7, change: previous}
+    - {id: ofz_1y, group: rates, title: "КБД ОФЗ, 1 год", unit: share, basis: market, series: [iss.zcyc.1], cadence: day, stale_days: 7, change: previous}
+    - {id: ofz_10y, group: rates, title: "КБД ОФЗ, 10 лет", unit: share, basis: market, series: [iss.zcyc.10], cadence: day, stale_days: 7, change: previous}
+    - {id: deposit_top10, group: rates, title: "Максимальная ставка по вкладам топ-10", unit: share, basis: market, series: [cbr.deposit_top10], cadence: decade, stale_days: 25, change: previous}
+    - {id: liquidity, group: rates, title: "Структурный дефицит ликвидности", unit: bn, basis: market, series: [cbr.bliquidity], cadence: day, stale_days: 7, change: previous, note: "плюс — дефицит"}
+    - {id: "price_{ticker}", per_ticker: true, group: market, title: "Цена {ticker}", unit: price, basis: market, series: ["tinvest.price.{ticker}", "iss.price.{ticker}"], history: ["iss.close.{ticker}"], cadence: day, stale_days: 7, change: previous}
+    - {id: brokers_median, group: market, title: "Медиана целей брокеров", unit: price, basis: market, series: ["tinvest.brokers.median.{main_ticker}"], cadence: day, stale_days: 14, change: previous}
+    - {id: imoex, group: market, title: "Индекс Мосбиржи", unit: level, basis: market, series: [iss.index.IMOEX], cadence: day, stale_days: 7, change: previous}
+    - {id: moexfn, group: sector, title: "Индекс финансов Мосбиржи", unit: level, basis: market, series: [iss.index.MOEXFN], cadence: day, stale_days: 7, change: previous}

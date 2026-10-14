@@ -1,0 +1,675 @@
+{
+ "about": "Пример приложения K методики (docs/MODEL.md): дополнительный капитал держит долю RWA своей клетки — ключ capital.n20.t2_share {enabled, from} (§4.11, §4.14, §7, §10, §15.2). Собран по формулам текста в точной арифметике; деньги — млрд ₽, нормативы и доли — доли единицы; q = 0 — якорь 2027Q4, Q = 4 — 2028Q4.",
+ "share": {
+  "inputs": {
+   "capital": {
+    "rwa0": 1000,
+    "ded20_0": 60,
+    "ded11_0": 62.5,
+    "fvoci_recognition": 0.7,
+    "at1": 0,
+    "gap20": 0,
+    "gap11": 0.001
+   },
+   "periods": [
+    "2027Q4",
+    "2028Q1",
+    "2028Q2",
+    "2028Q3",
+    "2028Q4"
+   ],
+   "trajectory": [
+    10,
+    10,
+    12,
+    13.2,
+    14.4
+   ],
+   "rwa": {
+    "A": [
+     1000,
+     1100,
+     1200,
+     1320,
+     1440
+    ],
+    "B": [
+     1000,
+     1150,
+     1500,
+     1800,
+     2100
+    ]
+   },
+   "q_chi": 3,
+   "from": "2028Q3",
+   "quarter_Q": {
+    "A": {
+     "rwa": 1440,
+     "bv": 300,
+     "dpreg": 0,
+     "reserve": 0,
+     "e": 9,
+     "dpp20": 0.001,
+     "dpp11": 0.001
+    },
+    "B": {
+     "rwa": 2100,
+     "bv": 330,
+     "dpreg": 0,
+     "reserve": 0,
+     "e": 9,
+     "dpp20": 0.001,
+     "dpp11": 0.001
+    }
+   }
+  },
+  "path": {
+   "A": {
+    "rwa": [
+     1000,
+     1100,
+     1200,
+     1320,
+     1440
+    ],
+    "chi": 0.01,
+    "t2_key": [
+     10,
+     10,
+     12,
+     13.2,
+     14.4
+    ],
+    "t2_record": [
+     10,
+     10,
+     12,
+     13.2,
+     14.4
+    ],
+    "share_key": [
+     0.01,
+     0.009090909091,
+     0.01,
+     0.01,
+     0.01
+    ],
+    "share_record": [
+     0.01,
+     0.009090909091,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   "B": {
+    "rwa": [
+     1000,
+     1150,
+     1500,
+     1800,
+     2100
+    ],
+    "chi": 0.008,
+    "t2_key": [
+     10,
+     10,
+     12,
+     14.4,
+     16.8
+    ],
+    "t2_record": [
+     10,
+     10,
+     12,
+     13.2,
+     14.4
+    ],
+    "share_key": [
+     0.01,
+     0.008695652174,
+     0.008,
+     0.008,
+     0.008
+    ],
+    "share_record": [
+     0.01,
+     0.008695652174,
+     0.008,
+     0.007333333333,
+     0.006857142857
+    ]
+   }
+  },
+  "rows_Q": {
+   "A": {
+    "key": {
+     "rwa": 1440,
+     "bvreg": 300,
+     "ded20": 86.4,
+     "ded11": 90,
+     "t2": 14.4,
+     "k20": 228,
+     "k11": 201,
+     "a20": -0.001,
+     "a11": 0,
+     "n20": 0.157333333333,
+     "n11": 0.139583333333,
+     "n11_star": 0.145833333333,
+     "share_term": 0.01
+    },
+    "record": {
+     "rwa": 1440,
+     "bvreg": 300,
+     "ded20": 86.4,
+     "ded11": 90,
+     "t2": 14.4,
+     "k20": 228,
+     "k11": 201,
+     "a20": -0.001,
+     "a11": 0,
+     "n20": 0.157333333333,
+     "n11": 0.139583333333,
+     "n11_star": 0.145833333333,
+     "share_term": 0.01
+    },
+    "n20_key_minus_record": 0,
+    "formula": 0
+   },
+   "B": {
+    "key": {
+     "rwa": 2100,
+     "bvreg": 330,
+     "ded20": 126,
+     "ded11": 131.25,
+     "t2": 16.8,
+     "k20": 220.8,
+     "k11": 189.75,
+     "a20": -0.001,
+     "a11": 0,
+     "n20": 0.104142857143,
+     "n11": 0.090357142857,
+     "n11_star": 0.094642857143,
+     "share_term": 0.008
+    },
+    "record": {
+     "rwa": 2100,
+     "bvreg": 330,
+     "ded20": 126,
+     "ded11": 131.25,
+     "t2": 14.4,
+     "k20": 218.4,
+     "k11": 189.75,
+     "a20": -0.001,
+     "a11": 0,
+     "n20": 0.103,
+     "n11": 0.090357142857,
+     "n11_star": 0.094642857143,
+     "share_term": 0.006857142857
+    },
+    "n20_key_minus_record": 0.001142857143,
+    "formula": 0.001142857143
+   }
+  }
+ },
+ "terminal": {
+  "inputs": {
+   "terminal": {
+    "req20": 0.1,
+    "req11": 0.08,
+    "rwa": 2100,
+    "bv_q": 330,
+    "pbt_l": 40,
+    "y_bal": 0.1,
+    "c_wh": 0.12,
+    "headroom": 500,
+    "min_share": 0.1,
+    "wt": 0,
+    "tau": 0.2,
+    "nci": 0,
+    "coupon": 0,
+    "tau_stat": 0.2,
+    "lt_inflation": 0.04,
+    "real_growth": 0.02,
+    "fade": 0.5,
+    "multiple": 1,
+    "k_t": 0.16985856
+   },
+   "block_source": {
+    "f_a": 300,
+    "r_f": 160,
+    "c20": 80,
+    "c11": 85,
+    "dgrow20_over_rwa0": 0.06,
+    "dgrow11_over_rwa0": 0.0625
+   },
+   "chi": 0.008,
+   "kappa20_without_key": 0.161,
+   "kappa20_key": 0.153,
+   "kappa11": 0.1425,
+   "blocks": {
+    "record": {
+     "f_a": 300,
+     "r_f": 160,
+     "c20": 80,
+     "c11": 85,
+     "kappa20": 0.161,
+     "kappa11": 0.1425
+    },
+    "key": {
+     "f_a": 300,
+     "r_f": 160,
+     "c20": 80,
+     "c11": 85,
+     "kappa20": 0.153,
+     "kappa11": 0.1425
+    },
+    "key_no_kappa": {
+     "f_a": 300,
+     "r_f": 160,
+     "c20": 80,
+     "c11": 85,
+     "kappa20": 0.161,
+     "kappa11": 0.1425
+    }
+   }
+  },
+  "cases": {
+   "record": {
+    "1": {
+     "x20": 6.3,
+     "x11": 30.75,
+     "x_t": 6.3,
+     "bv_star": 323.7,
+     "g": 0.0608,
+     "y_x": 0.63,
+     "ci": 33.4416,
+     "lam_f": 1,
+     "business_capital": 323.7,
+     "business_ci": 33.4416,
+     "roe": 0.10331047266,
+     "roe_faded": 0.10331047266,
+     "p_t": 126.176615572404,
+     "tv_ri": -197.523384427596,
+     "tv_ddm": 132.476615572404,
+     "block": null
+    },
+    "0": {
+     "x20": 6.3,
+     "x11": 30.75,
+     "x_t": 6.3,
+     "bv_star": 323.7,
+     "g": 0.0608,
+     "y_x": 0.63,
+     "ci": 33.4416,
+     "lam_f": 0,
+     "business_capital": 217.94,
+     "business_ci": 49.92558336,
+     "roe": 0.229079486831,
+     "roe_faded": 0.199469023416,
+     "p_t": 185.629664199287,
+     "tv_ri": -138.070335800713,
+     "tv_ddm": 191.929664199287,
+     "block": {
+      "binding": "n20",
+      "c": 80,
+      "kappa": 0.161,
+      "f_a": 300,
+      "r_f": 160,
+      "f_k": 105.76,
+      "y_m": 0.1,
+      "d_f": 194.24,
+      "i_f": -15.5392
+     }
+    }
+   },
+   "key": {
+    "1": {
+     "x20": 8.7,
+     "x11": 30.75,
+     "x_t": 8.7,
+     "bv_star": 321.3,
+     "g": 0.0608,
+     "y_x": 0.87,
+     "ci": 33.2496,
+     "lam_f": 1,
+     "business_capital": 321.3,
+     "business_ci": 33.2496,
+     "roe": 0.103484593838,
+     "roe_faded": 0.103484593838,
+     "p_t": 125.754090279571,
+     "tv_ri": -195.545909720429,
+     "tv_ddm": 134.454090279571,
+     "block": null
+    },
+    "0": {
+     "x20": 8.7,
+     "x11": 30.75,
+     "x_t": 8.7,
+     "bv_star": 321.3,
+     "g": 0.0608,
+     "y_x": 0.87,
+     "ci": 33.2496,
+     "lam_f": 0,
+     "business_capital": 216.82,
+     "business_ci": 49.84220928,
+     "roe": 0.229878282815,
+     "roe_faded": 0.199868421408,
+     "p_t": 184.396764379052,
+     "tv_ri": -136.903235620948,
+     "tv_ddm": 193.096764379052,
+     "block": {
+      "binding": "n20",
+      "c": 80,
+      "kappa": 0.153,
+      "f_a": 300,
+      "r_f": 160,
+      "f_k": 104.48,
+      "y_m": 0.1,
+      "d_f": 195.52,
+      "i_f": -15.6416
+     }
+    }
+   },
+   "key_no_kappa": {
+    "1": {
+     "x20": 8.7,
+     "x11": 30.75,
+     "x_t": 8.7,
+     "bv_star": 321.3,
+     "g": 0.0608,
+     "y_x": 0.87,
+     "ci": 33.2496,
+     "lam_f": 1,
+     "business_capital": 321.3,
+     "business_ci": 33.2496,
+     "roe": 0.103484593838,
+     "roe_faded": 0.103484593838,
+     "p_t": 125.754090279571,
+     "tv_ri": -195.545909720429,
+     "tv_ddm": 134.454090279571,
+     "block": null
+    },
+    "0": {
+     "x20": 8.7,
+     "x11": 30.75,
+     "x_t": 8.7,
+     "bv_star": 321.3,
+     "g": 0.0608,
+     "y_x": 0.87,
+     "ci": 33.2496,
+     "lam_f": 0,
+     "business_capital": 215.54,
+     "business_ci": 49.73358336,
+     "roe": 0.230739460703,
+     "roe_faded": 0.200299010352,
+     "p_t": 184.21840155287,
+     "tv_ri": -137.08159844713,
+     "tv_ddm": 192.91840155287,
+     "block": {
+      "binding": "n20",
+      "c": 80,
+      "kappa": 0.161,
+      "f_a": 300,
+      "r_f": 160,
+      "f_k": 105.76,
+      "y_m": 0.1,
+      "d_f": 194.24,
+      "i_f": -15.5392
+     }
+    }
+   }
+  },
+  "business_at_T": {
+   "rwa": 1940,
+   "t2": 15.52,
+   "t2_block": 1.28,
+   "k20": 195.94,
+   "n20": 0.1
+  },
+  "business_at_T_without_kappa_correction": {
+   "rwa": 1940,
+   "t2": 16.8,
+   "k20": 195.94,
+   "n20": 0.1,
+   "t2_share": 0.008659793814
+  },
+  "tv_ddm_differences": {
+   "key_vs_record": {
+    "1": 1.977474707166,
+    "0": 1.167100179765
+   },
+   "kappa_correction": {
+    "1": 0,
+    "0": 0.178362826182
+   }
+  }
+ },
+ "recap": {
+  "inputs": {
+   "req20": 0.13,
+   "w_balancing": 0.2,
+   "trial": {
+    "rwa": 2100,
+    "k20": 220.8,
+    "n20": 0.104142857143,
+    "a20": -0.001
+   }
+  },
+  "rec": 54.3,
+  "d_rwa": 10.86,
+  "d_ded20": 0.6516,
+  "d_t2": 0.08688,
+  "k20_final_minus_trial": 53.73528,
+  "n20_final": 0.129058497484,
+  "n20_final_minus_req": -0.000941502516,
+  "same_without_t2_share_term": -0.000982661095
+ },
+ "bridge": {
+  "inputs": {
+   "anchor": {
+    "rwa": 1000,
+    "bvreg": 200,
+    "t2": 10,
+    "a20": 0
+   },
+   "k20_0": 150
+  },
+  "by_record": {
+   "key": {
+    "start": 0.15,
+    "end": 0.104142857143,
+    "profit_amount": 130,
+    "profit_pp": 0.061904761905,
+    "deductions_amount": -66,
+    "deductions_pp": -0.032428571429,
+    "rwa_growth_pp": -0.078571428571,
+    "other_amount": 6.8,
+    "other_pp": 0.003238095238
+   },
+   "record": {
+    "start": 0.15,
+    "end": 0.103,
+    "profit_amount": 130,
+    "profit_pp": 0.061904761905,
+    "deductions_amount": -66,
+    "deductions_pp": -0.032428571429,
+    "rwa_growth_pp": -0.078571428571,
+    "other_amount": 4.4,
+    "other_pp": 0.002095238095
+   }
+  }
+ },
+ "reanchor": {
+  "cases": {
+   "2028Q1": {
+    "new_anchor": "2028Q1",
+    "new_first_period": "2028Q2",
+    "from_new": "2028Q3",
+    "from_moved": false,
+    "q_chi_new": 2,
+    "t2_report": 10,
+    "chi_new": 0.008
+   },
+   "2028Q2": {
+    "new_anchor": "2028Q2",
+    "new_first_period": "2028Q3",
+    "from_new": "2028Q3",
+    "from_moved": false,
+    "q_chi_new": 1,
+    "t2_report": 12,
+    "chi_new": 0.008
+   },
+   "2028Q3": {
+    "new_anchor": "2028Q3",
+    "new_first_period": "2028Q4",
+    "from_new": "2028Q4",
+    "from_moved": true,
+    "q_chi_new": 1,
+    "t2_report": 14.4,
+    "chi_new": 0.008,
+    "t2_report_wrong_trajectory": 13.2,
+    "chi_wrong": 0.007333333333,
+    "n20_shift_next_quarters_wrong": -0.000666666667
+   }
+  },
+  "estimated_levels": {
+   "anchor": "2028Q3",
+   "from": "2028Q4",
+   "t2_0": 14.4,
+   "rwa_0": 1800,
+   "chi": 0.008,
+   "rwa_estimated": 2100,
+   "t2_estimated": 16.8,
+   "t2_trajectory_wrong": 14.4
+  }
+ },
+ "axis": {
+  "delta": 3,
+  "chi": 0.01,
+  "t2_key": [
+   13,
+   13,
+   15,
+   18,
+   21
+  ],
+  "t2_record": [
+   13,
+   13,
+   15,
+   16.2,
+   17.4
+  ],
+  "n20_shift_Q_key": 0.002,
+  "n20_shift_Q_record": 0.001428571429,
+  "share_shift": 0.002
+ },
+ "schema": [
+  {
+   "spec": null,
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "годен: ключа нет — поведение образца"
+  },
+  {
+   "spec": {
+    "enabled": true,
+    "from": "2028Q3"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "годен"
+  },
+  {
+   "spec": {
+    "enabled": true,
+    "from": "2028Q1"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "годен"
+  },
+  {
+   "spec": {
+    "enabled": true,
+    "from": "2027Q4"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: from вне 2028Q1…2028Q4"
+  },
+  {
+   "spec": {
+    "enabled": true,
+    "from": "2029Q1"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: from вне 2028Q1…2028Q4"
+  },
+  {
+   "spec": {
+    "enabled": true
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: нет from"
+  },
+  {
+   "spec": {
+    "enabled": false
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "годен: выключен"
+  },
+  {
+   "spec": {
+    "enabled": false,
+    "from": "2028Q3"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "годен: выключен"
+  },
+  {
+   "spec": {
+    "enabled": false,
+    "from": "2028-3"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: from — квартал ГГГГQn"
+  },
+  {
+   "spec": {
+    "enabled": "yes",
+    "from": "2028Q3"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: enabled — true | false"
+  },
+  {
+   "spec": {
+    "from": "2028Q3"
+   },
+   "anchor": "2027Q4",
+   "first_period": "2028Q1",
+   "last_period": "2028Q4",
+   "result": "отказ: enabled — true | false"
+  }
+ ]
+}

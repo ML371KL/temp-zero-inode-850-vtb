@@ -1,0 +1,353 @@
+{
+ "as_of": "2026-10-13",
+ "horizon": "4-й квартал 2026 года и 2027 год: отчёты МСФО, месячные результаты, форма 0409805, решения о дивидендах, заседания Банка России, ступени надбавок",
+ "note": "confirmed: true — дата объявлена (календарь инвестора банка, календарь Банка России, нормативный акт); estimated: true — день назван по ритму прошлых лет, окно earliest–latest; черновик — research/facts/vtb-regulation-macro/calendar_2026Q4_2027.tsv",
+ "sources": [
+  {
+   "key": "cbr_cal_mp",
+   "title": "Банк России: календарь решений по ключевой ставке на 2026 и 2027 годы (снимок 13.10.2026)",
+   "url": "https://www.cbr.ru/dkp/cal_mp/",
+   "accessed": "2026-10-13",
+   "file": "primary/vrm_cbr_cal_mp_20261013.html",
+   "sha256": "3362cffa65b67cfd64e0d367aca9ed300eac4ba264814135ea2d5a3e0c3629b6"
+  },
+  {
+   "key": "issuer_calendar",
+   "title": "Календарь инвестора на сайте Банка ВТБ (снимок 13.10.2026)",
+   "url": "https://www.vtb.ru/ir/calendar/",
+   "accessed": "2026-10-13",
+   "file": "primary/vrm_vtb_ir_calendar_20261013.html",
+   "sha256": "ea9b2d86d27839d90277108b34c3323ecd90fab1e7dfd0217375c9532089277a"
+  },
+  {
+   "key": "draft",
+   "title": "Черновик календаря направления vtb-regulation-macro",
+   "file": "research/facts/vtb-regulation-macro/calendar_2026Q4_2027.tsv",
+   "sha256": "ec2f02788a3f5ede82dcbef0a74a377063da9bc2a2513a4dd4da206edd6cdfac"
+  },
+  {
+   "key": "SH_2026_open_subscription_registration",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2026_open_subscription_registration.pdf)",
+   "file": "primary/SH_2026_open_subscription_registration.pdf",
+   "sha256": "065867b2bb5f5683ec0daf7f85cc8c7512438be32286c2ecdba714d0ceca6156"
+  },
+  {
+   "key": "vcs_news_interfax_2026-09-29_spo_end_october",
+   "title": "Банк ВТБ: документ или лист этапа 1 (vcs_news_interfax_2026-09-29_spo_end_october.html)",
+   "file": "primary/vcs_news_interfax_2026-09-29_spo_end_october.html",
+   "sha256": "a6705c402577086095be9ee490a27d753fbf885ca038036e8bb1ce97054385a5"
+  }
+ ],
+ "events": [
+  {
+   "id": "regulation-2026-10-15",
+   "kind": "regulation",
+   "date": "2026-10-15",
+   "title": "Вступает в силу надбавка 250 % к коэффициентам риска по облигациям, обеспеченным потребительскими и автокредитами",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "пресс-релиз Банка России от 14.09.2026 (черновик календаря vtb-regulation-macro), sha256 ec2f02788a3f5ede",
+   "note": "ВТБ — продавец секьюритизаций потребительских кредитов: цена «кредитного манёвра»"
+  },
+  {
+   "id": "cbr-2026-10-23",
+   "kind": "cbr_forecast",
+   "date": "2026-10-23",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке (опорное: среднесрочный прогноз)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)",
+   "note": "решение в 13:30 по московскому времени; публикация прогноза — вход миров семейства"
+  },
+  {
+   "id": "ifrs-2026Q3",
+   "kind": "ifrs",
+   "date": "2026-10-30",
+   "title": "МСФО группы за 3-й квартал и девять месяцев 2026 года",
+   "covers": "2026Q3",
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_vtb_ir_calendar_20261013.html (sha256 ea9b2d86d27839d9) (календарь инвестора на сайте банка; черновик vtb-regulation-macro)",
+   "note": "перезаякоривание на 30.09.2026; Н20.x на 01.10.2026 — в Databook и презентации"
+  },
+  {
+   "id": "spo-2026",
+   "kind": "deal",
+   "date": "2026-10-31",
+   "title": "Размещение дополнительных обыкновенных акций по открытой подписке: до 6 292 651 866 акций по 87 ₽ (до 547,5 млрд ₽); закрытие сделки с Wildberries & Russ",
+   "covers": null,
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2026-10-20",
+   "latest": "2026-11-30",
+   "in_book": false,
+   "src": "primary/SH_2026_open_subscription_registration.pdf (sha256 065867b2bb5f5683); primary/vcs_news_interfax_2026-09-29_spo_end_october.html (sha256 a6705c4025770860)",
+   "note": "выпуск зарегистрирован 17.07.2026, на 13.10.2026 не размещён; срок «конец октября» — сообщение Интерфакса 29.09.2026; до размещения — вне числа акций"
+  },
+  {
+   "id": "form805-2026Q3",
+   "kind": "form805",
+   "date": "2026-11-26",
+   "title": "Форма 0409805 банковской группы на 1 октября 2026 года на сайте Банка России: нормативы и капитал группы",
+   "covers": "2026Q3",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2026-11-10",
+   "latest": "2026-12-12",
+   "src": "оценка по сроку появления формы у группы Т (41–73 дня после конца квартала) (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "срок для группы ВТБ отдельно не установлен; до формы — нормативы из отчётности и месячных книг банка"
+  },
+  {
+   "id": "ifrs_monthly-2026M10",
+   "kind": "ifrs_monthly",
+   "date": "2026-11-27",
+   "title": "Результаты группы по МСФО за 10 месяцев 2026 года (месячная книга)",
+   "covers": "2026M10",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2026-11-25",
+   "latest": "2026-11-30",
+   "src": "ритм прошлых лет: 28.11.2025 (черновик vtb-regulation-macro), sha256 ec2f02788a3f5ede",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "cbr-2026-12-18",
+   "kind": "cbr_rate",
+   "date": "2026-12-18",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "ifrs_monthly-2026M11",
+   "kind": "ifrs_monthly",
+   "date": "2026-12-25",
+   "title": "Результаты группы по МСФО за 11 месяцев 2026 года (месячная книга)",
+   "covers": "2026M11",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2026-12-23",
+   "latest": "2026-12-30",
+   "src": "ритм прошлых лет: 26.12.2025 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "regulation-2027-01-01",
+   "kind": "regulation",
+   "date": "2027-01-01",
+   "title": "Надбавки к нормативам: поддержания капитала 1,5 %, за системную значимость 0,75 % — минимум Н20.0 10,75 %, Н20.1 7,25 %, Н20.2 8,75 %",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "Инструкция Банка России 220-И (черновик vtb-regulation-macro), sha256 ec2f02788a3f5ede",
+   "note": "первая дата проверки — 01.04.2027"
+  },
+  {
+   "id": "cbr-2027-02-12",
+   "kind": "cbr_forecast",
+   "date": "2027-02-12",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке (опорное: среднесрочный прогноз)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "ifrs-2026Q4",
+   "kind": "ifrs",
+   "date": "2027-02-25",
+   "title": "МСФО группы за 2026 год; прогноз на 2027 год; возможно — стратегия 2027–2029 и новая дивидендная политика",
+   "covers": "2026Q4",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-02-24",
+   "latest": "2027-02-26",
+   "src": "ритм прошлых лет: 25.02.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "form805-2026Q4",
+   "kind": "form805",
+   "date": "2027-03-01",
+   "title": "Форма 0409805 банковской группы на 1 января 2027 года",
+   "covers": "2026Q4",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-02-10",
+   "latest": "2027-04-30",
+   "src": "оценка (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "годовая форма выходит позже квартальных"
+  },
+  {
+   "id": "cbr-2027-03-19",
+   "kind": "cbr_rate",
+   "date": "2027-03-19",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "regulation-2027-04-01",
+   "kind": "regulation",
+   "date": "2027-04-01",
+   "title": "Первая дата проверки надбавок 2,25 п.п. (минимум Н20.0 10,75 %)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "Инструкция Банка России 220-И (черновик vtb-regulation-macro), sha256 ec2f02788a3f5ede"
+  },
+  {
+   "id": "ifrs-2027Q1",
+   "kind": "ifrs",
+   "date": "2027-04-28",
+   "title": "МСФО группы за 1-й квартал 2027 года",
+   "covers": "2027Q1",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-04-27",
+   "latest": "2027-04-30",
+   "src": "ритм прошлых лет: 28.04.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "cbr-2027-04-30",
+   "kind": "cbr_forecast",
+   "date": "2027-04-30",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке (опорное: среднесрочный прогноз)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "dividend-recommendation-2026",
+   "kind": "dividend_decision",
+   "date": "2027-05-25",
+   "title": "Рекомендация наблюдательного совета по дивидендам за 2026 год",
+   "covers": "2026Q4",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-05-15",
+   "latest": "2027-05-31",
+   "src": "ритм 2026 года: рекомендация 26.05.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "менеджмент 28.07.2026: выход на выплату 50 % по итогам 2026 года маловероятен"
+  },
+  {
+   "id": "cbr-2027-06-11",
+   "kind": "cbr_rate",
+   "date": "2027-06-11",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "dividend-decision-2026",
+   "kind": "dividend_decision",
+   "date": "2027-06-30",
+   "title": "Годовое общее собрание акционеров: решение о дивидендах за 2026 год",
+   "covers": "2026Q4",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-06-20",
+   "latest": "2027-06-30",
+   "src": "ритм 2025–2026 годов: собрания 30.06.2025 и 30.06.2026; реестр 11.07.2025 и 20.07.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "реестр ≈ 20.07.2027, выплата — начало августа; вычет из норматива — в месяце выплаты"
+  },
+  {
+   "id": "ifrs-2027Q2",
+   "kind": "ifrs",
+   "date": "2027-07-28",
+   "title": "МСФО группы за 2-й квартал и полугодие 2027 года",
+   "covers": "2027Q2",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-07-27",
+   "latest": "2027-07-30",
+   "src": "ритм прошлых лет: 28.07.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "cbr-2027-07-30",
+   "kind": "cbr_forecast",
+   "date": "2027-07-30",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке (опорное: среднесрочный прогноз)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "cbr-2027-09-10",
+   "kind": "cbr_rate",
+   "date": "2027-09-10",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "cbr-2027-10-22",
+   "kind": "cbr_forecast",
+   "date": "2027-10-22",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке (опорное: среднесрочный прогноз)",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "ifrs-2027Q3",
+   "kind": "ifrs",
+   "date": "2027-10-29",
+   "title": "МСФО группы за 3-й квартал и девять месяцев 2027 года",
+   "covers": "2027Q3",
+   "confirmed": false,
+   "precision": "window",
+   "estimated": true,
+   "earliest": "2027-10-27",
+   "latest": "2027-10-30",
+   "src": "ритм прошлых лет: 30.10.2026 (черновик календаря vtb-regulation-macro, sha256 ec2f02788a3f5ede)",
+   "note": "оценка дня по прошлому году"
+  },
+  {
+   "id": "cbr-2027-12-17",
+   "kind": "cbr_rate",
+   "date": "2027-12-17",
+   "title": "Заседание Совета директоров Банка России по ключевой ставке",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "primary/vrm_cbr_cal_mp_20261013.html (sha256 3362cffa65b67cfd)"
+  },
+  {
+   "id": "regulation-2028-01-01",
+   "kind": "regulation",
+   "date": "2028-01-01",
+   "title": "Надбавки на целевом уровне: поддержания капитала 2,5 %, за системную значимость 1,0 % — минимум Н20.0 12,0 %",
+   "covers": null,
+   "confirmed": true,
+   "precision": "day",
+   "src": "Инструкция Банка России 220-И (черновик vtb-regulation-macro), sha256 ec2f02788a3f5ede",
+   "note": "шаг +1,25 п.п.; менеджмент: набирать весь 2027 год"
+  }
+ ]
+}

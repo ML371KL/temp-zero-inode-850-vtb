@@ -1,0 +1,469 @@
+{
+ "about": "Пример приложения G методики (docs/MODEL.md): числа примера, не книги и не фактов; допуск сверки 1e-9",
+ "spread": {
+  "worlds": {
+   "A": 0.5,
+   "B": 0.5
+  },
+  "regimes": {
+   "calm": 0.8,
+   "crisis": 0.2
+  },
+  "price": {
+   "A/calm/base": 100.0,
+   "B/calm/base": 80.0,
+   "A/calm/relief": 110.0,
+   "B/calm/relief": 90.0,
+   "A/crisis/base": 40.0,
+   "B/crisis/base": 20.0,
+   "A/crisis/relief": 60.0,
+   "B/crisis/relief": 40.0
+  },
+  "dependent": {
+   "table": {
+    "calm": {
+     "base": 1.0,
+     "relief": 0.0
+    },
+    "crisis": {
+     "base": 0.25,
+     "relief": 0.75
+    }
+   },
+   "probabilities": {
+    "A/calm/base": 0.4,
+    "A/calm/relief": 0.0,
+    "A/crisis/base": 0.025,
+    "A/crisis/relief": 0.075,
+    "B/calm/base": 0.4,
+    "B/calm/relief": 0.0,
+    "B/crisis/base": 0.025,
+    "B/crisis/relief": 0.075
+   },
+   "mean": 81.0,
+   "variance": 439.0,
+   "var_world": 100.0,
+   "var_regime": 324.0,
+   "var_scenario_main": 169.58823529411765,
+   "var_scenario_sequential": 4.411764705882353,
+   "var_rest_sequential": 10.588235294117647,
+   "regime_means": {
+    "calm": 90.0,
+    "crisis": 45.0
+   },
+   "scenario_means": {
+    "base": 86.47058823529412,
+    "relief": 50.0
+   },
+   "scenario_beyond_regime": {
+    "base": -0.8823529411764706,
+    "relief": 5.0
+   },
+   "main_effects": {
+    "world": 0.22779043280182232,
+    "regime": 0.7380410022779044,
+    "scenario": 0.3863057751574434,
+    "interaction": -0.35213721023717004
+   },
+   "sequential": {
+    "world": 0.22779043280182232,
+    "regime": 0.7380410022779044,
+    "scenario": 0.010049577917727455,
+    "interaction": 0.024118987002545892
+   },
+   "rest_check": 0.0
+  },
+  "independent": {
+   "table": {
+    "calm": {
+     "base": 0.85,
+     "relief": 0.15
+    },
+    "crisis": {
+     "base": 0.85,
+     "relief": 0.15
+    }
+   },
+   "probabilities": {
+    "A/calm/base": 0.34,
+    "A/calm/relief": 0.06,
+    "A/crisis/base": 0.085,
+    "A/crisis/relief": 0.015,
+    "B/calm/base": 0.34,
+    "B/calm/relief": 0.06,
+    "B/crisis/base": 0.085,
+    "B/crisis/relief": 0.015
+   },
+   "mean": 79.8,
+   "variance": 667.96,
+   "var_world": 100.0,
+   "var_regime": 547.56,
+   "var_scenario_main": 18.36,
+   "var_scenario_sequential": 18.36,
+   "var_rest_sequential": 2.04,
+   "regime_means": {
+    "calm": 91.5,
+    "crisis": 33.0
+   },
+   "scenario_means": {
+    "base": 78.0,
+    "relief": 90.0
+   },
+   "scenario_beyond_regime": {
+    "base": -1.8,
+    "relief": 10.2
+   },
+   "main_effects": {
+    "world": 0.149709563446913,
+    "regime": 0.8197496856099168,
+    "scenario": 0.027486675848853226,
+    "interaction": 0.003054075094317025
+   },
+   "sequential": {
+    "world": 0.149709563446913,
+    "regime": 0.8197496856099168,
+    "scenario": 0.027486675848853226,
+    "interaction": 0.003054075094317025
+   },
+   "rest_check": 0.0
+  }
+ },
+ "dps_print": {
+  "n_out": 1000.0,
+  "n_iss": 1040.0,
+  "n_base": 1040.0,
+  "share_count_adj": 0.25,
+  "n_div": 1300.0,
+  "payout": 0.5,
+  "cells": [
+   {
+    "cell": "c1",
+    "p": 0.5,
+    "base": 40.0,
+    "pool": 20.0,
+    "div": 19.23076923076923,
+    "n_before": 1300.0,
+    "shares_out": 1260.0,
+    "shares_issued": 1300.0,
+    "dps": 15.262515262515263,
+    "dps_policy": 15.384615384615385,
+    "intact": true
+   },
+   {
+    "cell": "c2",
+    "p": 0.3,
+    "base": 30.0,
+    "pool": 15.0,
+    "div": 10.0,
+    "n_before": 1700.0,
+    "shares_out": 1660.0,
+    "shares_issued": 1700.0,
+    "dps": 6.024096385542169,
+    "dps_policy": 8.823529411764707,
+    "intact": true
+   },
+   {
+    "cell": "c3",
+    "p": 0.12,
+    "base": 20.0,
+    "pool": 10.0,
+    "div": 8.0,
+    "n_before": null,
+    "shares_out": null,
+    "shares_issued": null,
+    "dps": 0.0,
+    "dps_policy": 0.0,
+    "intact": false
+   },
+   {
+    "cell": "c4",
+    "p": 0.08,
+    "base": 10.0,
+    "pool": 5.0,
+    "div": 0.0,
+    "n_before": 2600.0,
+    "shares_out": 2560.0,
+    "shares_issued": 2600.0,
+    "dps": 0.0,
+    "dps_policy": 1.9230769230769231,
+    "intact": true
+   }
+  ],
+  "mix": {
+   "dps": 9.438486546920283,
+   "broken_mass": 0.12,
+   "dps_intact": 10.725552894227594,
+   "amount": 14.1184,
+   "broken_amount": 0.9984,
+   "dps_policy": 10.493212669683258,
+   "p_zero": 0.2,
+   "identity": 0.0
+  },
+  "nowcast": {
+   "pool_mix": 16.1,
+   "base_mix": 32.2,
+   "shares_effective": 1534.325140146615,
+   "base_now": 34.0,
+   "dps_now": 11.079789775441949,
+   "dps_at_model_base": 10.493212669683258,
+   "dps_on_anchor_issued": 16.346153846153847
+  },
+  "without_adjustment": {
+   "dps_c1_on_n_out": 19.23076923076923
+  }
+ },
+ "policy_step": {
+  "tol_ratio": 0.003,
+  "cases": [
+   {
+    "case": "first_at_threshold",
+    "note": "первое расхождение клетки: порог между запасами моделей, запасы рядом",
+    "core": {
+     "step": 0,
+     "headroom": [
+      581.329,
+      581.329
+     ],
+     "want": [
+      581.005,
+      290.5025
+     ]
+    },
+    "control": {
+     "step": 1,
+     "headroom": [
+      580.66,
+      580.66
+     ],
+     "want": [
+      580.768,
+      290.384
+     ]
+    },
+    "rwa": 49449.0,
+    "first_divergence": true,
+    "step_checked": 0,
+    "margin_core": 0.324,
+    "margin_control": -0.108,
+    "margin_distance": 0.432,
+    "tau": 148.347,
+    "steps_differ": true,
+    "at_threshold": true,
+    "step_gap": 290.384
+   },
+   {
+    "case": "cascade_next_year",
+    "note": "следующее решение той же клетки: следствие первого расхождения, само порогом не судится",
+    "core": {
+     "step": 1,
+     "headroom": [
+      615.954,
+      615.954
+     ],
+     "want": [
+      625.499,
+      312.7495
+     ]
+    },
+    "control": {
+     "step": 0,
+     "headroom": [
+      767.159,
+      767.159
+     ],
+     "want": [
+      626.849,
+      313.4245
+     ]
+    },
+    "rwa": 52869.1,
+    "first_divergence": false,
+    "step_checked": 0,
+    "margin_core": -9.545,
+    "margin_control": 140.31,
+    "margin_distance": 149.855,
+    "tau": 158.6073,
+    "steps_differ": true,
+    "at_threshold": null,
+    "step_gap": 313.4245
+   },
+   {
+    "case": "far_from_threshold",
+    "note": "запасы моделей разошлись на 300 при допуске 150: настоящее расхождение",
+    "core": {
+     "step": 0,
+     "headroom": [
+      800.0,
+      800.0
+     ],
+     "want": [
+      600.0,
+      300.0
+     ]
+    },
+    "control": {
+     "step": 1,
+     "headroom": [
+      500.0,
+      500.0
+     ],
+     "want": [
+      600.0,
+      300.0
+     ]
+    },
+    "rwa": 50000.0,
+    "first_divergence": true,
+    "step_checked": 0,
+    "margin_core": 200.0,
+    "margin_control": -100.0,
+    "margin_distance": 300.0,
+    "tau": 150.0,
+    "steps_differ": true,
+    "at_threshold": false,
+    "step_gap": 300.0
+   },
+   {
+    "case": "same_step",
+    "note": "ступень одна и та же — правило не применяется",
+    "core": {
+     "step": 0,
+     "headroom": [
+      700.0,
+      700.0
+     ],
+     "want": [
+      600.0,
+      300.0
+     ]
+    },
+    "control": {
+     "step": 0,
+     "headroom": [
+      690.0,
+      690.0
+     ],
+     "want": [
+      601.0,
+      300.5
+     ]
+    },
+    "rwa": 50000.0,
+    "first_divergence": false,
+    "step_checked": 0,
+    "margin_core": 100.0,
+    "margin_control": 89.0,
+    "margin_distance": 11.0,
+    "tau": 150.0,
+    "steps_differ": false,
+    "at_threshold": false,
+    "step_gap": 300.5
+   }
+  ],
+  "rows_first_case": [
+   {
+    "what": "dividend_2034",
+    "core": 581.1672,
+    "control": 435.5217,
+    "diff": -145.6455,
+    "diff_rel": -0.25060860282548636,
+    "tol": 0.1,
+    "tol_abs_plain": 43.14,
+    "ok_plain": false,
+    "tol_abs_step": 333.524,
+    "ok_step": true
+   },
+   {
+    "what": "dps_2033",
+    "core": 23.7598,
+    "control": 17.802,
+    "diff": -5.9578,
+    "diff_rel": -0.2507512689500753,
+    "tol": 0.15,
+    "tol_abs_plain": 1.76,
+    "ok_plain": false,
+    "tol_abs_step": 13.629513343167641,
+    "ok_step": true
+   }
+  ],
+  "step_gap_first_case": 290.384,
+  "ratio_tolerance_after": 0.008872393779449534,
+  "value_guard": {
+   "cell_value_core": 1557.0,
+   "cell_value_control": 1554.0,
+   "tol_rel": 0.03,
+   "ok": true
+  }
+ },
+ "share_boundary": {
+  "deduction_old": 603.537,
+  "deduction_new": 603.441,
+  "multiplier": 1.000159087632428,
+  "record_step": 0.001,
+  "cases": [
+   {
+    "name": "центр 0,6065",
+    "kind": "center",
+    "was": 0.6065,
+    "now": 0.606596486649,
+    "rule": "сумма в рублях прежняя"
+   },
+   {
+    "name": "нижний конец оси 0,4",
+    "kind": "end",
+    "was": 0.4,
+    "now": 0.400063635053,
+    "rule": "сумма в рублях прежняя"
+   },
+   {
+    "name": "верхний конец оси 0,8",
+    "kind": "end",
+    "was": 0.8,
+    "now": 0.800127270106,
+    "rule": "сумма в рублях прежняя"
+   },
+   {
+    "name": "конец оси на границе 1",
+    "kind": "end",
+    "was": 1.0,
+    "now": 1.0,
+    "rule": "граница остаётся границей"
+   },
+   {
+    "name": "конец оси на границе 0",
+    "kind": "end",
+    "was": 0.0,
+    "now": 0.0,
+    "rule": "граница остаётся границей"
+   },
+   {
+    "name": "край отрезка поиска 1",
+    "kind": "search",
+    "was": 1.0,
+    "now": 1.0,
+    "rule": "граница остаётся границей"
+   },
+   {
+    "name": "конец оси 0,9999",
+    "kind": "end",
+    "was": 0.9999,
+    "now": null,
+    "rule": "отказ: сумма больше вычета нового якоря"
+   },
+   {
+    "name": "центр на границе 1",
+    "kind": "center",
+    "was": 1.0,
+    "now": null,
+    "rule": "отказ: сумма больше вычета нового якоря"
+   },
+   {
+    "name": "центр 0",
+    "kind": "center",
+    "was": 0.0,
+    "now": 0.0,
+    "rule": "ноль остаётся нулём"
+   }
+  ]
+ }
+}

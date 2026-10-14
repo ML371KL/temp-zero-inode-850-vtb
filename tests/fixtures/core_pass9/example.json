@@ -1,0 +1,339 @@
+{
+ "note": "Пример приложения M методики (М§4.8, §4.9, §5.2, §7, PAYLOAD мост); точная арифметика — notes/core-pass9-example.py папки передачи. Допуск сверки — 1e-9.",
+ "tolerance": 1e-09,
+ "M2": {
+  "inputs": {
+   "fixed": 20.0,
+   "floating": 160.0,
+   "spread": 0.05,
+   "coupon_quarter": 4,
+   "key": {
+    "0": 0.17,
+    "1": 0.16,
+    "2": 0.15,
+    "3": 0.14,
+    "4": 0.13
+   },
+   "days": {
+    "1": 90,
+    "2": 91,
+    "3": 92,
+    "4": 92
+   },
+   "anchor_year_case": {
+    "key": {
+     "0": 0.15,
+     "1": 0.14,
+     "2": 0.13
+    },
+    "coupon_q": 2
+   },
+   "at1_spread": 0.04,
+   "at1_over_base_q3": 100.0,
+   "at1_over_base_Q": 120.0
+  },
+  "kbar_q4": 0.145,
+  "coupon_anchor_q4": 51.2,
+  "coupon_new_q4": 4.284931506849315,
+  "coupon_q4": 55.484931506849314,
+  "anchor_year_kbar": 0.1425,
+  "anchor_year_coupon": 50.8,
+  "coupon_anchor_T1": 48.8,
+  "coupon_T1": 69.2
+ },
+ "M1": {
+  "inputs": {
+   "tau_stat": 0.25,
+   "bond_rate": 0.2,
+   "bond_scale": 1.2,
+   "other_pp": 0.02,
+   "coupon_deductible": true,
+   "nci_share": 0.05,
+   "effective_gap_off": -0.05,
+   "pbt": {
+    "1": 100.0,
+    "2": 120.0,
+    "3": -40.0,
+    "4": 140.0
+   },
+   "iis": {
+    "1": 80.0,
+    "2": 84.0,
+    "3": 88.0,
+    "4": 92.0
+   },
+   "coupon": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 55.484931506849314
+   }
+  },
+  "quarters": {
+   "1": {
+    "tax": 22.2,
+    "tax_coupon": 0.0,
+    "tau_eff": 0.27,
+    "ni": 77.8,
+    "ni_sh": 73.91,
+    "ci": 73.91,
+    "tax_off": 20.0,
+    "ni_sh_off": 76.0,
+    "ci_off": 76.0,
+    "etr": 0.222,
+    "gap": -0.028,
+    "gap_rule": -0.028
+   },
+   "2": {
+    "tax": 27.36,
+    "tax_coupon": 0.0,
+    "tau_eff": 0.27,
+    "ni": 92.64,
+    "ni_sh": 88.008,
+    "ci": 88.008,
+    "tax_off": 24.0,
+    "ni_sh_off": 91.2,
+    "ci_off": 91.2,
+    "etr": 0.228,
+    "gap": -0.022,
+    "gap_rule": -0.022
+   },
+   "3": {
+    "tax": -15.28,
+    "tax_coupon": 0.0,
+    "tau_eff": 0.25,
+    "ni": -24.72,
+    "ni_sh": -23.484,
+    "ci": -23.484,
+    "tax_off": -8.0,
+    "ni_sh_off": -30.4,
+    "ci_off": -30.4
+   },
+   "4": {
+    "tax": 18.40876712328767,
+    "tax_coupon": 13.871232876712329,
+    "tau_eff": 0.27,
+    "ni": 121.59123287671233,
+    "ni_sh": 115.51167123287671,
+    "ci": 60.026739726027394,
+    "tax_off": 28.0,
+    "ni_sh_off": 106.4,
+    "ci_off": 64.78630136986301,
+    "etr": 0.13149119373776907,
+    "gap": -0.11850880626223093,
+    "gap_rule": -0.11850880626223093
+   }
+  },
+  "year": {
+   "pbt": 320.0,
+   "tax": 52.68876712328767,
+   "ni_sh": 253.94567123287672,
+   "ci": 198.46073972602738,
+   "ni_sh_off": 243.2,
+   "ci_off": 201.586301369863,
+   "etr": 0.16465239726027397
+  }
+ },
+ "M3": {
+  "coupon_year": 55.484931506849314,
+  "base_k1": 198.46073972602738,
+  "base_off": 201.586301369863,
+  "base_k1_identity": 198.46073972602738,
+  "bridge_profit_k1": 198.46073972602738,
+  "bridge_profit_off": 201.586301369863
+ },
+ "M4": {
+  "inputs": {
+   "g_t": 0.06,
+   "pbt_l": 400.0,
+   "iis_l": 330.0,
+   "sec": 0.7,
+   "y_sec": 0.12,
+   "y_liq": 0.1,
+   "c_wholesale": 0.15,
+   "coupon_T1": 69.2,
+   "d_f": 80.0
+  },
+  "excess": {
+   "x_t": 50.0,
+   "h_star": 30.0,
+   "wt": 0.0,
+   "pbt_l": 400.0,
+   "a_x": 30.0,
+   "y_x": 6.42,
+   "pbt_x": 417.58,
+   "iis_t1": 347.28,
+   "tax_t1": 74.6098,
+   "ni_t1": 325.82169,
+   "ci_t1": 256.62169,
+   "ni_t1_off": 317.3608,
+   "ci_t1_off": 265.4608
+  },
+  "shortfall": {
+   "x_t": -40.0,
+   "h_star": 0.0,
+   "wt": 25.0,
+   "pbt_l": 400.0,
+   "a_x": -15.0,
+   "y_x": -5.46,
+   "pbt_x": 429.46,
+   "iis_t1": 351.06,
+   "tax_t1": 77.5906,
+   "ni_t1": 334.27593,
+   "ci_t1": 265.07593,
+   "ni_t1_off": 326.3896,
+   "ci_t1_off": 274.4896
+  },
+  "loss": {
+   "x_t": 10.0,
+   "h_star": 30.0,
+   "wt": 0.0,
+   "pbt_l": -20.0,
+   "a_x": 10.0,
+   "y_x": 1.14,
+   "pbt_x": -22.34,
+   "iis_t1": 348.96,
+   "tax_t1": -43.8226,
+   "ni_t1": 20.40847,
+   "ci_t1": -48.79153,
+   "ni_t1_off": -16.9784,
+   "ci_t1_off": -68.8784
+  },
+  "i_f_balancing": {
+   "y_after_tax": 0.08826,
+   "i_f": -6.70776,
+   "i_f_off": -6.9312
+  },
+  "i_f_wholesale": {
+   "y_after_tax": 0.1095,
+   "i_f": -8.322,
+   "i_f_off": -9.12
+  }
+ },
+ "M5": {
+  "inputs": {
+   "q2": {
+    "pbt": 111.0,
+    "tax": 18.4,
+    "iis_core": 145.46,
+    "ifrs_lines": 177.2,
+    "coupon": 10.8
+   },
+   "h1": {
+    "pbt": 279.7,
+    "tax": 54.5,
+    "bond_income": 356.0,
+    "coupon": 18.6,
+    "dta": 0.0082
+   },
+   "tau_stat": 0.25,
+   "bond_rate": 0.2,
+   "other_pp": 0.019
+  },
+  "zeta": 1.2182043173380999,
+  "q2_gap_fact": -0.08423423423423423,
+  "q2_gap_rule": -0.08514414414414415,
+  "q2_gap_rule_zeta1": -0.07084684684684685,
+  "h1_gap_fact": -0.05514837325706114,
+  "h1_gap_fact_structural": -0.06334837325706114,
+  "h1_gap_rule": -0.06126456918126564,
+  "h1_bond_pp": -0.06363961387200572,
+  "h1_coupon_pp": -0.01662495530925992,
+  "o_core_zeta1": 0.007366106542724347
+ },
+ "M6": {
+  "valid": [
+   {
+    "tax.structure": {
+     "enabled": false
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": true,
+     "bond_rate": 0.2,
+     "bond_scale": 1.2182,
+     "other_pp": 0.019,
+     "coupon_deductible": true
+    }
+   },
+   {
+    "capital.at1_coupon": {
+     "enabled": false
+    }
+   },
+   {
+    "capital.at1_coupon": {
+     "enabled": true,
+     "fixed": 19.4,
+     "floating": 166.6,
+     "spread": 0.0488
+    }
+   }
+  ],
+  "invalid": [
+   {
+    "tax.structure": {
+     "enabled": true,
+     "bond_rate": 0.2,
+     "other_pp": 0.019,
+     "coupon_deductible": true
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": true,
+     "bond_rate": 0.2,
+     "bond_scale": -1,
+     "other_pp": 0.019,
+     "coupon_deductible": true
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": true,
+     "bond_rate": 0.2,
+     "bond_scale": 1,
+     "other_pp": 0.019,
+     "coupon_deductible": "yes"
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": "true"
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": false,
+     "rate": 0.2
+    }
+   },
+   {
+    "capital.at1_coupon": {
+     "enabled": true,
+     "fixed": 19.4,
+     "spread": 0.05
+    }
+   },
+   {
+    "capital.at1_coupon": {
+     "enabled": true,
+     "fixed": 19.4,
+     "floating": -1,
+     "spread": 0.05
+    }
+   },
+   {
+    "tax.structure": {
+     "enabled": true,
+     "bond_rate": 0.2,
+     "bond_scale": 1,
+     "other_pp": 0.019,
+     "coupon_deductible": true
+    },
+    "axis_on": "tax.effective_gap"
+   }
+  ]
+ }
+}

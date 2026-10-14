@@ -1,0 +1,350 @@
+{
+ "basis": "IFRS",
+ "as_of": "2026-06-30",
+ "period": "2026Q2",
+ "days": {
+  "v": 91,
+  "calc": "дней в квартале 2К2026 (act/365)"
+ },
+ "unit": "остатки и проценты — млрд ₽; ставки — доли, годовые, act/365",
+ "rates_carry_residual": false,
+ "note": "ЧЕРНОВИК фазы 3, второй круг (поток «nii», 14.10.2026): книга liquidity — только доходные размещения (средства в банках, обратное репо); денежные средства и обязательные резервы — в прочих активах (решение B2). Проценты по книгам у ВТБ не раскрыты — interest_q и rate_anchor восьми книг из девяти — оценки листа stage1/calib-nii (поле estimated, диапазон range)",
+ "books": {
+  "corp_loans": {
+   "balance_open": {
+    "v": 17826.9,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 18198.3,
+    "calc": "остаток книги на 30.06.2026 (balance.books.corp_loans)"
+   },
+   "balance_avg": {
+    "v": 18012.6,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 640.38,
+    "calc": "кредиты всего (прим. 3: кредиты по АС 898,0 + финаренда 14,0 + 13 % строки ПСД 117,4 + 10 % строки ССЧПУ 23,9 − обратное репо) минус кредиты ФЛ (сегмент РБ)",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     631.08,
+     645.86
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.142598,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.14053,
+     0.14382
+    ]
+   }
+  },
+  "mortgage": {
+   "balance_open": {
+    "v": 4649.8,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 4592.0,
+    "calc": "остаток книги на 30.06.2026 (balance.books.mortgage)"
+   },
+   "balance_avg": {
+    "v": 4620.9,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 167.14,
+    "calc": "кредиты ФЛ (прим. 2, сегмент РБ: процентные доходы минус доходы от прочих сегментов, минус купоны бумаг СК и обратное репо ФЛ) минус прочие кредиты ФЛ",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     155.6,
+     178.68
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.14508,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.13506,
+     0.1551
+    ]
+   }
+  },
+  "consumer_loans": {
+   "balance_open": {
+    "v": 2336.4,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 2293.2,
+    "calc": "остаток книги на 30.06.2026 (balance.books.consumer_loans)"
+   },
+   "balance_avg": {
+    "v": 2314.8,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 106.77,
+    "calc": "суждение: ставка 18,5 % (16,5–20,5) × средний остаток",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     95.22,
+     118.31
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.185,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.16499,
+     0.205
+    ]
+   }
+  },
+  "securities": {
+   "balance_open": {
+    "v": 5786.9,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 6169.1,
+    "calc": "остаток книги на 30.06.2026 (balance.books.securities)"
+   },
+   "balance_avg": {
+    "v": 5978.0,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 145.46,
+    "calc": "прим. 3: инвестиционные ФА по АС 35,9 + 75 % строки ПСД 117,4 + 90 % строки ССЧПУ 23,9",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     138.19,
+     152.73
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.097598,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.09272,
+     0.10248
+    ]
+   }
+  },
+  "liquidity": {
+   "balance_open": {
+    "v": 1403.5,
+    "calc": "остаток книги на 31.03.2026 в новом составе: 3409,6 − денежные средства 1889,6 − обязательные резервы 116,9 + деньги НПФ 0,4"
+   },
+   "balance_close": {
+    "v": 1442.7,
+    "calc": "остаток книги на 30.06.2026 (balance.books.liquidity, новый состав: только доходные размещения)"
+   },
+   "balance_avg": {
+    "v": 1423.1,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 55.95,
+    "calc": "прим. 3: средства в банках 26,5 + 12 % строки ПСД 117,4 + обратное репо по ключевой + 0,5 п.п. (проценты ряда не менялись: деньги и обязательные резервы дохода не несли)",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     53.15,
+     58.75
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.157694,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.1498,
+     0.16559
+    ]
+   }
+  },
+  "retail_current": {
+   "balance_open": {
+    "v": 3550.2,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 3591.2,
+    "calc": "остаток книги на 30.06.2026 (balance.books.retail_current)"
+   },
+   "balance_avg": {
+    "v": 3570.72,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 40.06,
+    "calc": "суждение: ставка 4,5 % (2,5–6,5) × средний остаток",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     22.26,
+     57.87
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.045,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.025,
+     0.06501
+    ]
+   }
+  },
+  "retail_term": {
+   "balance_open": {
+    "v": 10104.5,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 10221.2,
+    "calc": "остаток книги на 30.06.2026 (balance.books.retail_term)"
+   },
+   "balance_avg": {
+    "v": 10162.83,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 304.59,
+    "calc": "средства ФЛ (середина трансфертной оценки по сегменту РБ и единой ставки средств клиентов) минус текущие счета",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     261.05,
+     348.13
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.120213,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.10303,
+     0.1374
+    ]
+   }
+  },
+  "corp_funds": {
+   "balance_open": {
+    "v": 14169.3,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 13742.7,
+    "calc": "остаток книги на 30.06.2026 (balance.books.corp_funds)"
+   },
+   "balance_avg": {
+    "v": 13956.0,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 370.85,
+    "calc": "прим. 3: средства клиентов 715,5 минус средства ФЛ",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d",
+    "estimated": true,
+    "range": [
+     345.12,
+     396.58
+    ]
+   },
+   "rate_anchor": {
+    "v": 0.106583,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)",
+    "estimated": true,
+    "range": [
+     0.09919,
+     0.11398
+    ]
+   }
+  },
+  "wholesale": {
+   "balance_open": {
+    "v": 4911.1,
+    "calc": "остаток книги на 31.03.2026 (stage1/facts/sheets/books_balances.csv)"
+   },
+   "balance_close": {
+    "v": 5425.7,
+    "calc": "остаток книги на 30.06.2026 (balance.books.wholesale)"
+   },
+   "balance_avg": {
+    "v": 5168.4,
+    "calc": "(balance_open + balance_close) / 2"
+   },
+   "interest_q": {
+    "v": 168.2,
+    "calc": "прим. 3: средства банков и прочие заёмные 125,2 + выпущенные бумаги 30,5 + субординированная задолженность 12,5",
+    "src": "2026Q2_ifrs_fs.pdf, с. 13 и 15, sha256 9bef55d9357d5f6d"
+   },
+   "rate_anchor": {
+    "v": 0.130533,
+    "calc": "interest_q / balance_avg × 365/91 (доля, act/365)"
+   }
+  }
+ },
+ "interest_assets_q": {
+  "v": 1115.7,
+  "calc": "Σ interest_q книг активов"
+ },
+ "interest_liabilities_q": {
+  "v": 883.7,
+  "calc": "Σ interest_q книг пассивов (величиной)"
+ },
+ "other_interest_net_q": {
+  "v": -3.8,
+  "calc": "проценты вне книг (остаются в ЧПД, в ставки книг не входят): прочие финансовые активы 1,1; аренда −2,1; прочие процентные расходы −2,8",
+  "src": "2026Q2_ifrs_fs.pdf, с. 15, sha256 9bef55d9357d5f6d"
+ },
+ "dia_q": {
+  "v": 19.4,
+  "calc": "платежи в рамках системы страхования вкладов за квартал, величиной",
+  "src": "2026Q2_ifrs_fs.pdf, с. 15, sha256 9bef55d9357d5f6d"
+ },
+ "nii_q": {
+  "v": 208.8,
+  "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B12, sha256 0a08006704b1144c"
+ },
+ "iea_avg": {
+  "v": 32349.4,
+  "calc": "Σ balance_avg книг активов (три кредитные книги, долговые бумаги, доходная ликвидность)"
+ },
+ "nim_eng_q": {
+  "v": 0.025889,
+  "calc": "nii_q × 365/91 / iea_avg (ЧПМ базиса движка = определение банка 2026 года)"
+ },
+ "current_share_anchor": {
+  "v": 0.26,
+  "calc": "текущие счета физлиц / средства физлиц на якоре: слайд (точность 1 п.п.)",
+  "src": "2026Q2_ifrs_presentation.pdf, с. 9 (слайд — изображение), sha256 2562bbdecf35a376",
+  "estimated": true,
+  "range": [
+   0.255,
+   0.265
+  ]
+ },
+ "key_avg_anchor_q": {
+  "v": 0.146181,
+  "calc": "средняя ключевая ставка Банка России за 2К2026 по календарным дням",
+  "src": "key_rate_quarterly.csv, строка 2026Q2, sha256 84a1af94980b81a3"
+ },
+ "check": {
+  "v": -0.0,
+  "calc": "Σ активов − Σ пассивов − dia_q + other_interest_net_q − nii_q (допуск 0,1)"
+ }
+}

@@ -1,0 +1,331 @@
+{
+ "about": "Пример приложения I методики (docs/MODEL.md): база объёма iea квартала фактов в определении клетки (§4.7), норма клетки механики (§15.2), плотность постоянной части прочих активов при переносе якоря (§15.2 п. 3). Собран по формулам текста в точной арифметике; деньги — млрд ₽, доли — доли единицы. Сценарий — notes/core-pass6-example.py папки передачи.",
+ "volume_base": {
+  "inputs": {
+   "open": {
+    "loans": 700.0,
+    "securities": 180.0,
+    "liquidity": 120.0,
+    "allowance": 20.0,
+    "other_assets": 50.0,
+    "funds": 800.0,
+    "wholesale": 60.0,
+    "other_liabilities": 20.0,
+    "dividends_payable": 0.0,
+    "bv": 150.0
+   },
+   "quarter": {
+    "loans": 720.0,
+    "allowance": 20.0,
+    "other_assets": 50.0,
+    "funds": 815.0,
+    "other_liabilities": 20.0,
+    "wholesale_base": 60.0,
+    "div": 10.0,
+    "ci": 12.0,
+    "rec": 5.0,
+    "sec_share": 0.6
+   },
+   "next_year_iea_avg": 1100.0,
+   "fees_q": 40.0,
+   "wage": 0.05,
+   "link": 0.5
+  },
+  "cases": {
+   "free": {
+    "liquid_min": 0.2,
+    "la_min": 187.5,
+    "preliminary": {
+     "bv": 140.0,
+     "la": 295.0,
+     "wholesale_extra": 0.0,
+     "iea": 1015.0
+    },
+    "final": {
+     "bv": 157.0,
+     "la": 312.0,
+     "wholesale_extra": 0.0,
+     "iea": 1032.0
+    },
+    "cell_iea_avg": 1007.5,
+    "delta_e": 17.0,
+    "facts_a": 1007.5,
+    "facts_a_old_rule": 1016.0,
+    "facts_minus_cell": 0.0,
+    "next_year": {
+     "cell_iea_avg": 1100.0,
+     "v": 0.09181141439205956,
+     "v_old_rule": 0.08267716535433071,
+     "fees": 42.83622828784119,
+     "fees_old_rule": 42.653543307086615
+    }
+   },
+   "binding_preliminary": {
+    "liquid_min": 0.29,
+    "la_min": 306.3380281690141,
+    "preliminary": {
+     "bv": 140.0,
+     "la": 306.3380281690141,
+     "wholesale_extra": 11.338028169014084,
+     "iea": 1026.338028169014
+    },
+    "final": {
+     "bv": 157.0,
+     "la": 312.0,
+     "wholesale_extra": 0.0,
+     "iea": 1032.0
+    },
+    "cell_iea_avg": 1013.169014084507,
+    "delta_e": 17.0,
+    "facts_a": 1007.5,
+    "facts_a_old_rule": 1016.0,
+    "facts_minus_cell": -5.669014084507042,
+    "next_year": {
+     "cell_iea_avg": 1100.0,
+     "v": 0.09181141439205956,
+     "v_old_rule": 0.08267716535433071,
+     "fees": 42.83622828784119,
+     "fees_old_rule": 42.653543307086615
+    }
+   },
+   "binding_both": {
+    "liquid_min": 0.3,
+    "la_min": 321.42857142857144,
+    "preliminary": {
+     "bv": 140.0,
+     "la": 321.42857142857144,
+     "wholesale_extra": 26.428571428571427,
+     "iea": 1041.4285714285713
+    },
+    "final": {
+     "bv": 157.0,
+     "la": 321.42857142857144,
+     "wholesale_extra": 9.428571428571429,
+     "iea": 1041.4285714285713
+    },
+    "cell_iea_avg": 1020.7142857142857,
+    "delta_e": 17.0,
+    "facts_a": 1012.2142857142857,
+    "facts_a_old_rule": 1020.7142857142857,
+    "facts_minus_cell": -8.5,
+    "next_year": {
+     "cell_iea_avg": 1100.0,
+     "v": 0.08672641309717027,
+     "v_old_rule": 0.07767669699090272,
+     "fees": 42.7345282619434,
+     "fees_old_rule": 42.55353393981805
+    }
+   }
+  }
+ },
+ "volume_base_vtb_facts": {
+  "source": "data/facts/balance.json → history (bv_common, iea; конец якоря — equity.bv_common и Σ книг активов), dividends.json → history (2025Q4: decided_date 2026-06-30, pool_all_classes 125,529); черновик потока facts на якоре 30.06.2026 — ПРЕДВАРИТЕЛЬНО",
+  "rows": [
+   {
+    "x": -3,
+    "period": "2025Q3",
+    "iea_prev": 32061.3,
+    "iea": 32151.7,
+    "bv_prev": 2181.8,
+    "bv": 2355.2,
+    "div": 0.0,
+    "delta_e": 173.4,
+    "a_old_rule": 32106.5,
+    "a": 32019.8,
+    "diff": -86.7,
+    "rel": -0.0027003877719464905
+   },
+   {
+    "x": -2,
+    "period": "2025Q4",
+    "iea_prev": 32151.7,
+    "iea": 33065.2,
+    "bv_prev": 2355.2,
+    "bv": 2309.3,
+    "div": 0.0,
+    "delta_e": -45.9,
+    "a_old_rule": 32608.45,
+    "a": 32631.4,
+    "diff": 22.95,
+    "rel": 0.0007038053019999417
+   },
+   {
+    "x": -1,
+    "period": "2026Q1",
+    "iea_prev": 33065.2,
+    "iea": 34009.6,
+    "bv_prev": 2309.3,
+    "bv": 2439.1,
+    "div": 0.0,
+    "delta_e": 129.8,
+    "a_old_rule": 33537.4,
+    "a": 33472.5,
+    "diff": -64.9,
+    "rel": -0.0019351529933745609
+   },
+   {
+    "x": 0,
+    "period": "2026Q2",
+    "iea_prev": 34009.6,
+    "iea": 34664.0,
+    "bv_prev": 2439.1,
+    "bv": 2402.2,
+    "div": 125.529,
+    "delta_e": 88.629,
+    "a_old_rule": 34336.8,
+    "a": 34292.4855,
+    "diff": -44.3145,
+    "rel": -0.001290583280911442
+   }
+  ]
+ },
+ "mechanics_norm": {
+  "tolerance": 0.001,
+  "cells": [
+   {
+    "cell": "a",
+    "v_base": 1700.0,
+    "v_own_path": 1701.5,
+    "bv_v": 880.0,
+    "c_v": 0.0,
+    "dv": 1.5,
+    "rel_to_v": 0.0008823529411764706,
+    "norm": 1700.0,
+    "r": 0.0008823529411764706,
+    "ok_old": true,
+    "ok": true
+   },
+   {
+    "cell": "b",
+    "v_base": 1500.0,
+    "v_own_path": 1502.0,
+    "bv_v": 2500.0,
+    "c_v": 0.0,
+    "dv": 2.0,
+    "rel_to_v": 0.0013333333333333333,
+    "norm": 2500.0,
+    "r": 0.0008,
+    "ok_old": false,
+    "ok": true
+   },
+   {
+    "cell": "c",
+    "v_base": 40.0,
+    "v_own_path": 40.4,
+    "bv_v": 2500.0,
+    "c_v": 0.0,
+    "dv": 0.4,
+    "rel_to_v": 0.01,
+    "norm": 2500.0,
+    "r": 0.00016,
+    "ok_old": false,
+    "ok": true
+   },
+   {
+    "cell": "d",
+    "v_base": -25.0,
+    "v_own_path": -24.65,
+    "bv_v": 2500.0,
+    "c_v": 0.0,
+    "dv": 0.35,
+    "rel_to_v": -0.014,
+    "norm": 2500.0,
+    "r": 0.00014,
+    "ok_old": false,
+    "ok": true
+   },
+   {
+    "cell": "e",
+    "v_base": 300.0,
+    "v_own_path": 303.0,
+    "bv_v": 2600.0,
+    "c_v": 100.0,
+    "dv": 3.0,
+    "rel_to_v": 0.01,
+    "norm": 2500.0,
+    "r": 0.0012,
+    "ok_old": false,
+    "ok": false
+   },
+   {
+    "cell": "f",
+    "v_base": 2400.0,
+    "v_own_path": 2397.0,
+    "bv_v": 2500.0,
+    "c_v": 0.0,
+    "dv": -3.0,
+    "rel_to_v": -0.00125,
+    "norm": 2500.0,
+    "r": -0.0012,
+    "ok_old": false,
+    "ok": false
+   }
+  ],
+  "verdicts": [
+   {
+    "cells": [
+     "a",
+     "b",
+     "c",
+     "d"
+    ],
+    "worst_old": "d",
+    "ok_old": false,
+    "worst": "a",
+    "ok": true
+   },
+   {
+    "cells": [
+     "a",
+     "b",
+     "c",
+     "d",
+     "e"
+    ],
+    "worst_old": "d",
+    "ok_old": false,
+    "worst": "e",
+    "ok": false
+   },
+   {
+    "cells": [
+     "a",
+     "b",
+     "c",
+     "d",
+     "f"
+    ],
+    "worst_old": "d",
+    "ok_old": false,
+    "worst": "f",
+    "ok": false
+   }
+  ]
+ },
+ "fixed_part_density": {
+  "inputs": {
+   "other_assets_fixed": 100.0,
+   "delta_1": -20.0,
+   "omega_oaf": 0.5,
+   "omega_delta": 0.0
+  },
+  "other_assets_fixed_new": 80.0,
+  "omega_oaf_new": 0.625,
+  "rwa_fixed": {
+   "2029": {
+    "old_book": 50.0,
+    "new_book": 50.0,
+    "new_book_old_density": 40.0
+   },
+   "2030": {
+    "old_book": 50.0,
+    "new_book": 50.0,
+    "new_book_old_density": 40.0
+   }
+  },
+  "special": {
+   "no_delta_density_key": 0.5,
+   "from_zero": 0.0
+  }
+ }
+}

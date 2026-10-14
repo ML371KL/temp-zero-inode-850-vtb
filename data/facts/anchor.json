@@ -1,0 +1,152 @@
+{
+ "basis": "IFRS",
+ "as_of": "2026-06-30",
+ "period": "2026Q2",
+ "note": "якорь — отчётность МСФО группы за 6 месяцев 2026 года (опубликована 28.07.2026); черновики фактов фазы 3; documents — реестр документов и листов, на которые ссылаются src узлов (путь — от корня папки передачи)",
+ "documents": [
+  {
+   "key": "zcyc_quarter_ends_2024_2026",
+   "file": "primary/market/zcyc_quarter_ends_2024_2026.csv",
+   "sha256": "0eaf8fbc7e536b56b27a2d201af45d2d98408c322e84faeee850c6b3d5277444",
+   "title": "Московская биржа: кривая бескупонной доходности ОФЗ на концы кварталов 2024–2026 (лист этапа 1)"
+  },
+  {
+   "key": "2025Q1_ifrs_fs",
+   "file": "primary/2025Q1_ifrs_fs.pdf",
+   "sha256": "c14f6a16d8c233e99ee5a418efb24514d2ca733250285bdae7e982f27d85a6f1",
+   "title": "Банк ВТБ: отчётность по МСФО (2025Q1_ifrs_fs.pdf)"
+  },
+  {
+   "key": "2025Q2_ifrs_fs",
+   "file": "primary/2025Q2_ifrs_fs.pdf",
+   "sha256": "284e1cc217a4172ad00c5db51af40c4d10390f0a6d900bf125e0a9384e9a891f",
+   "title": "Банк ВТБ: отчётность по МСФО (2025Q2_ifrs_fs.pdf)"
+  },
+  {
+   "key": "2025Q3_ifrs_fs",
+   "file": "primary/2025Q3_ifrs_fs.pdf",
+   "sha256": "87db3a66b4e49f190cb4bac6d97e4fb3e0b048d277c08b82bb4963c13250c9aa",
+   "title": "Банк ВТБ: отчётность по МСФО (2025Q3_ifrs_fs.pdf)"
+  },
+  {
+   "key": "2026Q1_ifrs_fs",
+   "file": "primary/2026Q1_ifrs_fs.pdf",
+   "sha256": "1f679ad42daa87d4041dfd556b0a26f450183badd4a1b27257dda1ec539ed119",
+   "title": "Банк ВТБ: отчётность по МСФО (2026Q1_ifrs_fs.pdf)"
+  },
+  {
+   "key": "2026Q2_call_transcript",
+   "file": "primary/2026Q2_call_transcript.pdf",
+   "sha256": "f2bc2526afe072f71c2ab97ffa1afc7f06510aa52266239f146f37a97c42a179",
+   "title": "Банк ВТБ: расшифровка звонка (2026Q2_call_transcript.pdf)"
+  },
+  {
+   "key": "2026Q2_ifrs_databook",
+   "file": "primary/2026Q2_ifrs_databook.xlsx",
+   "sha256": "0a08006704b1144c85b7ae04ee5f3f7c0f5a515930ffbbf5da6ff859933bf647",
+   "title": "Банк ВТБ: приложение к презентации (Databook) (2026Q2_ifrs_databook.xlsx)"
+  },
+  {
+   "key": "2026Q2_ifrs_fs",
+   "file": "primary/2026Q2_ifrs_fs.pdf",
+   "sha256": "9bef55d9357d5f6d152ffdd33c0ab2a8504814c1215f7791afdc037b4cbd06f4",
+   "title": "Банк ВТБ: отчётность по МСФО (2026Q2_ifrs_fs.pdf)"
+  },
+  {
+   "key": "2026Q2_ifrs_presentation",
+   "file": "primary/2026Q2_ifrs_presentation.pdf",
+   "sha256": "2562bbdecf35a376941d51992a1dd0e17e863f7db98651e3628143dc260365c8",
+   "title": "Банк ВТБ: документ или лист этапа 1 (2026Q2_ifrs_presentation.pdf)"
+  },
+  {
+   "key": "DIV_policy_2016-01-29",
+   "file": "primary/DIV_policy_2016-01-29.pdf",
+   "sha256": "615e5ae6f33d57333f2002143626892e5bd5b672bed02b287b2d28628a63a524",
+   "title": "Банк ВТБ: документ или лист этапа 1 (DIV_policy_2016-01-29.pdf)"
+  },
+  {
+   "key": "FY2025_ifrs_fs",
+   "file": "primary/FY2025_ifrs_fs.pdf",
+   "sha256": "9c64c57daa58142db1fc1d72f9c27310bbc3b6e42899473bb31bc622a221147a",
+   "title": "Банк ВТБ: отчётность по МСФО (FY2025_ifrs_fs.pdf)"
+  },
+  {
+   "key": "GM_2025-06-30_agm_voting_report",
+   "file": "primary/GM_2025-06-30_agm_voting_report.pdf",
+   "sha256": "922f80887a95cf8161ea5d83bb6a1b5010da580fc823b15c8b506d6194b92729",
+   "title": "Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров (GM_2025-06-30_agm_voting_report.pdf)"
+  },
+  {
+   "key": "GM_2026-06-30_agm_voting_report",
+   "file": "primary/GM_2026-06-30_agm_voting_report.pdf",
+   "sha256": "9e7df8864fa1f26bfe516b767cb14c89465325f3160a406a0de77f78c639132d",
+   "title": "Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров (GM_2026-06-30_agm_voting_report.pdf)"
+  },
+  {
+   "key": "M_2026-07_ifrs_results",
+   "file": "primary/M_2026-07_ifrs_results.xlsx",
+   "sha256": "825bac63c10a100321a4f195a7ff9c3b7e8f215dc8aec2fc05ec907229a4af07",
+   "title": "Банк ВТБ: документ или лист этапа 1 (M_2026-07_ifrs_results.xlsx)"
+  },
+  {
+   "key": "M_2026-08_ifrs_results",
+   "file": "primary/M_2026-08_ifrs_results.xlsx",
+   "sha256": "96da644a1321d84cc0e50270264898cb46ddfecc9356ddc8c9305c6b2cf812f8",
+   "title": "Банк ВТБ: документ или лист этапа 1 (M_2026-08_ifrs_results.xlsx)"
+  },
+  {
+   "key": "SH_2023-03_closed_subscription_preemptive_results",
+   "file": "primary/SH_2023-03_closed_subscription_preemptive_results.pdf",
+   "sha256": "04da6d04a92d40f1e79fb198dbc4310dc85842b01477b3b89bfd30edfa5a11c7",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2023-03_closed_subscription_preemptive_results.pdf)"
+  },
+  {
+   "key": "SH_2023-06_open_subscription_results_notice",
+   "file": "primary/SH_2023-06_open_subscription_results_notice.pdf",
+   "sha256": "aad95b1158c1ebf9878e92be11a92933d11f777d4db6ce2ec9d07ad9c82398a4",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2023-06_open_subscription_results_notice.pdf)"
+  },
+  {
+   "key": "SH_2024-07-11_reverse_split",
+   "file": "primary/SH_2024-07-11_reverse_split.pdf",
+   "sha256": "9f683f3b17dc286597473cbce104f7ffe783a4a8e32ce8e698c402640dad00b9",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2024-07-11_reverse_split.pdf)"
+  },
+  {
+   "key": "SH_2025-09_spo_results_notice",
+   "file": "primary/SH_2025-09_spo_results_notice.pdf",
+   "sha256": "30a57c8a055b4a0c80a508003ee253a7c6a883f1c118ff7a10258dea7ba8909c",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2025-09_spo_results_notice.pdf)"
+  },
+  {
+   "key": "SH_2026_open_subscription_registration",
+   "file": "primary/SH_2026_open_subscription_registration.pdf",
+   "sha256": "065867b2bb5f5683ec0daf7f85cc8c7512438be32286c2ecdba714d0ceca6156",
+   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2026_open_subscription_registration.pdf)"
+  },
+  {
+   "key": "key_rate_quarterly",
+   "file": "stage1/facts/sheets/key_rate_quarterly.csv",
+   "sha256": "84a1af94980b81a3ee0a28f7a73a9e5d5aa420259fe679f6b333e0b1f1093a13",
+   "title": "Банк России: средняя ключевая ставка по кварталам (лист этапа 1 по ряду ключевой ставки сайта Банка России)"
+  },
+  {
+   "key": "vtb_cbr_f805_norms_reg1000",
+   "file": "research/facts/vtb_cbr_f805_norms_reg1000.csv",
+   "sha256": "db7fe3980e752160956eb9560978025af663e9d745a236c54232748f2b630153",
+   "title": "Банк ВТБ: документ или лист этапа 1 (vtb_cbr_f805_norms_reg1000.csv)"
+  },
+  {
+   "key": "vtb_dividends",
+   "file": "research/facts/vtb_dividends.csv",
+   "sha256": "2cb1c3af7c06ba8d9d25cc7723b67e029d6f3b74074b956043f7616315ab7c79",
+   "title": "Банк ВТБ: сводный лист дивидендов по решениям общих собраний акционеров (лист этапа 1)"
+  },
+  {
+   "key": "vtb_shares",
+   "file": "research/facts/vtb_shares.csv",
+   "sha256": "651c84186ee78b95606b98a4bbf619a119719d101b6ee840b186223795b9d455",
+   "title": "Банк ВТБ: документ или лист этапа 1 (vtb_shares.csv)"
+  }
+ ]
+}

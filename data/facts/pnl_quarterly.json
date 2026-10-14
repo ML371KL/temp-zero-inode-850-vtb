@@ -1,0 +1,1694 @@
+{
+ "basis": "IFRS",
+ "profit_basis": "reported",
+ "as_of": "2026-06-30",
+ "unit": "млрд ₽ за квартал; key_avg — доля единицы",
+ "sign": "как в отчётности: расходы, резервы, налог — со знаком минус; dia и at1_coupon — величиной; тождество pbt = nii + llp_debt_fa + fees_net + insurance_net + noncore_net + opex + misc_net; ni = pbt + tax",
+ "note": "прибыль движка — отчётная прибыль акционеров банка по МСФО (ni_shareholders); кварталы — колонки Databook 6М2026 (редакция 6M2026: прошлые периоды пересчитаны); 4-й квартал Databook печатает прямо, тождество «год − (1К + 2К + 3К)» проверяет check_facts.py; pbt движка включает убыток после налога от дочерних компаний, приобретённых для перепродажи (0…−1,4 в квартал), отчётные строки — в reported",
+ "quarters": {
+  "2023Q1": {
+   "nii": {
+    "v": 175.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 42.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -49.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 5.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 33,0 + расходы по страхованию −27,2 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 84.5,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 178,2 − (175,8 + 42,0 + −49,4 + 5,8 + 0 + −80,5); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -80.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 178.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 178,2 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -31.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 147.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 144.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 2.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 10.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": null,
+    "calc": "не собрано: выплаты по бессрочным инструментам за кварталы 2023 года в лист не внесены"
+   },
+   "ni_ordinary": {
+    "v": null,
+    "calc": "нет купона квартала"
+   },
+   "key_avg": {
+    "v": 0.075,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (90 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 89.5,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 0,8 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": 0.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "bargain_purchase",
+     "item": "прибыль от выгодной покупки (РНКБ)",
+     "amount": {
+      "v": 35.4,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R30, sha256 0a08006704b1144c",
+      "calc": "отдельная строка отчёта; разовая по природе"
+     }
+    },
+    {
+     "component": "fx",
+     "item": "валютный доход 1-го полугодия 2023 года сверх обычного уровня 16 в квартал",
+     "amount": {
+      "v": 47.1,
+      "calc": "расчёт: 63.1 − 16.0; обычный уровень — «доходы от валютных операций стабильны (~16 млрд руб. в квартал)» (звонок 28.07.2026); устав калибровки (окно L) называет разовым весь валютный доход 1П2023 (118,1) — тогда вычитать 63,1",
+      "estimated": true
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 178.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -31.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 147.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 147.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!R50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2023Q2": {
+   "nii": {
+    "v": 197.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 55.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -40.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 0.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 27,6 + расходы по страхованию −26,7 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 58.4,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 177,8 − (197,0 + 55,6 + −40,7 + 0,9 + 0 + −93,4); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -93.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 177.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 177,8 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -35.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 142.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 140.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 2.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 10.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": null,
+    "calc": "не собрано: выплаты по бессрочным инструментам за кварталы 2023 года в лист не внесены"
+   },
+   "ni_ordinary": {
+    "v": null,
+    "calc": "нет купона квартала"
+   },
+   "key_avg": {
+    "v": 0.075,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (91 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 64.1,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −4,8 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": -4.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fx",
+     "item": "валютный доход 1-го полугодия 2023 года сверх обычного уровня 16 в квартал",
+     "amount": {
+      "v": 39.0,
+      "calc": "расчёт: 55.0 − 16.0; то же (весь доход квартала — 55,0)",
+      "estimated": true
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 177.8,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -35.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 142.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 142.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!Q50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2023Q3": {
+   "nii": {
+    "v": 198.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 60.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -45.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 6.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 34,3 + расходы по страхованию −27,5 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": -12.7,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 109,2 − (198,0 + 60,6 + −45,0 + 6,8 + 0 + −98,5); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -98.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 109.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 109,2 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -22.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 86.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 83.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 2.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 11.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": null,
+    "calc": "не собрано: выплаты по бессрочным инструментам за кварталы 2023 года в лист не внесены"
+   },
+   "ni_ordinary": {
+    "v": null,
+    "calc": "нет купона квартала"
+   },
+   "key_avg": {
+    "v": 0.101793,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": -15.0,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 9,1 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": 9.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [],
+   "reported": {
+    "pbt": {
+     "v": 109.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -22.7,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 86.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 86.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!P50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2023Q4": {
+   "nii": {
+    "v": 190.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 58.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -40.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": -7.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 25,9 + расходы по страхованию −33,4 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": -20.5,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 53,0 − (190,6 + 58,8 + −40,5 + −7,5 + 0 + −127,9); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -127.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 53.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 53,0 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": 2.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 55.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 51.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 12.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": null,
+    "calc": "не собрано: выплаты по бессрочным инструментам за кварталы 2023 года в лист не внесены"
+   },
+   "ni_ordinary": {
+    "v": null,
+    "calc": "нет купона квартала"
+   },
+   "key_avg": {
+    "v": 0.145217,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": -11.3,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −16,7 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": -16.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [],
+   "reported": {
+    "pbt": {
+     "v": 53.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": 2.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 55.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 55.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!O50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2024Q1": {
+   "nii": {
+    "v": 153.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 51.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -32.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 8.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 37,0 + расходы по страхованию −28,7 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 59.6,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 141,9 − (153,8 + 51,7 + −32,1 + 8,3 + 0 + −99,4); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -99.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 141.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 141,9 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -19.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 122.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 118.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 13.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 7.6,
+    "src": "2025Q1_ifrs_fs.pdf, с. 20, sha256 c14f6a16d8c233e9",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 110.6,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.16,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (91 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 64.4,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 3,5 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": 3.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [],
+   "reported": {
+    "pbt": {
+     "v": 141.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -19.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 122.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 122.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!M50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2024Q2": {
+   "nii": {
+    "v": 134.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 60.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -36.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 9.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 38,8 + расходы по страхованию −29,8 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 49.1,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 104,5 − (134,5 + 60,7 + −36,0 + 9,0 + 0 + −112,8); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -112.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 104.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 104,5 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": 50.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 154.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 150.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 14.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 11.2,
+    "src": "2025Q2_ifrs_fs.pdf, с. 21, sha256 284e1cc217a4172a",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 138.9,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.16,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (91 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 56.3,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 1,8 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": 1.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [],
+   "reported": {
+    "pbt": {
+     "v": 104.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": 50.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 154.7,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 154.7,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!L50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2024Q3": {
+   "nii": {
+    "v": 133.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 74.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -45.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 6.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 39,8 + расходы по страхованию −33,6 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 49.7,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 107,8 − (133,9 + 74,2 + −45,4 + 6,2 + 0 + −110,8); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -110.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 107.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 107,8 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -9.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 97.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 92.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 5.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 15.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 6.1,
+    "src": "2025Q3_ifrs_fs.pdf, с. 8, sha256 87db3a66b4e49f19; 2025Q2_ifrs_fs.pdf, с. 21, sha256 284e1cc217a4172a",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус); расчёт: 9M2024 − 6M2024 = 24.9 − 18.8"
+   },
+   "ni_ordinary": {
+    "v": 86.8,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.175543,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 40.8,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 15,1 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": 15.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [],
+   "reported": {
+    "pbt": {
+     "v": 107.8,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -9.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 97.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 97.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!K50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2024Q4": {
+   "nii": {
+    "v": 65.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 82.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": 89.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 0.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 40,4 + расходы по страхованию −40,2 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 138.3,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 219,7 − (65,0 + 82,4 + 89,6 + 0,2 + 0 + −155,8); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -155.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 219.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 220,9 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −1,2 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -43.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 176.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 174.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 2.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 16.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 13.1,
+    "src": "FY2025_ifrs_fs.pdf, с. 26, sha256 9c64c57daa58142d; 2025Q3_ifrs_fs.pdf, с. 8, sha256 87db3a66b4e49f19",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус); расчёт: FY2024 − 9M2024 = 38.0 − 24.9"
+   },
+   "ni_ordinary": {
+    "v": 161.0,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.20413,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 156.3,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −16,6 − убыток перепродажи −1,2"
+   },
+   "other_provisions": {
+    "v": -16.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "disposals",
+     "item": "доходы от выбытия дочерних и ассоциированных компаний",
+     "amount": {
+      "v": 55.5,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J21, sha256 0a08006704b1144c",
+      "calc": "отдельная строка отчёта; разовая по природе"
+     }
+    },
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 19.6,
+      "src": "FY2025_ifrs_fs.pdf, с. 17, sha256 9c64c57daa58142d; 2025Q3_ifrs_fs.pdf, с. 16, sha256 87db3a66b4e49f19",
+      "calc": "прим. 5: за 2024 год 19,6; за 9М2024 — ноль; весь доход — в 4-м квартале"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 220.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -43.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 177.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -1.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 176.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!J50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2025Q1": {
+   "nii": {
+    "v": 52.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 72.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -49.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 5.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 41,3 + расходы по страхованию −36,2 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 219.7,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 182,3 − (52,6 + 72,7 + −49,5 + 5,1 + 0 + −118,3); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -118.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 182.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 182,3 + убыток после налога от дочерних компаний, приобретённых для перепродажи, 0,0 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -40.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 141.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 136.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 18.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 7.2,
+    "src": "2026Q1_ifrs_fs.pdf, с. 21, sha256 1f679ad42daa87d4",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 129.6,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.21,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (90 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 233.1,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −8,3 − убыток перепродажи 0,0"
+   },
+   "other_provisions": {
+    "v": -8.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 126.7,
+      "src": "2026Q2_ifrs_fs.pdf, с. 16, sha256 9bef55d9357d5f6d",
+      "calc": "расчёт: 6M2025 − 2Q2025 = 139.5 − 12.8 (прим. 5, сравнительные колонки отчёта за 6М2026)"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 182.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -40.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 141.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": 0.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 141.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!H50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2025Q2": {
+   "nii": {
+    "v": 94.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 72.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -48.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 2.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 41,4 + расходы по страхованию −39,0 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 56.8,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 49,4 − (94,2 + 72,9 + −48,2 + 2,4 + 0 + −128,7); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -128.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 49.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 49,9 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −0,5 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": 90.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 139.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 134.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 19.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 11.9,
+    "src": "2026Q2_ifrs_fs.pdf, с. 20, sha256 9bef55d9357d5f6d",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 122.7,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.207582,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (91 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 63.5,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −3,8 − убыток перепродажи −0,5"
+   },
+   "other_provisions": {
+    "v": -3.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 12.8,
+      "src": "2026Q2_ifrs_fs.pdf, с. 16, sha256 9bef55d9357d5f6d",
+      "calc": "прим. 5 (сравнительная колонка «за три месяца»)"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 49.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": 90.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 139.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -0.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 139.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!G50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2025Q3": {
+   "nii": {
+    "v": 121.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 80.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -54.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 0.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 42,6 + расходы по страхованию −41,7 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 71.4,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 85,4 − (121,1 + 80,6 + −54,5 + 0,9 + 0 + −134,1); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -134.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 85.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 85,5 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −0,1 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": 14.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 100.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 95.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 19.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 6.7,
+    "src": "2025Q3_ifrs_fs.pdf, с. 8, sha256 87db3a66b4e49f19; 2026Q2_ifrs_fs.pdf, с. 20, sha256 9bef55d9357d5f6d",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус); расчёт: 9M2025 − 6M2025 = 25.8 − 19.1"
+   },
+   "ni_ordinary": {
+    "v": 88.7,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.18413,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 29.3,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 43,1 − убыток перепродажи −0,1"
+   },
+   "other_provisions": {
+    "v": 43.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 6.0,
+      "src": "2025Q3_ifrs_fs.pdf, с. 16, sha256 87db3a66b4e49f19",
+      "calc": "прим. 5 («за три месяца»)"
+     }
+    },
+    {
+     "component": "other_provisions",
+     "item": "восстановление резерва по обязательствам кредитного характера и прочим финансовым активам",
+     "amount": {
+      "v": 44.1,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F22, sha256 0a08006704b1144c",
+      "calc": "разовое по величине: в остальных кварталах 2023–2026 годов от −18.8 до +14.1"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 85.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": 14.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 100.1,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -0.1,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 100.0,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!F50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2025Q4": {
+   "nii": {
+    "v": 165.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 80.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -91.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 8.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 44,0 + расходы по страхованию −35,4 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 121.0,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 106,0 − (165,7 + 80,9 + −91,0 + 8,6 + 0 + −179,2); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -179.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 106.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 107,4 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −1,4 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": 15.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 121.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 116.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 19.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 11.8,
+    "src": "FY2025_ifrs_fs.pdf, с. 26, sha256 9c64c57daa58142d; 2025Q3_ifrs_fs.pdf, с. 8, sha256 87db3a66b4e49f19",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус); расчёт: FY2025 − 9M2025 = 37.6 − 25.8"
+   },
+   "ni_ordinary": {
+    "v": 105.1,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.16587,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 119.1,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы 11,9 − убыток перепродажи −1,4"
+   },
+   "other_provisions": {
+    "v": 11.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 10.2,
+      "src": "FY2025_ifrs_fs.pdf, с. 17, sha256 9c64c57daa58142d; 2025Q3_ifrs_fs.pdf, с. 16, sha256 87db3a66b4e49f19",
+      "calc": "расчёт: FY2025 − 9M2025 = 155.7 − 145.5"
+     }
+    },
+    {
+     "component": "ppe",
+     "item": "обесценение земли, зданий и нематериальных активов",
+     "amount": {
+      "v": -15.0,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E41, sha256 0a08006704b1144c",
+      "calc": "повторяется в четвёртых кварталах: −5,3 (4К2023), −11,7 (4К2024), −15,0 (4К2025) — скорее сезонная статья, чем разовая"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 107.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": 15.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 122.7,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -1.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 121.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!E50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2026Q1": {
+   "nii": {
+    "v": 196.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 80.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -50.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 4.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 44,0 + расходы по страхованию −39,8 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 80.2,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 168,7 − (196,8 + 80,1 + −50,3 + 4,2 + 0 + −142,3); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -142.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 168.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 169,2 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −0,5 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -36.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 132.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 128.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 19.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 7.8,
+    "src": "2026Q1_ifrs_fs.pdf, с. 21, sha256 1f679ad42daa87d4",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 120.2,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.157056,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (90 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 91.4,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −6,5 − убыток перепродажи −0,5"
+   },
+   "other_provisions": {
+    "v": -6.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "fin_instruments",
+     "item": "доход от первоначального признания финансовых активов через прочий совокупный доход",
+     "amount": {
+      "v": 2.1,
+      "src": "2026Q2_ifrs_fs.pdf, с. 16, sha256 9bef55d9357d5f6d",
+      "calc": "расчёт: 6M2026 − 2Q2026 = 2.1 − 0.0"
+     }
+    },
+    {
+     "component": "nonfin",
+     "item": "обесценение земли, зданий и нематериальных активов нефинансовой деятельности",
+     "amount": {
+      "v": -6.8,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C36, sha256 0a08006704b1144c",
+      "calc": "в остальных кварталах от −0.9 до +7.5"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 169.2,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -36.1,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 133.1,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -0.5,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 132.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!C50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2026Q2": {
+   "nii": {
+    "v": 208.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 95.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -65.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B13, sha256 0a08006704b1144c"
+   },
+   "insurance_net": {
+    "v": 7.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B28, sha256 0a08006704b1144c",
+    "calc": "выручка по страхованию 44,6 + расходы по страхованию −37,1 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 7.9,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 111,0 − (208,8 + 95,7 + −65,3 + 7,5 + 0 + −143,6); состав — лист sheets/misc_composition.csv"
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка"
+   },
+   "opex": {
+    "v": -143.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B44, sha256 0a08006704b1144c"
+   },
+   "pbt": {
+    "v": 111.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B46, sha256 0a08006704b1144c",
+    "calc": "прибыль до налогообложения 111,3 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −0,3 — чтобы держалось ni = pbt + tax"
+   },
+   "tax": {
+    "v": -18.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 92.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 88.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 4.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B53, sha256 0a08006704b1144c"
+   },
+   "dia": {
+    "v": 19.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B11, sha256 0a08006704b1144c",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 10.8,
+    "src": "2026Q2_ifrs_fs.pdf, с. 20, sha256 9bef55d9357d5f6d",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной (в отчёте о капитале — минус)"
+   },
+   "ni_ordinary": {
+    "v": 77.3,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.146181,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (91 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 16.9,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −1,2 − убыток перепродажи −0,3"
+   },
+   "other_provisions": {
+    "v": -1.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B22, sha256 0a08006704b1144c",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам + по искам (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "disposals",
+     "item": "убыток от продажи «Галс-Девелопмент» (по балансовой стоимости с беспроцентной рассрочкой)",
+     "amount": {
+      "v": -8.7,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B21, sha256 0a08006704b1144c; 2026Q2_call_transcript.pdf, с. 2, sha256 f2bc2526afe072f7",
+      "calc": "звонок 28.07.2026: «отрицательный разовый фактор … убыток в размере 8,7 млрд руб.»"
+     }
+    },
+    {
+     "component": "nonfin",
+     "item": "расходы от списания имущества, предназначенного для продажи",
+     "amount": {
+      "v": -5.3,
+      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B35, sha256 0a08006704b1144c",
+      "calc": "строка нефинансовой деятельности; в остальных кварталах около нуля"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 111.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B46, sha256 0a08006704b1144c"
+    },
+    "tax": {
+     "v": -18.4,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B47, sha256 0a08006704b1144c"
+    },
+    "np_after_tax": {
+     "v": 92.9,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B48, sha256 0a08006704b1144c"
+    },
+    "np_resale_subs": {
+     "v": -0.3,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B49, sha256 0a08006704b1144c"
+    },
+    "ni": {
+     "v": 92.6,
+     "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B50, sha256 0a08006704b1144c"
+    }
+   }
+  }
+ },
+ "years": {
+  "2023": {
+   "nii": {
+    "v": 761.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 217.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -175.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N13, sha256 0a08006704b1144c"
+   },
+   "opex": {
+    "v": -400.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N44, sha256 0a08006704b1144c"
+   },
+   "pbt_reported": {
+    "v": 518.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N46, sha256 0a08006704b1144c"
+   },
+   "tax": {
+    "v": -86.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 432.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 420.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 11.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!N53, sha256 0a08006704b1144c"
+   }
+  },
+  "2024": {
+   "nii": {
+    "v": 487.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 269.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -23.9,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I13, sha256 0a08006704b1144c"
+   },
+   "opex": {
+    "v": -478.8,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I44, sha256 0a08006704b1144c"
+   },
+   "pbt_reported": {
+    "v": 575.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I46, sha256 0a08006704b1144c"
+   },
+   "tax": {
+    "v": -22.5,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 551.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 535.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 16.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!I53, sha256 0a08006704b1144c"
+   }
+  },
+  "2025": {
+   "nii": {
+    "v": 433.6,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D12, sha256 0a08006704b1144c"
+   },
+   "fees_net": {
+    "v": 307.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D15, sha256 0a08006704b1144c"
+   },
+   "llp_debt_fa": {
+    "v": -243.2,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D13, sha256 0a08006704b1144c"
+   },
+   "opex": {
+    "v": -560.3,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D44, sha256 0a08006704b1144c"
+   },
+   "pbt_reported": {
+    "v": 425.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D46, sha256 0a08006704b1144c"
+   },
+   "tax": {
+    "v": 79.0,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D47, sha256 0a08006704b1144c"
+   },
+   "ni": {
+    "v": 502.1,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D50, sha256 0a08006704b1144c"
+   },
+   "ni_shareholders": {
+    "v": 483.7,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D52, sha256 0a08006704b1144c"
+   },
+   "ni_nci": {
+    "v": 18.4,
+    "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!D53, sha256 0a08006704b1144c"
+   }
+  }
+ }
+}

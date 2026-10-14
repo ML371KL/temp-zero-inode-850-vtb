@@ -1,0 +1,160 @@
+{
+ "unit": "RUB на обыкновенную акцию, в нынешних акциях",
+ "source": "stage1/ind/dividends.csv (решения о дивидендах по годам прибыли)",
+ "note": "справочный лист: реестр выпуска ведут брокерский календарь, новость и ручная запись; стартовый реестр — факты",
+ "years": {
+  "2006": {
+   "dps": {
+    "v": 3.3,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00066,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2007": {
+   "dps": {
+    "v": 6.7,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00134,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2008": {
+   "dps": {
+    "v": 2.235,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.000447,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2009": {
+   "dps": {
+    "v": 2.9,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00058,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2010": {
+   "dps": {
+    "v": 2.9,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00058,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2011": {
+   "dps": {
+    "v": 4.4,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00088,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2012": {
+   "dps": {
+    "v": 7.15,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00143,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2013": {
+   "dps": {
+    "v": 5.8,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00116,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2014": {
+   "dps": {
+    "v": 5.85,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00117,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2015": {
+   "dps": {
+    "v": 5.85,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00117,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2016": {
+   "dps": {
+    "v": 5.85,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00117,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2017": {
+   "dps": {
+    "v": 17.267457,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00345349138975912,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2018": {
+   "dps": {
+    "v": 5.493388,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00109867761463259,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2019": {
+   "dps": {
+    "v": 3.867267,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.00077345337561138,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2020": {
+   "dps": {
+    "v": 7.000654,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 0.0014001308178917,
+   "decided_date": null,
+   "record_date": null
+  },
+  "2024": {
+   "dps": {
+    "v": 25.58,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 25.58,
+   "decided_date": "2025-06-30",
+   "record_date": "2025-07-11"
+  },
+  "2025": {
+   "dps": {
+    "v": 9.71,
+    "src": "страница дивидендов эмитента, снимок 2026-10-13 (primary/vdn_vtb_ir_dividends_page_20261013.html)"
+   },
+   "dps_declared": 9.71,
+   "decided_date": "2026-06-30",
+   "record_date": "2026-07-20"
+  }
+ }
+}

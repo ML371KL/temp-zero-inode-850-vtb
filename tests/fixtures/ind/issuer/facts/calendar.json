@@ -1,0 +1,13 @@
+{
+ "as_of": "2026-10-13",
+ "note": "заглушка теста: события сочинены в форме фактов",
+ "events": [
+  {"id": "cbr-2026-10-23", "kind": "cbr_rate", "date": "2026-10-23", "title": "Совет директоров ЦБ по ключевой ставке",
+   "covers": null, "confirmed": true, "precision": "day", "src": "заглушка теста"},
+  {"id": "ifrs-2026Q3", "kind": "ifrs", "date": "2026-10-30", "title": "МСФО за 3 квартал и 9 месяцев 2026 года",
+   "covers": "2026Q3", "confirmed": true, "precision": "day", "src": "заглушка теста"},
+  {"id": "dividend-2026", "kind": "dividend_decision", "date": "2027-06-30",
+   "title": "Решение годового собрания о дивиденде за 2026 год", "covers": "2026Q4", "confirmed": false,
+   "estimated": true, "precision": "window", "earliest": "2027-06-25", "latest": "2027-06-30", "src": "заглушка теста"}
+ ]
+}

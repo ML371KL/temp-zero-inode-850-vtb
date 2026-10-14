@@ -1,0 +1,147 @@
+{
+ "basis": "mgmt",
+ "unit": "share",
+ "source": "stage1/ind/quarters.csv (ЧПМ и стоимость риска квартала в определении эмитента; винтаж числа — графа vintage листа и src числа: печать отчёта своего квартала либо приложение к презентации более позднего квартала — тогда не первая печать)",
+ "quarters": {
+  "2023Q1": {
+   "nim": {
+    "v": 0.031,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   },
+   "cor": {
+    "v": 0.011,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   }
+  },
+  "2023Q2": {
+   "nim": {
+    "v": 0.033,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   },
+   "cor": {
+    "v": 0.009,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   }
+  },
+  "2023Q3": {
+   "nim": {
+    "v": 0.031,
+    "src": "приложение к презентации МСФО за 2024Q3 (primary/2024Q3_ifrs_databook.xls), sha256 936ff05048c7"
+   },
+   "cor": {
+    "v": 0.011,
+    "src": "приложение к презентации МСФО за 2024Q3 (primary/2024Q3_ifrs_databook.xls), sha256 936ff05048c7"
+   }
+  },
+  "2023Q4": {
+   "nim": {
+    "v": 0.029,
+    "src": "приложение к презентации МСФО за 2024Q4 (primary/2024Q4_ifrs_databook.xls), sha256 5bcae1f8b4ad"
+   },
+   "cor": {
+    "v": 0.005,
+    "src": "приложение к презентации МСФО за 2024Q4 (primary/2024Q4_ifrs_databook.xls), sha256 5bcae1f8b4ad"
+   }
+  },
+  "2024Q1": {
+   "nim": {
+    "v": 0.022,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   },
+   "cor": {
+    "v": 0.006,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   }
+  },
+  "2024Q2": {
+   "nim": {
+    "v": 0.019,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   },
+   "cor": {
+    "v": 0.006,
+    "src": "приложение к презентации МСФО за 2024Q2 (primary/2024Q2_ifrs_databook.xls), sha256 3edc6f689736"
+   }
+  },
+  "2024Q3": {
+   "nim": {
+    "v": 0.018,
+    "src": "приложение к презентации МСФО за 2024Q3 (primary/2024Q3_ifrs_databook.xls), sha256 936ff05048c7"
+   },
+   "cor": {
+    "v": 0.006,
+    "src": "приложение к презентации МСФО за 2024Q3 (primary/2024Q3_ifrs_databook.xls), sha256 936ff05048c7"
+   }
+  },
+  "2024Q4": {
+   "nim": {
+    "v": 0.008,
+    "src": "приложение к презентации МСФО за 2024Q4 (primary/2024Q4_ifrs_databook.xls), sha256 5bcae1f8b4ad"
+   },
+   "cor": {
+    "v": -0.006,
+    "src": "приложение к презентации МСФО за 2024Q4 (primary/2024Q4_ifrs_databook.xls), sha256 5bcae1f8b4ad"
+   }
+  },
+  "2025Q1": {
+   "nim": {
+    "v": 0.007,
+    "src": "приложение к презентации МСФО за 2025Q1 (primary/2025Q1_ifrs_databook.xls), sha256 063c3d36af5f"
+   },
+   "cor": {
+    "v": 0.008,
+    "src": "приложение к презентации МСФО за 2025Q1 (primary/2025Q1_ifrs_databook.xls), sha256 063c3d36af5f"
+   }
+  },
+  "2025Q2": {
+   "nim": {
+    "v": 0.012,
+    "src": "приложение к презентации МСФО за 2025Q2 (primary/2025Q2_ifrs_databook.xls), sha256 753c2042b7e7"
+   },
+   "cor": {
+    "v": 0.008,
+    "src": "приложение к презентации МСФО за 2025Q2 (primary/2025Q2_ifrs_databook.xls), sha256 753c2042b7e7"
+   }
+  },
+  "2025Q3": {
+   "nim": {
+    "v": 0.015,
+    "src": "приложение к презентации МСФО за 2025Q3 (primary/2025Q3_ifrs_databook.xlsx), sha256 69c320948711"
+   },
+   "cor": {
+    "v": 0.011,
+    "src": "приложение к презентации МСФО за 2025Q3 (primary/2025Q3_ifrs_databook.xlsx), sha256 69c320948711"
+   }
+  },
+  "2025Q4": {
+   "nim": {
+    "v": 0.02,
+    "src": "приложение к презентации МСФО за 2025Q4 (primary/2025Q4_ifrs_databook.xlsx), sha256 cf611f2ce6b5"
+   },
+   "cor": {
+    "v": 0.018,
+    "src": "приложение к презентации МСФО за 2025Q4 (primary/2025Q4_ifrs_databook.xlsx), sha256 cf611f2ce6b5"
+   }
+  },
+  "2026Q1": {
+   "nim": {
+    "v": 0.025,
+    "src": "приложение к презентации МСФО за 2026Q1 (primary/2026Q1_ifrs_databook.xlsx), sha256 adbdafc7abd9"
+   },
+   "cor": {
+    "v": 0.009,
+    "src": "приложение к презентации МСФО за 2026Q1 (primary/2026Q1_ifrs_databook.xlsx), sha256 adbdafc7abd9"
+   }
+  },
+  "2026Q2": {
+   "nim": {
+    "v": 0.026,
+    "src": "приложение к презентации МСФО за 2026Q2 (primary/2026Q2_ifrs_databook.xlsx), sha256 0a08006704b1"
+   },
+   "cor": {
+    "v": 0.01,
+    "src": "приложение к презентации МСФО за 2026Q2 (primary/2026Q2_ifrs_databook.xlsx), sha256 0a08006704b1"
+   }
+  }
+ }
+}

@@ -1019,8 +1019,12 @@ def _headline_problems(d: Mapping[str, Any]) -> list[str]:
             if not _close(got[k], v, stored_tolerance(PRECISION["price"])):
                 p.append(f"{where}: {k} {got[k]} не воспроизводится из прогонов ({v:.4f})")
         pb = sum(1 for v in c if v < price) / len(c)
-        if row.get("p_below_market") is None or abs(row["p_below_market"] - pb) > 1e-6:
-            p.append(f"{where}: P(ниже рынка) {row.get('p_below_market')} ≠ {pb}")
+        half = (PRECISION["draw"] + PRECISION["price"]) / 2 + 1e-9  # прогоны хранятся с шагом draw, цена — с шагом price:
+        pb_lo = sum(1 for v in c if v < price - half) / len(c)     # прогон в полушаге от цены считается любой стороной
+        pb_hi = sum(1 for v in c if v < price + half) / len(c)
+        got_pb = row.get("p_below_market")
+        if got_pb is None or not (pb_lo - 1e-6 <= got_pb <= pb_hi + 1e-6):
+            p.append(f"{where}: P(ниже рынка) {got_pb} ≠ {pb} (допустимо {pb_lo}…{pb_hi})")
         if printed:
             for key, val in (("printed_median", want["median"]),):
                 if row.get(key) != U.round_half_up(val, step):

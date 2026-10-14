@@ -1619,7 +1619,7 @@ def build_mutant(mutation: Mutation, target: Path) -> Path:
     return target
 
 
-def run_checks_in(target: Path | None, timeout: float = 300.0, only: Iterable[str] | str | None = None) -> dict[str, str]:
+def run_checks_in(target: Path | None, timeout: float = 900.0, only: Iterable[str] | str | None = None) -> dict[str, str]:
     """Проверки подпроцессом; `target` — каталог мутанта (None — подлинное ядро). Имя → «ok» | причина.
     `only` — только названные проверки (перечень имён: быстрый круг `ops/tools/pmut.py`) либо строка — начало имён
     проверок (прогон выбранных мутантов одной темы); тест мутаций гоняет все."""

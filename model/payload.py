@@ -4234,7 +4234,10 @@ def _nowcast(x: _Ctx, nxt: Mapping, next_exp: Mapping) -> dict:
         ops["ni_target"] = {"multiplier": target["multiplier"], "title": target["title"]}
     return {"period_unit": "quarter", "input_unit": "month", "connected_to_price": False,
             "targets": nowcast_targets(x.book), "quarter": quarter, "year": year,
-            "months": {"basis": "ras", "rows": list(getattr(ind, "ras_months", ()) or ())},
+            # базис месячной таблицы — код слоя индикаторов (`sources.yaml → monthly.basis`): у месячных
+            # результатов группы по МСФО — ifrs; без слоя — РСБУ общей формы
+            "months": {"basis": getattr(ind, "months_basis", None) or "ras",
+                       "rows": list(getattr(ind, "ras_months", ()) or ())},
             "form102": list(getattr(ind, "form102", ()) or ()),
             "admission": _filled(getattr(ind, "admission", None), ADMISSION_SKELETON),
             "retro": _filled(getattr(ind, "retro", None), RETRO_SKELETON),

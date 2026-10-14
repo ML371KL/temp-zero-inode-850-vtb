@@ -144,31 +144,31 @@
 | Реестр | Ключ | Документ | sha256 |
 |---|---|---|---|
 | `anchor.json` | `zcyc_quarter_ends_2024_2026` | Московская биржа: кривая бескупонной доходности ОФЗ на концы кварталов 2024–2026 (лист этапа 1) | 0eaf8fbc7e536b56 |
-| `anchor.json` | `2025Q1_ifrs_fs` | Банк ВТБ: отчётность по МСФО (2025Q1_ifrs_fs.pdf) | c14f6a16d8c233e9 |
-| `anchor.json` | `2025Q2_ifrs_fs` | Банк ВТБ: отчётность по МСФО (2025Q2_ifrs_fs.pdf) | 284e1cc217a4172a |
-| `anchor.json` | `2025Q3_ifrs_fs` | Банк ВТБ: отчётность по МСФО (2025Q3_ifrs_fs.pdf) | 87db3a66b4e49f19 |
-| `anchor.json` | `2026Q1_ifrs_fs` | Банк ВТБ: отчётность по МСФО (2026Q1_ifrs_fs.pdf) | 1f679ad42daa87d4 |
-| `anchor.json` | `2026Q2_call_transcript` | Банк ВТБ: расшифровка звонка (2026Q2_call_transcript.pdf) | f2bc2526afe072f7 |
-| `anchor.json` | `2026Q2_ifrs_databook` | Банк ВТБ: приложение к презентации (Databook) (2026Q2_ifrs_databook.xlsx) | 0a08006704b1144c |
-| `anchor.json` | `2026Q2_ifrs_fs` | Банк ВТБ: отчётность по МСФО (2026Q2_ifrs_fs.pdf) | 9bef55d9357d5f6d |
-| `anchor.json` | `2026Q2_ifrs_presentation` | Банк ВТБ: документ или лист этапа 1 (2026Q2_ifrs_presentation.pdf) | 2562bbdecf35a376 |
-| `anchor.json` | `DIV_policy_2016-01-29` | Банк ВТБ: документ или лист этапа 1 (DIV_policy_2016-01-29.pdf) | 615e5ae6f33d5733 |
-| `anchor.json` | `FY2025_ifrs_fs` | Банк ВТБ: отчётность по МСФО (FY2025_ifrs_fs.pdf) | 9c64c57daa58142d |
-| `anchor.json` | `GM_2025-06-30_agm_voting_report` | Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров (GM_2025-06-30_agm_voting_report.pdf) | 922f80887a95cf81 |
-| `anchor.json` | `GM_2026-06-30_agm_voting_report` | Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров (GM_2026-06-30_agm_voting_report.pdf) | 9e7df8864fa1f26b |
-| `anchor.json` | `M_2026-07_ifrs_results` | Банк ВТБ: документ или лист этапа 1 (M_2026-07_ifrs_results.xlsx) | 825bac63c10a1003 |
-| `anchor.json` | `M_2026-08_ifrs_results` | Банк ВТБ: документ или лист этапа 1 (M_2026-08_ifrs_results.xlsx) | 96da644a1321d84c |
-| `anchor.json` | `SH_2023-03_closed_subscription_preemptive_results` | Банк ВТБ: документ или лист этапа 1 (SH_2023-03_closed_subscription_preemptive_results.pdf) | 04da6d04a92d40f1 |
-| `anchor.json` | `SH_2023-06_open_subscription_results_notice` | Банк ВТБ: документ или лист этапа 1 (SH_2023-06_open_subscription_results_notice.pdf) | aad95b1158c1ebf9 |
-| `anchor.json` | `SH_2024-07-11_reverse_split` | Банк ВТБ: документ или лист этапа 1 (SH_2024-07-11_reverse_split.pdf) | 9f683f3b17dc2865 |
-| `anchor.json` | `SH_2025-09_spo_results_notice` | Банк ВТБ: документ или лист этапа 1 (SH_2025-09_spo_results_notice.pdf) | 30a57c8a055b4a0c |
-| `anchor.json` | `SH_2026_open_subscription_registration` | Банк ВТБ: документ или лист этапа 1 (SH_2026_open_subscription_registration.pdf) | 065867b2bb5f5683 |
+| `anchor.json` | `2025Q1_ifrs_fs` | Банк ВТБ: промежуточная отчётность по МСФО за три месяца 2025 года | c14f6a16d8c233e9 |
+| `anchor.json` | `2025Q2_ifrs_fs` | Банк ВТБ: промежуточная отчётность по МСФО за шесть месяцев 2025 года | 284e1cc217a4172a |
+| `anchor.json` | `2025Q3_ifrs_fs` | Банк ВТБ: промежуточная отчётность по МСФО за девять месяцев 2025 года | 87db3a66b4e49f19 |
+| `anchor.json` | `2026Q1_ifrs_fs` | Банк ВТБ: промежуточная отчётность по МСФО за три месяца 2026 года | 1f679ad42daa87d4 |
+| `anchor.json` | `2026Q2_call_transcript` | Банк ВТБ: расшифровка звонка с инвесторами по результатам МСФО за шесть месяцев 2026 года | f2bc2526afe072f7 |
+| `anchor.json` | `2026Q2_ifrs_databook` | Банк ВТБ: приложение к презентации результатов МСФО за шесть месяцев 2026 года (Databook) | 0a08006704b1144c |
+| `anchor.json` | `2026Q2_ifrs_fs` | Банк ВТБ: промежуточная отчётность по МСФО за шесть месяцев 2026 года | 9bef55d9357d5f6d |
+| `anchor.json` | `2026Q2_ifrs_presentation` | Банк ВТБ: презентация результатов МСФО за шесть месяцев 2026 года | 2562bbdecf35a376 |
+| `anchor.json` | `DIV_policy_2016-01-29` | Банк ВТБ: положение о дивидендной политике (редакция от 29.01.2016) | 615e5ae6f33d5733 |
+| `anchor.json` | `FY2025_ifrs_fs` | Банк ВТБ: годовая отчётность по МСФО за 2025 год | 9c64c57daa58142d |
+| `anchor.json` | `GM_2025-06-30_agm_voting_report` | Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров 30.06.2025 | 922f80887a95cf81 |
+| `anchor.json` | `GM_2026-06-30_agm_voting_report` | Банк ВТБ: отчёт об итогах голосования на годовом общем собрании акционеров 30.06.2026 | 9e7df8864fa1f26b |
+| `anchor.json` | `M_2026-07_ifrs_results` | Банк ВТБ: результаты группы по МСФО за 7 месяцев 2026 года (месячная книга) | 825bac63c10a1003 |
+| `anchor.json` | `M_2026-08_ifrs_results` | Банк ВТБ: результаты группы по МСФО за 8 месяцев 2026 года (месячная книга) | 96da644a1321d84c |
+| `anchor.json` | `SH_2023-03_closed_subscription_preemptive_results` | Банк ВТБ: итоги преимущественного права при закрытой подписке на акции (март 2023 года) | 04da6d04a92d40f1 |
+| `anchor.json` | `SH_2023-06_open_subscription_results_notice` | Банк ВТБ: уведомление об итогах открытой подписки на акции (июнь 2023 года) | aad95b1158c1ebf9 |
+| `anchor.json` | `SH_2024-07-11_reverse_split` | Банк ВТБ: консолидация акций 11.07.2024 | 9f683f3b17dc2865 |
+| `anchor.json` | `SH_2025-09_spo_results_notice` | Банк ВТБ: уведомление об итогах размещения дополнительных акций (сентябрь 2025 года) | 30a57c8a055b4a0c |
+| `anchor.json` | `SH_2026_open_subscription_registration` | Банк ВТБ: регистрация дополнительного выпуска акций по открытой подписке (2026 год) | 065867b2bb5f5683 |
 | `anchor.json` | `key_rate_quarterly` | Банк России: средняя ключевая ставка по кварталам (лист этапа 1 по ряду ключевой ставки сайта Банка России) | 84a1af94980b81a3 |
-| `anchor.json` | `vtb_cbr_f805_norms_reg1000` | Банк ВТБ: документ или лист этапа 1 (vtb_cbr_f805_norms_reg1000.csv) | db7fe3980e752160 |
+| `anchor.json` | `vtb_cbr_f805_norms_reg1000` | Банк России: нормативы банковской группы ВТБ по форме 0409805 (сводный лист) | db7fe3980e752160 |
 | `anchor.json` | `vtb_dividends` | Банк ВТБ: сводный лист дивидендов по решениям общих собраний акционеров (лист этапа 1) | 2cb1c3af7c06ba8d |
-| `anchor.json` | `vtb_shares` | Банк ВТБ: документ или лист этапа 1 (vtb_shares.csv) | 651c84186ee78b95 |
+| `anchor.json` | `vtb_shares` | Банк ВТБ: сводный лист числа акций и событий капитала | 651c84186ee78b95 |
 | `calendar.json` | `cbr_cal_mp` | Банк России: календарь решений по ключевой ставке на 2026 и 2027 годы (снимок 13.10.2026) | 3362cffa65b67cfd |
 | `calendar.json` | `issuer_calendar` | Календарь инвестора на сайте Банка ВТБ (снимок 13.10.2026) | ea9b2d86d27839d9 |
 | `calendar.json` | `draft` | Черновик календаря направления vtb-regulation-macro | ec2f02788a3f5ede |
-| `calendar.json` | `SH_2026_open_subscription_registration` | Банк ВТБ: документ или лист этапа 1 (SH_2026_open_subscription_registration.pdf) | 065867b2bb5f5683 |
-| `calendar.json` | `vcs_news_interfax_2026-09-29_spo_end_october` | Банк ВТБ: документ или лист этапа 1 (vcs_news_interfax_2026-09-29_spo_end_october.html) | a6705c4025770860 |
+| `calendar.json` | `SH_2026_open_subscription_registration` | Банк ВТБ: регистрация дополнительного выпуска акций по открытой подписке (2026 год) | 065867b2bb5f5683 |
+| `calendar.json` | `vcs_news_interfax_2026-09-29_spo_end_october` | Интерфакс, 29.09.2026: новость о завершении размещения акций ВТБ в конце октября | a6705c4025770860 |

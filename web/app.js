@@ -610,6 +610,8 @@ function divisor(d) {
 	return isNum(s.divisor_mln) ? `${num1(s.divisor_mln)} млн: ${ruText(s.divisor_label || "делитель выпуска")}` : `${num1(s.outstanding_mln)} млн акций в обращении${both(d)}`;
 }
 // Подписи базиса (`meta.basis_labels`) — подвалом у карточек с ROE и P/E.
+// Форма панели (DASHBOARD §7).
+function panelForm(d) { const m = obj(d.meta); return !!(m.basis_labels || obj(m.shares).divisor_mln); }
 function basisLabel(d, k) { return ruText(obj(obj(d.meta).basis_labels)[k] || ""); }
 function basisFoot(d, ...keys) {
 	const words = { profit: "Прибыль", roe: "ROE", divisor: "На акцию" };
@@ -1527,6 +1529,10 @@ function reportPublished(d) {
 function monthly(d) { return list(obj(d.calendar).events).find((e) => e.kind === "ras" || e.kind === "ops_release" || e.kind === "ifrs_monthly"); }
 // Форму месячного входа называет вид события: релиз РСБУ — вход нау-каста, операционные результаты — наблюдение.
 // У месячных результатов по МСФО, как и без события, её называют данные: есть месячная таблица потоков — вход нау-каста.
+// Месячный вход — по базису месячной таблицы (`nowcast.months.basis`).
+function mBasis(d) { return obj(obj(d.nowcast).months).basis || "ras"; }
+function mWord(d) { return basisName(mBasis(d)); }
+function mSrc(d, one) { return mBasis(d) === "ras" ? `${one ? "месячная " : ""}РСБУ банка` : `месячные результаты (${mWord(d)})`; }
 function rasForm(d) { const e = monthly(d); return e && e.kind !== "ifrs_monthly" ? e.kind === "ras" : list(obj(obj(d.nowcast).months).rows).length > 0 || !obj(d.nowcast).ops; }
 
 // Дата формы ЦБ — оценка: печатается окном.
@@ -1536,7 +1542,7 @@ function earlierReport(d) {
 	const form = ras.enters_via === "form102";
 	const win = `≈${NBSP}${fmt.date(ras.date)}${parseDay(ras.form102_latest_est) ? `–${fmt.date(ras.form102_latest_est)}` : ""}`;
 	if (!rasForm(d)) return foot(`Форма 0409102 за ${periodLabel(ras.month)} — ${win} (дата — оценка): прибыль банка за месяц для сверки с релизом; к цене нау-каст не подключён.`);
-	return foot(`Раньше МСФО: ${form ? win : fmt.date(ras.date)} — РСБУ банка за ${periodLabel(ras.month)} `,
+	return foot(`Раньше МСФО: ${form ? win : fmt.date(ras.date)} — ${mSrc(d)} за ${periodLabel(ras.month)} `,
 		`(${form ? "по форме 0409102, дата — оценка" : "релиз, принятый по двум источникам"}): вход нау-каста; к цене нау-каст не подключён.`);
 }
 
@@ -1568,7 +1574,7 @@ function reportTeaser(d) {
 	const nr = obj(d.next_report);
 	const year = obj(obj(d.nowcast).year);
 	const n = obj(obj(nr.neutral).cor);
-	return card({ title: `Ближайший отчёт: ${periodLabel(nr.period)}`, span: 6, link: ["report", "Подробно"], sub: `два ритма: ${rasForm(d) ? "месячная РСБУ банка" : "месячный релиз и формы ЦБ"} и квартальная МСФО группы` },
+	return card({ title: `Ближайший отчёт: ${periodLabel(nr.period)}`, span: 6, link: ["report", "Подробно"], sub: `два ритма: ${rasForm(d) ? mSrc(d, 1) : "месячный релиз и формы ЦБ"} и квартальная МСФО группы` },
 		nextRasLine(d), nextFactLine(d),
 		isNum(year.ni_year) ? kpis(14,
 			kpi(bn0(year.ni_year), `прибыль ${year.year}: факт + ожидание модели${rasForm(d) ? " с поправкой нау-каста" : ""}`),
@@ -2419,12 +2425,12 @@ function varianceCard(d) {
 function governanceCard(d) {
 	const g = obj(d.governance);
 	const comps = list(g.components);
-	if (!comps.length) return none("Дисконт за управление", "дисконт за управление", 6);
+	if (!comps.length && !isNum(g.discount)) return none("Дисконт за управление", "дисконт за управление", 6);
 	let run = 0;
 	const steps = comps.map((c) => { const v = (c.sign || 1) * c.value; const from = run; run += v; return { title: c.name, from, to: run, text: fmt.pp(v) }; });
 	steps.push({ title: "Дисконт g", from: 0, to: g.sum_signed, total: true, text: pct2(g.sum_signed) });
 	return card({ title: `Дисконт за управление: ${pct2(g.discount)}`, span: 6, sub: "Каналы снизу вверх; канал без опоры — 0. Налоги, капитал и кризис в дисконт не входят." },
-		waterfall(steps),
+		comps.length ? waterfall(steps) : pa("Каналов с опорой нет: дисконт — число книги."),
 		isNum(g.price_at_low) ? foot(`Точка на краях оси дисконта: ${rub1(g.price_at_low)} … ${rub1(g.price_at_high)}.`) : null,
 		comps.some((c) => c.basis) ? bx("card-foot", detailsBlock(`Основания каналов · ${comps.length}`, comps.map((c) => pa(strong(c.name), `: ${sentence(ruText(c.basis || "—"))}`)))) : null);
 }
@@ -2436,7 +2442,7 @@ function screenReport(d) {
 	const nf = obj(obj(d.calendar).next_fact);
 	return bx("screen",
 		screenHead("Ближайший отчёт", nf.title ? `${ruText(nf.title)}: что он даст оценке` : `Что даст отчёт за ${periodLabel(nr.period)}`,
-			`Два ритма: ${rasForm(d) ? "месячная РСБУ банка — вход нау-каста" : "месячный релиз эмитента и формы ЦБ — наблюдение"}, и квартальная МСФО группы — факт для книги, журнала и обучения вероятностей режимов. `
+			`Два ритма: ${rasForm(d) ? `${mSrc(d, 1)} — вход нау-каста` : "месячный релиз эмитента и формы ЦБ — наблюдение"}, и квартальная МСФО группы — факт для книги, журнала и обучения вероятностей режимов. `
 			+ `Нау-каст к цене не подключён до допуска: экран показывает, что сделает с оценкой факт ${periodLabel(nr.period)}, и копит зачёт против наивных эталонов.`),
 		sec(countdownCard(d), nowcastCard(d)), sec(yearDpsCard(d)), sec(impactCard(d)),
 		more([retroBenchmarksCard(d), journalCard(d), opsMonthsCard(d), rasMonthsCard(d), indicatorsCard(d), eventsCard(d, 99, 12)]));
@@ -2502,7 +2508,7 @@ function nowcastCard(d) {
 		const bars = columnsChart(months.map((m) => ({ key: m.month, label: periodWord(m.month), value: m[field], faded: m.status !== "known",
 			color: m.status === "known" ? MODEL : GREY, tipTitle: periodLabel(m.month),
 			tipRows: [["статус", m.status === "known" ? `известен (${m.source === "form102" ? "форма 0409102" : "релиз"})` : "оценка профилем"]] })),
-		{ height: 150, valueName: `${fieldName}, млрд ₽`, fmt: fmt.bn, short: (v) => fmt.num(v), label: `${upperFirst(fieldName)} по месяцам квартала, РСБУ банка` });
+		{ height: 150, valueName: `${fieldName}, млрд ₽`, fmt: fmt.bn, short: (v) => fmt.num(v), label: `${upperFirst(fieldName)} по месяцам квартала, ${mWord(d)}` });
 		const iv = list(b.interval);
 		// Эталоны — выпуска и последней записи журнала; на полосе — те, что в пределах оси.
 		const names = benchNames(d);
@@ -2518,9 +2524,9 @@ function nowcastCard(d) {
 			...shown.map(([name, v]) => ({ v, kind: "bench", tip: { title: `Эталон: ${name}`, rows: [["значение", targetValue(d, key, v)]] } })),
 		], { band: iv, fmt: (v) => (key === "ni_q" ? num1(v) : num2(v * 100)), label: "Нау-каст, ожидание модели и эталоны на одной шкале" });
 		fill(body, 
-			months.length ? [tileLabel(`${upperFirst(fieldName)} по месяцам, РСБУ банка: ${fmt.num(q.months_known)} из ${fmt.num(months.length)} известны`), bars] : null,
+			months.length ? [tileLabel(`${upperFirst(fieldName)} по месяцам, ${mWord(d)}: ${fmt.num(q.months_known)} из ${fmt.num(months.length)} известны`), bars] : null,
 			kpis(10,
-				isNum(b.ras_estimate) ? kpi(targetValue(d, key, b.ras_estimate), "оценка квартала по РСБУ") : null,
+				isNum(b.ras_estimate) ? kpi(targetValue(d, key, b.ras_estimate), `оценка квартала по ${mBasis(d) === "ras" ? "РСБУ" : "месяцам"}`) : null,
 				isNum(b.bridge) ? kpi(fmt.num(b.bridge, 3), "сезонный мост МСФО / РСБУ") : null,
 				kpi(targetValue(d, key, b.expectation), `ожидание модели, слой «${layerTitle(d, "analytical")}» (${basisName(b.basis)})`),
 				b.w > 0 ? kpi(num2(b.w), "вес индикаторов w") : null,
@@ -2532,7 +2538,7 @@ function nowcastCard(d) {
 	};
 	draw();
 	return card({ title: `Нау-каст ${periodLabel(q.period)}`, span: 7,
-		sub: `${list(q.months).length ? `входы — ${inputUnit(d).many} РСБУ банка; ` : ""}цель — ${modelUnit(d).one} МСФО; ${nc.connected_to_price ? "подключён к цене" : "к цене не подключён"}` },
+		sub: `${list(q.months).length ? `входы — ${inputUnit(d).many} ${mWord(d)}; ` : ""}цель — ${modelUnit(d).one} МСФО; ${nc.connected_to_price ? "подключён к цене" : "к цене не подключён"}` },
 	bx("pick-row", chooser(targets.filter((t) => by[t.key]).map((t) => ({ value: t.key, label: t.title })), NOWCAST_TARGET, (v) => { NOWCAST_TARGET = v; draw(); }, "Цель нау-каста")),
 	body);
 }
@@ -2749,7 +2755,7 @@ function rasMonthsCard(d) {
 	const m = obj(obj(d.nowcast).months);
 	const rows = list(m.rows);
 	if (!rows.length) return null;
-	return card({ title: `${upperFirst(inputUnit(d).many)} РСБУ банка`, sub: `базис — ${basisName(m.basis)}; млрд ₽ и доли; последний — ${periodLabel(rows[rows.length - 1].month)}` },
+	return card({ title: `${upperFirst(inputUnit(d).many)} ${mWord(d)}`, sub: `базис — ${basisName(m.basis)}; млрд ₽ и доли; последний — ${periodLabel(rows[rows.length - 1].month)}` },
 		sparkline({ title: "прибыль месяца", history: { date: rows.map((r) => r.month), value: rows.map((r) => r.ni) } }, fmt.bn, `за ${fmt.num(rows.length)} мес.`),
 		spaced(10, dataTable([
 			Tc("Месяц", (r) => periodLabel(r.month), "name nowrap"),
@@ -2896,7 +2902,7 @@ function capitalKpis(d) {
 			kpi(bn0(a.bv_common), "капитал акционеров"),
 			kpi(rub2(obj(obj(d.market).multiples).bv_per_share), `капитал на акцию на дату оценки — на ${divisor(d)}`),
 			kpi(`${fmt.num(a.ded20)} / ${fmt.num(a.ded11)}`, "вычеты из капитала в нормативы, млрд ₽"),
-			a.at1 ? kpi(`${fmt.num(a.at1)} / ${fmt.num(a.t2)}`, "AT1 / T2, млрд ₽") : kpi(bn0(a.t2), "регуляторные инструменты капитала")),
+			a.at1 ? kpi(`${fmt.num(a.at1)} / ${fmt.num(a.t2)}`, panelForm(d) ? "инструменты добавочного / дополнительного капитала, млрд ₽" : "AT1 / T2, млрд ₽") : kpi(bn0(a.t2), "регуляторные инструменты капитала")),
 		isNum(o.n1_1) && !(o.as_of === obj(a.n11_bank).as_of && o.n1_1 === obj(a.n11_bank).value && !isNum(o.n1_0) && !isNum(o.n1_2)) ? mt(14, "p", "note-box",
 			strong(`${capTitle(d, "n11_observed")} на ${fmt.date(o.as_of)}: ${pct2(o.n1_1)}`
 				+ `${isNum(o.n1_0) ? `; ${capTitle(d, "n1_0")} — ${pct2(o.n1_0)}, ${capTitle(d, "n1_2")} — ${pct2(o.n1_2)}` : ""}. `),

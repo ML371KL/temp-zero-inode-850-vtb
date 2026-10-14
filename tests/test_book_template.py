@@ -786,8 +786,8 @@ def test_opex_roots_and_their_axis(book):
 
 def test_the_labels_are_complete_and_carry_only_known_fields(book):
     """Подписи книги (MODEL §0.6): все группы и ключи договора, непустые строки; поля подстановки — только названные у
-    ключа; набор строк сводки контрольной модели — ровно пятнадцать. Слово долгосрочного уровня у ВТБ — «сквозь цикл»
-    (у образца «после фазы роста»); прибыль квартала нау-каста — МСФО (банк не публикует управленческую прибыль)."""
+    ключа; набор строк сводки контрольной модели — ровно пятнадцать. Слово долгосрочного уровня у ВТБ — «после фазы роста»
+    («сквозь цикл» — слово общей формы, на панели его нет: tests/web/web_release_text.mjs); прибыль квартала нау-каста — МСФО (банк не публикует управленческую прибыль)."""
     labels = book["meta"]["labels"]
     assert set(labels) == set(LABEL_GROUPS)
     for group, keys in LABEL_GROUPS.items():
@@ -806,9 +806,9 @@ def test_the_labels_are_complete_and_carry_only_known_fields(book):
         assert isinstance(value, str) and value.strip(), path
         fields = {name for _, name, spec, conv in Formatter().parse(value) if name is not None}
         assert fields <= LABEL_FIELDS.get(path, set()), (path, fields)
-        assert "после фазы роста" not in value, path             # одно слово долгосрочного уровня во всех подписях
+        assert "сквозь цикл" not in value, path                  # одно слово долгосрочного уровня во всех подписях
     assert count >= 44
-    assert lt == "сквозь цикл" and labels["terms"]["roe_lt"] == f"ROE {lt}"
+    assert lt == "после фазы роста" and labels["terms"]["roe_lt"] == f"ROE {lt}"
     assert labels["basis"]["divisor"] == "размещённые акции с поправкой на выпуск по 87 ₽"
     assert labels["capital"]["n20_short"] == "Н20.0" and labels["capital"]["n11_short"] == "Н20.1"
 

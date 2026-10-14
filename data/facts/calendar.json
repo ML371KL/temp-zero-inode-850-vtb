@@ -27,13 +27,13 @@
   },
   {
    "key": "SH_2026_open_subscription_registration",
-   "title": "Банк ВТБ: документ или лист этапа 1 (SH_2026_open_subscription_registration.pdf)",
+   "title": "Банк ВТБ: регистрация дополнительного выпуска акций по открытой подписке (2026 год)",
    "file": "primary/SH_2026_open_subscription_registration.pdf",
    "sha256": "065867b2bb5f5683ec0daf7f85cc8c7512438be32286c2ecdba714d0ceca6156"
   },
   {
    "key": "vcs_news_interfax_2026-09-29_spo_end_october",
-   "title": "Банк ВТБ: документ или лист этапа 1 (vcs_news_interfax_2026-09-29_spo_end_october.html)",
+   "title": "Интерфакс, 29.09.2026: новость о завершении размещения акций ВТБ в конце октября",
    "file": "primary/vcs_news_interfax_2026-09-29_spo_end_october.html",
    "sha256": "a6705c402577086095be9ee490a27d753fbf885ca038036e8bb1ce97054385a5"
   }

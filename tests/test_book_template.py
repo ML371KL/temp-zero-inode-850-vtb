@@ -25,7 +25,7 @@ except ImportError:                      # прогон без pytest.ini (pytho
 pytestmark = pytest.mark.tact
 
 MARKS = ("  #{{WORLDS}}", "#{{WORLDS_BANK}}", "#{{OVERLAY_SHA256}}")
-VERSION = "0.8"
+VERSION = "0.9"
 RESULTS = S.BOOK_DIR / "results.json"
 DERIVE_OUT = S.EVIDENCE / "path" / "out"                     # запись листа вывода на ядре (derive_on_engine.py)
 NII_SHEET = S.EVIDENCE / "path" / "inputs" / "vtb_r2_inputs.json"   # запись листа calib-nii: ближние ключи спредов книг

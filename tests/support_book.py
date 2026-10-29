@@ -25,11 +25,11 @@ MODEL_MD = ROOT / "docs" / "MODEL.md"
 # воспроизводит запись). Хэши рецепта — LF-нормализованных байтов (репозиторий хранит текст в LF).
 RECORD_SHA256 = "1e905cb77c1d3a81cc89d6b80769171a60c0169d103340d3e7314bd8030d6f00"
 RECORD_CSV_SHA256 = "5fc8e86b97b9647e54dc7ef61cd34043aae6a4b8f5b492048abe6dd8957e87b0"
-RECIPE_LF_SHA256 = {                  # worlds_recipe.py — байт в байт копия «Ленты»; .md и .yaml — её копии с шапкой Сбера
+RECIPE_LF_SHA256 = {                  # worlds_recipe.py — семейная копия (как у «Ленты»); .md и .yaml — копии со своей шапкой (ВТБ)
                                       # (шапка .md оговаривает: раздел о сборщике описывает сборщик книги-источника)
-    "worlds_inputs.yaml": "591b13dd35d8e5be66564b0cfeead53b158766d8fc8640b6c7aa3a9e7ee6eef4",
+    "worlds_inputs.yaml": "f25c667f4d9136af90a760ff026337e871fc9a5220b4f76f5340415415cf7bd1",
     "worlds_recipe.py": "3b786f7b39356a9592fce4f460e45f4a65ae397b730aa1702af3680cca3b56a4",
-    "WORLDS-RECIPE.md": "e8283af65b32f4d78a0d01f0c0447cc6b3868e540be75c69f765328b9e00c090",
+    "WORLDS-RECIPE.md": "74a56922efcb7bebc42cb07cf6d6ddd16210aa06593a8047aab45e2259361251",
 }
 # Чего в копиях рецепта быть не должно (публичный репозиторий): тикер и адрес выпуска книги-источника, её суммы в ₽
 RECIPE_FORBIDDEN = ("MGNT", "Магнит", "pages.dev", "tzi-850oa")

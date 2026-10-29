@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BOOK = ROOT / "data" / "assumptions"
 SHEET_DIR = BOOK / "evidence" / "path"
 TODAY = dt.date(2031, 2, 3)                      # дата пометки в тестах: в шаблоне её быть не может
-BOOK_VERSION = "0.8"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
+BOOK_VERSION = "0.9"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
 TRACKED = ("assumptions_template.yaml", "assumptions.yaml", "assumptions.json", "evidence/path/out/derive_out.json",
            "evidence/path/out/derive_out.txt", "evidence/path/out/derive_start.json")
 

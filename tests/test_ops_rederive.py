@@ -796,7 +796,13 @@ def test_the_decisions_of_round_six_stand_in_book_06():
     loader.loader.exec_module(fc)
     rows = fc.rows_of(R.Tree().book_yaml, R.Tree().facts)["rows"]
     row = next(r for r in rows if r["name"].startswith(f"1(а) маржа {sheet.MISC_YEAR} года на режиме «нормализация»"))
-    assert (row["low"], row["high"]) == fc.NIM_WINDOW == (0.026, 0.032) and row["ok"], row
+    assert (row["low"], row["high"]) == fc.NIM_WINDOW == (0.026, 0.032), row
+    # книга 0.9 (миры 1.7): маржа 2027 года ниже окна — объяснённое отклонение (решение ведущего 29.10.2026, docs/DECISIONS.md,
+    # часть 8): ключевая 2027 года во всех мирах записи 1.7 выше условий окна. Строка остаётся «НЕТ» и красным флагом перевода;
+    # здесь держится, что отклонение не выросло молча (не ниже 2,55 %) и записано в журнале решений с числом
+    if not row["ok"]:
+        part8 = (R.ROOT / "docs" / "DECISIONS.md").read_text(encoding="utf-8").split("## Часть 8.", 1)[1].split("\n## ", 1)[0]
+        assert 0.0255 <= row["value"] < fc.NIM_WINDOW[0] and "2,56 %" in part8 and "2,65 %" in part8, row
     assert "смесь заголовка" in row["words"] and "модальная клетка" in row["words"]
 
 

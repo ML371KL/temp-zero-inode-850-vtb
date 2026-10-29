@@ -50,7 +50,10 @@ def test_the_recipe_is_the_anonymised_family_copy():
         text = raw.decode("utf-8")
         assert not [w for w in S.RECIPE_FORBIDDEN if w in text], name
         if not name.endswith(".py"):                       # у кода — только формат печати «₽», без чисел
-            assert "₽" not in text, name
+            # сумм книги-источника в ₽ нет; с записи 1.7 во входах — только средняя зарплата Росстата (источник wage_actual)
+            rub = [line for line in text.splitlines() if "₽" in line]
+            assert all("Росстат" in line and "заработная плата" in line for line in rub), (name, rub)
+            assert len(rub) <= (1 if name == "worlds_inputs.yaml" else 0), name
 
 
 def test_git_keeps_the_record_bytes():
@@ -84,9 +87,13 @@ def test_world_blocks_are_the_record_over_100(book, record):
         fair = record["fair_zero_curve_today"][w]
         assert {k: v for k, v in blk["zero_curve"].items() if k != "LT"} == {k: round(x / 100, 5) for k, x in fair.items()}
         assert blk["lt_inflation"] == round(record["lt_inflation"][w] / 100, 5)
+    # уровень кривой в терминале: с записи 1.7 — блок curve_lt записи (правило рецепта для всех миров, не таблица 9,0 / 12,7)
     recipe = S.load_module(S.BOOK_DIR / "worlds_recipe.py", "book_worlds_recipe")
-    assert book["worlds"]["M"]["zero_curve"]["LT"] == round(recipe.curve_lt_rule(record)["M"] / 100, 5)
-    assert book["worlds"]["N"]["zero_curve"]["LT"] == 0.09 and book["worlds"]["H"]["zero_curve"]["LT"] == 0.127
+    rule = recipe.curve_lt_rule(record)
+    assert record["curve_lt"] == rule
+    for w in book["worlds"]["ids"]:
+        assert book["worlds"][w]["zero_curve"]["LT"] == round(record["curve_lt"][w] / 100, 5) == round(rule[w] / 100, 5)
+    assert book["worlds"]["N"]["zero_curve"]["LT"] == 0.089 and book["worlds"]["H"]["zero_curve"]["LT"] == 0.126
 
 
 def test_world_weights_and_their_axis_stay_inside_the_record_ranges(book, record):

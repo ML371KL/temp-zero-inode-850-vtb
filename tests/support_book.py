@@ -19,17 +19,17 @@ EVIDENCE = BOOK_DIR / "evidence"
 FACTS_DIR = ROOT / "data" / "facts"
 MODEL_MD = ROOT / "docs" / "MODEL.md"
 
-# Запись миров семейства (850oa, книга 1.6; кривая 18.09.2026): хранимые байты — побайтово с CRLF
+# Запись миров семейства (850oa, книга 1.7; снимок кривой — окно 23–28.10.2026): хранимые байты — побайтово с CRLF
 # (.gitattributes: worlds_source.* -text). Рецепт — обезличенные копии, как у «Ленты» (решение ведущего B4): тексты и код
 # без тикера и адреса выпуска книги-источника и без её сумм; функционально те же (`worlds_recipe.py --check`
 # воспроизводит запись). Хэши рецепта — LF-нормализованных байтов (репозиторий хранит текст в LF).
-RECORD_SHA256 = "7296567d5200b5599efd0989de6ed8c8461d56c5c5dda244ab7d622303969fec"
-RECORD_CSV_SHA256 = "2faae142d447a309daaf43eeea0a928db94ae2dc90ff1e0b21771703cd4a8dfc"
+RECORD_SHA256 = "1e905cb77c1d3a81cc89d6b80769171a60c0169d103340d3e7314bd8030d6f00"
+RECORD_CSV_SHA256 = "5fc8e86b97b9647e54dc7ef61cd34043aae6a4b8f5b492048abe6dd8957e87b0"
 RECIPE_LF_SHA256 = {                  # worlds_recipe.py — байт в байт копия «Ленты»; .md и .yaml — её копии с шапкой Сбера
                                       # (шапка .md оговаривает: раздел о сборщике описывает сборщик книги-источника)
-    "worlds_inputs.yaml": "8cf64cc3cb3bb3ebf6a7118e46a57aeb9bcc5ea2c27c3172ba4bc8549d80160f",
-    "worlds_recipe.py": "459b7b6eb8da4228ab8eec657ba9ae758b5521676306555bfd37bc07e4fcf180",
-    "WORLDS-RECIPE.md": "a588382a8b1cdfe6fe25083a03b786da246c478f29bced7f883758cbe0801661",
+    "worlds_inputs.yaml": "591b13dd35d8e5be66564b0cfeead53b158766d8fc8640b6c7aa3a9e7ee6eef4",
+    "worlds_recipe.py": "3b786f7b39356a9592fce4f460e45f4a65ae397b730aa1702af3680cca3b56a4",
+    "WORLDS-RECIPE.md": "e8283af65b32f4d78a0d01f0c0447cc6b3868e540be75c69f765328b9e00c090",
 }
 # Чего в копиях рецепта быть не должно (публичный репозиторий): тикер и адрес выпуска книги-источника, её суммы в ₽
 RECIPE_FORBIDDEN = ("MGNT", "Магнит", "pages.dev", "tzi-850oa")

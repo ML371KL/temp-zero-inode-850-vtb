@@ -192,6 +192,53 @@ def test_the_candidate_template_changes_only_the_record_lines(refresh_worlds):
     assert any('"' + "f" * 64 + '"' in b for _, b in changed)
 
 
+def _stale_near_key_book(tmp_path: Path) -> Path:
+    """Копия книги, у которой ключ 2027 года кредитов юрлиц стоит на прежней ключевой мира H (запись 1.4: 14,0 против 15,0 —
+    ключ выше на (1 − a) × 1 п.п.), остальное — как в книге."""
+    import re
+
+    book = tmp_path / "assumptions"
+    shutil.copytree(BOOK, book, ignore=shutil.ignore_patterns("evidence", "__pycache__"))
+    path = book / "assumptions_template.yaml"
+    text = path.read_text(encoding="utf-8")
+    m = re.search(r'^(    corp_loans:.*?spread: \{"2026": -?\d+\.\d+, "2027": )(-?\d+\.\d+)', text, re.M)
+    assert m, "строка ключей кредитов юрлиц не найдена"
+    path.write_text(text[:m.start(2)] + f"{float(m.group(2)) + 0.00386:.5f}" + text[m.end(2):], encoding="utf-8", newline="\n")
+    return book
+
+
+def test_the_near_keys_of_the_book_stand_on_the_reference_world_of_its_record(refresh_worlds):
+    """Проход: ближние ключи спредов книг ЧПД — правило листа calib-nii на ключевой мира-опоры H записи книги (та же сверка,
+    что у перевода, плюс ключи полугодий и LT той же линией окна); проверка канона печатает это строкой."""
+    _needs_book()
+    assert refresh_worlds.near_keys_diffs(BOOK / "assumptions.yaml") == []
+    problems, report = refresh_worlds.check_canon()
+    assert problems == [] and any("ближние ключи спредов книг воспроизводятся" in r for r in report), (problems, report)
+
+
+def test_a_candidate_on_stale_near_keys_is_refused(refresh_worlds, tmp_path):
+    """Отказ: кандидат, у которого ближние ключи книг не стоят на ключевой мира-опоры записи, — смещён (ВТБ, анализ 27.10.2026:
+    точка +9,4 ₽ без пересчёта ключей против +2,5 ₽ с ним); инструмент отказывает кодом 1 и файлов книги-кандидата не оставляет.
+    Проверка канона на такой книге тоже не проходит."""
+    _needs_book()
+    book = _stale_near_key_book(tmp_path)
+    record = tmp_path / "record"
+    record.mkdir()
+    shutil.copyfile(BOOK / "worlds_source.json", record / "worlds_source.json")
+    out = tmp_path / "candidate"
+    with pytest.raises(refresh_worlds.Refused) as refused:
+        refresh_worlds.build_candidate(record, out, book=book)
+    assert "ближние ключи спредов книг" in str(refused.value) and "corp_loans.2027" in str(refused.value)
+    assert "near_keys_worlds.py" in str(refused.value)                              # что делать — в тексте отказа
+    assert not (out / "assumptions.candidate.yaml").exists() and not (out / "CANDIDATE.md").exists()
+    builder = refresh_worlds._module(book / "build_assumptions.py", "_stale_build_assumptions")
+    text_yaml, text_json, _ = builder.render()
+    (book / "assumptions.yaml").write_text(text_yaml, encoding="utf-8", newline="\n")
+    (book / "assumptions.json").write_text(text_json, encoding="utf-8", newline="\n")
+    problems, _ = refresh_worlds.check_canon(book)
+    assert len(problems) == 1 and "ближние ключи спредов книг не воспроизводятся" in problems[0], problems
+
+
 # ------------------------------------------------------------ probe
 
 def _no_network(monkeypatch, module) -> list:

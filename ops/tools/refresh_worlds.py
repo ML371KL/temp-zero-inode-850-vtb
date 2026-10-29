@@ -9,14 +9,21 @@
   python -B ops/tools/refresh_worlds.py --check
       строгая проверка канона (CI): рецепт на входах книги воспроизводит
       worlds_source.json целиком; sha256 и asof записи = worlds.source.* шаблона;
-      сборка build_assumptions.py воспроизводит машинную книгу бит в бит.
+      сборка build_assumptions.py воспроизводит машинную книгу бит в бит; ближние
+      ключи спредов книг ЧПД воспроизводятся правилом листа calib-nii на ключевой
+      мира-опоры H записи (near_keys_diffs; та же сверка, что у перевода).
 
   python -B ops/tools/refresh_worlds.py --record КАТАЛОГ --out КАТАЛОГ [--median [--draws N]]
       кандидат на новую запись семейства: КАТАЛОГ записи — worlds_source.json
       (+ worlds_source.csv, worlds_inputs.yaml, если входы менялись). Проверяет, что
       рецепт воспроизводит новую запись, собирает книгу-кандидат (шаблон с новыми
       worlds.source.{sha256, record_asof, curve_date} и meta.curve_as_of) и
-      считает ядро на книге и на кандидате (цена, дата и реестр книги).
+      считает ядро на книге и на кандидате (цена, дата и реестр книги). У банка
+      ближние ключи спредов книг стоят на ключевой мира-опоры H: инструмент
+      сверяет их на кандидате с правилом листа calib-nii и ОТКАЗЫВАЕТ (код 1),
+      если они не держатся, — кандидат на прежних ключах смещён (ВТБ, анализ
+      27.10.2026: точка +9,4 ₽ без пересчёта против +2,5 ₽ с ним); ключи
+      пересчитывает лист, вносит новая версия книги.
       Пишет ТОЛЬКО в --out: assumptions_template.candidate.yaml,
       assumptions.candidate.yaml/.json и CANDIDATE.md (что меняется в записи,
       строки шаблона, точка и слои «книга → кандидат», черновик строки журнала).
@@ -26,8 +33,9 @@
 семейства и новая версия книги с подписью.
 
 Коды: 0 — канон держится / кандидат собран; 1 — канон не держится или негодные
-входы (нет файлов, рецепт не воспроизводит запись); 2 — кандидат не собрался
-(сборка книги или ядро на нём падают).
+входы (нет файлов, рецепт не воспроизводит запись, ближние ключи книги не держатся
+правилом на ключевой мира-опоры записи); 2 — кандидат не собрался (сборка книги
+или ядро на нём падают).
 """
 from __future__ import annotations
 
@@ -51,6 +59,13 @@ RECORD = "worlds_source.json"
 RECORD_CSV = "worlds_source.csv"
 INPUTS = "worlds_inputs.yaml"
 TEMPLATE = "assumptions_template.yaml"
+# Лист вывода книги: его счёт ближних ключей спредов книг (правило листа calib-nii, вход nii_books.near_rule) — тот же, которым
+# перевод (ops/tools/rederive.py, шаг misc) сверяет ключи книги перед подбором
+DERIVE_SHEET = BOOK / "evidence" / "path" / "derive_on_engine.py"
+NEAR_KEYS_REMEDY = ("ближние ключи стоят на ключевой мира-опоры H записи миров: при новой записи их пересчитывает лист calib-nii "
+                    "(stage1/calib-nii/r2/near_keys_worlds.py папки передачи; запись — evidence/path/inputs/vtb_r2_inputs.json, "
+                    "включая путь бэктеста) и вносит в шаблон новая версия книги; кандидат на прежних ключах смещён "
+                    "(docs/PORTING.md, пересборка миров 1.7)")
 
 OK, BAD_INPUT, NOT_BUILT = 0, 1, 2
 
@@ -87,6 +102,54 @@ def recipe_diffs(recipe, inputs: dict, record: dict) -> list[str]:
         bad, _ = recipe.check_nh(record, rebuilt)
         return bad
     return recipe.compare(record, rebuilt)
+
+
+def near_keys_diffs(book_path: Path, facts_dir: Path | None = None) -> list[str]:
+    """Ближние ключи спредов книг машинной книги `book_path` против правила листа calib-nii на ключевой мира-опоры ЭТОЙ книги
+    (её записи миров); пусто — ключи держатся.
+
+    Ключи лет ближнего пути (год якоря и следующий) и книга бумаг по кварталам — функцией листа вывода `near_rule_keys` (та же
+    сверка, что у перевода перед подбором, допуск — его же); ключи полугодий и LT книг с ключом года — та же линия окна без
+    остатка якоря (актив: s − (1 − a) × ключевая мира-опоры за полугодие; LT — на ключевой последнего квартала сетки; пассив —
+    s, у опта LT — wholesale_lt), как их пишет лист calib-nii (blocks_r2.spread_traj)."""
+    doe = _module(DERIVE_SHEET, "_refresh_derive_on_engine")
+    eng = doe.Engine(book_path, facts_dir)
+    rule = eng.inputs["nii_books"]["near_rule"]
+    books = eng.value("nii.books")
+    tol = float(doe.NEAR_RULE_TOL)
+    want = doe.near_rule_keys(eng, float(rule["fade"][doe.MISC_YEAR]))
+    book = eng.current()
+    ctx = eng.make_context(book, eng.facts)
+    tl = ctx.timeline
+    key = ctx.worlds[str(book.get("nii.transmission.reference_world"))].key
+
+    def half_key(p: str) -> float:
+        y, h = int(p[:4]), int(p[5])
+        qs = [q for q in tl.quarters_of_year(y) if q >= 1 and (int(tl.period(q)[5]) <= 2) == (h == 1)]
+        return sum(float(key[q]) for q in qs) / len(qs)
+
+    for b, c in rule["books"].items():
+        a, s = float(c["a"]), float(c["s"])
+        line = want.setdefault(b, {})
+        for k in books[b]["spread"]:
+            if k in line or k == "LT_from":
+                continue
+            if k == "LT":
+                if c["side"] == "asset":
+                    line[k] = s - (1.0 - a) * float(key[tl.Q])
+                else:
+                    line[k] = float(rule["wholesale_lt"]) if b == doe.MISC_WHOLESALE else s
+            elif re.fullmatch(r"\d{4}H[12]", str(k)) and c["side"] == "asset":
+                line[k] = s - (1.0 - a) * half_key(str(k))
+    bad = []
+    for b, keys in want.items():
+        have = books.get(b, {}).get("spread", {})
+        for k, v in keys.items():
+            if k not in have:
+                bad.append(f"{b}.{k}: в книге нет ключа (правило {v:.5f})")
+            elif abs(v - float(have[k])) > tol:
+                bad.append(f"{b}.{k}: книга {float(have[k]):.5f}, правило {v:.5f}")
+    return bad
 
 
 def check_canon(book: Path = BOOK) -> tuple[list[str], list[str]]:
@@ -127,9 +190,19 @@ def check_canon(book: Path = BOOK) -> tuple[list[str], list[str]]:
              if not (book / name).exists() or (book / name).read_text(encoding="utf-8") != text]
     if stale:
         problems.append("машинная книга не воспроизводится сборкой: " + ", ".join(stale))
+        return problems, report
+    report.append(f"машинная книга воспроизводится сборкой (версия {machine['meta']['version']}, "
+                  f"миры {', '.join(machine['worlds']['ids'])})")
+    try:
+        near = near_keys_diffs(book / "assumptions.yaml")
+    except Exception as exc:  # noqa: BLE001 — отказ ядра или листа вывода
+        problems.append(f"сверка ближних ключей спредов книг не выполнилась: {type(exc).__name__}: {exc}")
+        return problems, report
+    if near:
+        problems.append(f"ближние ключи спредов книг не воспроизводятся правилом листа calib-nii на ключевой мира-опоры "
+                        f"записи ({len(near)}): " + "; ".join(near[:6]) + " — " + NEAR_KEYS_REMEDY)
     else:
-        report.append(f"машинная книга воспроизводится сборкой (версия {machine['meta']['version']}, "
-                      f"миры {', '.join(machine['worlds']['ids'])})")
+        report.append("ближние ключи спредов книг воспроизводятся правилом листа calib-nii на ключевой мира-опоры записи")
     return problems, report
 
 
@@ -231,6 +304,15 @@ def build_candidate(record_dir: Path, out: Path, *, book: Path = BOOK, facts_dir
         raise NotBuilt(f"книга-кандидат не собирается: {type(exc).__name__}: {exc}") from exc
     (out / "assumptions.candidate.yaml").write_text(text_yaml, encoding="utf-8", newline="\n")
     (out / "assumptions.candidate.json").write_text(text_json, encoding="utf-8", newline="\n")
+    try:
+        near = near_keys_diffs(out / "assumptions.candidate.yaml", facts_dir)
+    except Exception as exc:  # noqa: BLE001 — отказ ядра или листа вывода на кандидате
+        raise NotBuilt(f"сверка ближних ключей на кандидате не выполнилась: {type(exc).__name__}: {exc}") from exc
+    if near:                                     # кандидат на прежних ключах смещён — не пишется (как отказ перевода)
+        for name in ("assumptions_template.candidate.yaml", "assumptions.candidate.yaml", "assumptions.candidate.json"):
+            (out / name).unlink(missing_ok=True)
+        raise Refused(f"ближние ключи спредов книг не воспроизводятся правилом листа calib-nii на ключевой мира-опоры "
+                      f"новой записи ({len(near)}): " + "; ".join(near[:6]) + " — " + NEAR_KEYS_REMEDY)
     for name in (RECORD, RECORD_CSV):
         if (record_dir / name).exists():
             shutil.copyfile(record_dir / name, out / name)

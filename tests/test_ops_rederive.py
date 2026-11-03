@@ -513,18 +513,23 @@ def test_the_keys_of_the_third_pass_stand_in_the_book_and_the_fourth_scenario_is
                                                                      "capital.recapitalization.lookahead_quarters": 3}
     assert variants["recap_lookahead_2"]["overrides"] == {"capital.recapitalization.lookahead_quarters": 2}
     # (г) выпуск по 87 ₽ одним местом (решение № 4, п. 3.1): связки осей ведут приток (и делитель — ось объёма), концы равны вариантам;
-    #     ни один вариант выпуска не несёт ключей вычета
+    #     вычет выпуска — одной формой с притоком (решение ведущего Р10): связки ведут и рубли пути вычета всех сценариев с квартала выпуска,
+    #     варианты на концах несут те же рубли (ключей вычета в п.п. у выпуска нет)
     volume = next(a for a in axes if a["paths"][0] == sheet.VOLUME_AXIS_PATH)
     stay = next(a for a in axes if a["paths"][0] == spec.STAY_AXIS["paths.0"])
-    assert volume["kind"] == stay["kind"] == "bundle" and volume["paths"] == [sheet.VOLUME_AXIS_PATH, sheet.ISSUE_FLOW_PATH]
-    assert stay["paths"] == [sheet.ISSUE_FLOW_PATH]
-    for ax, pairs in ((volume, (("low", "issue_none"), ("high", "issue_max_stay_50"))), (stay, (("low", "issue_325_stay_0"), ("high", "issue_325_stay_100")))):
+    rub = re.compile(r"(capital\.reg_scenarios\.\w+\.deduction_rub\.\w+)\.(\w+)$")
+    assert volume["kind"] == stay["kind"] == "bundle" and volume["paths"][:2] == [sheet.VOLUME_AXIS_PATH, sheet.ISSUE_FLOW_PATH]
+    assert stay["paths"][0] == sheet.ISSUE_FLOW_PATH and all(rub.match(p) for p in volume["paths"][2:] + stay["paths"][1:])
+    for ax, pairs in ((volume, (("low", "issue_none"), ("high", "issue_max_stay_50"))), (stay, (("low", "issue_300_stay_0"), ("high", "issue_300_stay_100")))):
         for end, vid in pairs:
             over = variants[vid]["overrides"]
-            assert not scenarios_of(over), f"{vid}: у выпуска нет ключей вычета"
+            assert not scenarios_of(over), f"{vid}: у выпуска нет ключей вычета в п.п."
             for path, value in ax[end].items():
                 if path == sheet.VOLUME_AXIS_PATH:
                     assert over[path] == value, (vid, path)
+                elif rub.match(path):
+                    root, key = rub.match(path).groups()
+                    assert over[root][key] == value, (vid, path)
                 else:
                     assert over["equity.other_movements"]["2026Q4"] == value, (vid, path)
     # (д) второе чтение высвобождения: к концу года — то же число, внутри года — на доли годового шага меньше

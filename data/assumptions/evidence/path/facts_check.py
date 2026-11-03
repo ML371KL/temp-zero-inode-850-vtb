@@ -47,7 +47,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 INPUTS = HERE / "inputs" / "vtb_r2_inputs.json"
-FACT_PERIOD = "2026Q3"
+FACT_PERIOD = "2026Q4"                    # первый квартал после якоря (3К2026): строки квартала с месячными фактами — когда в фактах есть хотя бы
+#                                           два его месяца (на якоре 3К месячных фактов 4К ещё нет — строки не судятся); на якоре 2К — "2026Q3"
 TOL = {"nii": 0.03, "fees": 0.03, "opex": 0.01, "llp": 0.25, "other": 0.25, "pbt": 0.15, "ni_q": 0.15, "ni_year": 0.10}
 #       ЧПД и комиссии — знаменатель клетки к факту (3 %); расходы — уровень поставлен по фактам (1 %); резервы — пути режимов
 #       второго полугодия 0,9–1,1 % при 0,8 и 1,0 % в июле и августе (25 %); прочие доходы — ключ года стоит темпом восьми
@@ -183,7 +184,7 @@ def rows_of(book_path: Path | None, facts_dir: Path | None) -> dict:
     want = {f"{year}-{m:02d}" for m in range(3 * qn - 2, 3 * qn + 1)}
     months = facts.file("mgmt_quarterly").get("monthly") or []
     known = [m for m in months if m["month"] in want]
-    k = 3.0 / len(known)
+    k = 3.0 / len(known) if known else 0.0
     total = lambda name: sum(float(m[name]["v"]) for m in known) * k  # noqa: E731
     q = tl.index(FACT_PERIOD)
     ex = lambda name: float(L.expect(run, prob, name, q))  # noqa: E731
@@ -197,20 +198,25 @@ def rows_of(book_path: Path | None, facts_dir: Path | None) -> dict:
         add(f"{title} {FACT_PERIOD} к фактам месяцев × {k:g}", model / fact, 1 - tol, 1 + tol,
             f"модель {model:.1f} при {fact:.1f} по фактам ({100 * (model / fact - 1):+.1f} %; допуск ±{100 * tol:.0f} %){note}")
 
-    # ---- квартал с месячными фактами: все строки
-    near("ЧПД", ex("nii"), total("nii_m"), TOL["nii"])
-    near("комиссии", ex("fees"), total("nci_m"), TOL["fees"])
-    near("расходы", abs(ex("opex")), -total("opex_m"), TOL["opex"])
-    near("резервы", abs(ex("llp")), -total("provisions_m"), TOL["llp"])
-    other_model = ex("ins") + ex("misc") + addback / 4
-    near("прочие доходы (определение банка)", other_model, total("other_income_m"), TOL["other"],
-         f"; модель — «прочее» движка {ex('misc'):.1f} + страховая строка {ex('ins'):.1f} + резервы не по кредитам {addback / 4:.1f}; ключ года стоит темпом "
-         "восьми месяцев, июль–август идут выше него")
-    pbt_fact = sum(total(n) for n in ("nii_m", "nci_m", "other_income_m", "provisions_m", "opex_m"))
-    near("прибыль до налога", ex("pbt"), pbt_fact, TOL["pbt"],
-         f"; факт — сумма строк месячной книги (ЧПД, комиссии, прочие доходы, резервы, расходы); налог по фактам {100 * (1 - total('net_profit_m') / pbt_fact):.1f} %, "
-         f"в модели {100 * (1 - ex('ni') / ex('pbt')):.1f} %")
-    near("вся прибыль", ex("ni"), total("net_profit_m"), TOL["ni_q"])
+    # ---- квартал с месячными фактами: все строки (когда в фактах есть хотя бы два его месяца)
+    if len(known) >= 2:
+        near("ЧПД", ex("nii"), total("nii_m"), TOL["nii"])
+        near("комиссии", ex("fees"), total("nci_m"), TOL["fees"])
+        near("расходы", abs(ex("opex")), -total("opex_m"), TOL["opex"])
+        near("резервы", abs(ex("llp")), -total("provisions_m"), TOL["llp"])
+        other_model = ex("ins") + ex("misc") + addback / 4
+        near("прочие доходы (определение банка)", other_model, total("other_income_m"), TOL["other"],
+             f"; модель — «прочее» движка {ex('misc'):.1f} + страховая строка {ex('ins'):.1f} + резервы не по кредитам {addback / 4:.1f}; ключ года стоит "
+             "темпом восьми месяцев, июль–август идут выше него")
+        pbt_fact = sum(total(n) for n in ("nii_m", "nci_m", "other_income_m", "provisions_m", "opex_m"))
+        near("прибыль до налога", ex("pbt"), pbt_fact, TOL["pbt"],
+             f"; факт — сумма строк месячной книги (ЧПД, комиссии, прочие доходы, резервы, расходы); налог по фактам "
+             f"{100 * (1 - total('net_profit_m') / pbt_fact):.1f} %, в модели {100 * (1 - ex('ni') / ex('pbt')):.1f} %")
+        near("вся прибыль", ex("ni"), total("net_profit_m"), TOL["ni_q"])
+    else:
+        add(f"справочно: квартал {FACT_PERIOD} — месячных фактов нет (месяцев {len(known)}), строки квартала не судятся", float(len(known)), 0.0, 3.0,
+            f"первый квартал после якоря {tl.period(0)}: в фактах месяцев {', '.join(sorted(want))} нет; модель — ЧПД {ex('nii'):.1f}, расходы "
+            f"{abs(ex('opex')):.1f}, вся прибыль {ex('ni'):.1f}")
     # ---- прибыль года якоря против темпа известных месяцев
     last = max(months, key=lambda m: m["month"])
     n_months = int(last["month"][-2:])
@@ -370,10 +376,11 @@ def rows_of(book_path: Path | None, facts_dir: Path | None) -> dict:
     #      пассивов (free_split.other), общий ближний сдвиг; остаток — уровень ставок книг на составе якоря и АСВ (слагаемые сходятся к средней)
     bt = all_inputs["backtest_path"]
     cell = run.cell(bt["world"], regime, scenario)
-    periods = bt["periods"][:BACKTEST_QUARTERS]
+    pairs = [(p, v) for p, v in zip(bt["periods"], bt["nim"]) if tl.index(p) > 0][:BACKTEST_QUARTERS]   # кварталы после якоря (на якоре 3К путь
+    periods = [p for p, _ in pairs]                                                                    # входа — запись 2К: 2026К3 — якорь)
     idx = [tl.index(p) for p in periods]
     path = [float(cell.quarters["nim"][i]) for i in idx]
-    gaps = [m - b for m, b in zip(path, bt["nim"][:BACKTEST_QUARTERS])]
+    gaps = [m - b for m, (_, b) in zip(path, pairs)]
     rms_path = math.sqrt(sum(g * g for g in gaps) / len(gaps))
     qparts = [level_parts(cell, [i], nbooks, anchor_bal, at1, nci_bal, oa_fixed) for i in idx]
     from model.cell import run_cell

@@ -112,7 +112,10 @@ HERE = Path(__file__).resolve().parent
 INPUTS = HERE / "inputs" / "vtb_r2_inputs.json"
 
 # ------------------------------------------------------------------ суждения листов и решений (лист их не меняет)
-NEAR_FACT_PERIOD = "2026Q3"               # квартал с месячными фактами (июль и август): маржа клетки = маржа фактов
+NEAR_FACT_PERIOD = None                   # квартал с месячными фактами после якоря: на якоре 3К2026 его нет (месячных фактов 4К2026 ещё нет) —
+#                                           шаг near не гоняется, ключ regimes.near_nim_shift — запись переноса (решения ведущего Р4 и план
+#                                           перевывода 04.11.2026, п. 1); пары шага misc берут путь и сдвиг d из этой записи. На якоре 2К2026
+#                                           здесь стоял "2026Q3" (июль и август: маржа клетки = маржа фактов)
 # Ближний сдвиг маржи по MODEL §3.2 (решение ведущего № 5, п. 3.5; заменяет форму 0,8 / 0,6 / 0,4 / 0,2 решения B4): траектория снимает
 # ступень σ0 на границе года якоря + 1 — в 1-м квартале года σ0 (nii.sigma0_from) несёт сдвиг d и встречную σ0 (вклад σ0 в маржу
 # модальной клетки в этом квартале: маржа клетки минус маржа той же клетки без σ0 в ближних годах) и линейно сходит к году схода книги
@@ -121,6 +124,8 @@ NEAR_FACT_PERIOD = "2026Q3"               # квартал с месячными
 NEAR_FADE = {"2026Q4": 1.0, "2027Q1": 1.0, "2027Q2": 0.75, "2027Q3": 0.5, "2027Q4": 0.25}   # доля сдвига d по кварталам
 SIGMA0_FADE = {"2027Q1": 1.0, "2027Q2": 0.75, "2027Q3": 0.5, "2027Q4": 0.25}                 # доля встречной σ0 по кварталам
 NEAR_OLD_FADE = {"2026Q4": 1.0, "2027Q1": 0.8, "2027Q2": 0.6, "2027Q3": 0.4, "2027Q4": 0.2}  # прежняя форма (книга 0.4): справочный вариант
+NEAR_D_QUARTER = next(iter(NEAR_FADE))    # квартал пути сдвига с долей d 1 (первый после года фактов): без квартала с месячными фактами сдвиг d
+#                                           записи книги читается здесь
 NEAR_LAST_YEAR = 2027                     # с 2028 года общего сдвига нет: путь делают книги (решения B4; № 2, п. 2; № 5, п. 3.5 — год схода 2028)
 NEAR_STEP_TOL = 5e-5                      # приёмка ступени маржи 2027К1 − 2026К4: не больше ступени одних книг на ставках мира, с запасом 0,005 п.п.
 #                                           (вклад σ0 меряется на клетке с тем же путём; остаток — второй порядок через баланс квартала)
@@ -137,6 +142,8 @@ OPEX_Q4_RATIO = 1.428                     # решение № 2, п. 3.1: 4-й 
 OPEX_Q4_AXIS = (1.409, 1.447)             # диапазон того же окна
 OPEX_Q4_WHOLE_SERIES = 1.3185             # середина всего ряда 2017–2025 — справочный вариант
 OPEX_GROUPS = (("2027", "2028", "2029", "2030"), ("2031", "2032"))   # годы одного корня; последний год группы — год цели
+OPEX_YEAR = "2026"                        # год якоря: 1–3-й кварталы — факт pnl_quarterly (3К2026 — якорь), корень — только у 4-го квартала
+OPEX_Q4 = f"{OPEX_YEAR}Q4"                # (план перевывода 04.11.2026, п. 3: ключ 2026Q3 закрыт якорем — убран из opex.real_growth)
 FEES_KEYS = ("2027", "2028", "2029", "2030")
 FEES_LT_FROM = 2031
 POLICY_PAYOUT = {"2026": 0.25, "LT": 0.50}    # доли политики от ВСЕЙ прибыли: решение № 2, п. 4.2
@@ -146,15 +153,19 @@ T2_FLAT_UNTIL = "2028Q4"                  # решение B8: плоско в �
 # К1–К2; дополнение 5, п. 6): суммы в рублях — ключом capital.reg_scenarios.<s>.deduction_rub.{n20_0,n1_1} (млрд ₽, прибавляется к
 # вычету без множителя RWA), растущая и регуляторная части — ключом deduction_pp (доли RWA). Слагаемые:
 #   (1) рост вычетов сверх роста с RWA — накопленный запас того же состава, что вычет якоря: доля η — сумма в рублях (deduction_rub:
-#       доля × накопленный рост, п.п., × RWA якоря), остальное — в п.п. RWA (deduction_pp); темп — решение B7: 0,1 п.п. за квартал с 3К2026
-#       по 4К2028 (всего 1,0 п.п.); ось доли вычета якоря η ведёт и эту долю (решение № 4, п. 3.3: одно суждение); состав роста
+#       доля × накопленный рост, п.п., × RWA якоря), остальное — в п.п. RWA (deduction_pp); темп — решение B7: 0,1 п.п. за квартал с 4К2026
+#       по 4К2028 (решение ведущего Р11, книга 1.0: на якоре 3К приращение 3К2026 уже в фактах; на якоре 2К — с 3К2026, всего 1,0 п.п.);
+#       ось доли вычета якоря η ведёт и эту долю (решение № 4, п. 3.3: одно суждение); состав роста
 #       вычетов «целиком в рублях / целиком с RWA» — справочными вариантами; НА СТОРОНЕ БАЛАНСА (решение № 5, п. 3.1; исправляет последнюю
 #       фразу решения № 4, п. 3.2) — доля η (ОНА и гудвил: отложенная налоговая экономия 1П2026 42,1 при росте вычета ОНА 49,9 — создание
 #       актива, оплаченного деньгами) входит в путь постоянной части прочих активов той же суммой в том же квартале, вес риска 0, деньги — из
 #       балансирующих статей; доля 1 − η (НМА; возврат послабления по НМА — четырёхлетняя амортизация вычета) — только на стороне капитала;
 #       «регуляторный счёт» (на балансе роста нет) — справочный вариант ded_growth_regulatory, «весь рост на балансе» — ded_growth_asset_all;
 #   (2) СНЯТО (решение № 4, п. 3.1): деньги выпуска по 87 ₽, которые по суждению стоимости не создают, в оценку не входят вовсе —
-#       выпуск записан притоком капитала (шаг issue), а не вычетом;
+#       выпуск записан притоком капитала (шаг issue), а не вычетом; ВЫЧЕТ ВЫПУСКА (решения ведущего Р2 и Р10, книга 1.0) — другое
+#       слагаемое: внесённая в оценку часть денег (доля денег × объём, в центре 150) вычитается из капитала норматива в рублях
+#       (deduction_rub) с квартала выпуска, одной формой с притоком: концы связок осей объёма и доли денег двигают рубли пути вычета
+#       тем же приращением, что приток квартала выпуска; справочные варианты — своя внесённая часть (ISSUE_DED_CARRIERS);
 #   (3) регуляторный вычет сценария — в п.п. RWA, deduction_pp (решение B6: 0 / 0,3 / 0,6 п.п. с 2029 года); у «послабления» после возврата
 #       надбавок (решение № 5, п. 3.3) — смесь трёх сценариев (0 / 0,3 / 0,6 п.п. с вероятностями строки без кризиса 0,30 / 0,45 / 0,25) той
 #       же долей возврата года, что надбавка за значимость (RELIEF_RETURN["sifi"]: 0 / 0,25 / 0,5 / 0,75 / 1 с 2033 года);
@@ -169,7 +180,7 @@ T2_FLAT_UNTIL = "2028Q4"                  # решение B8: плоско в �
 # ключи кварталов — там, где значение меняется внутри года (рост вычетов 3К2026–4К2028; второе чтение высвобождения), ключи лет — где
 # год плоский; год last_period — ключом года (среднее его кварталов: квартальные ключи в этом году ядро запрещает), LT — его значение.
 DED_GROWTH_PER_Q = 0.001
-DED_GROWTH_QUARTERS = ("2026Q3", "2028Q4")
+DED_GROWTH_QUARTERS = ("2026Q4", "2028Q4")   # решение ведущего Р11 (книга 1.0): рост вычетов — с первого прогнозного квартала якоря 3К
 DED_GROWTH_AXIS = (0.0, 0.002)            # ось роста вычетов: 0…0,8 п.п. в год (решения B7, B13)
 ISSUE_PRICE = 87.0                        # ₽ за акцию выпуска [Ф: решение о выпуске, primary/SH_2026-07_open_subscription_decision.pdf]
 ISSUE_STAY = 0.5                          # доля денег выпуска, которая создаёт стоимость: приходит в банк и в капитал норматива (устав; ось 0…1)
@@ -183,11 +194,18 @@ ISSUE_FLOW_PATH = f"{ISSUE_FLOW}.{ISSUE_FROM}"
 AT1_COUPON_RETURN = 24.6                  # [Р: слот ядра вычитает годовой купон 50,4 в 4-м квартале 2026 года, купоны 1-го полугодия уже
 #                                           вычтены из капитала якоря; купон 2-го полугодия по расписанию — 25,8: 50,4 − 25,8 = 24,6;
 #                                           r2/sheets/at1_coupon_bridge_r2.csv]
-FLOW_VARIANTS = {                         # справочные варианты с притоком квартала выпуска: доля денег и возврат купона (по умолчанию — центр)
-    "issue_none": {}, "issue_reg_only_162": {"stay": 1.0}, "issue_300_stay_50": {}, "issue_400_stay_50": {}, "issue_max_stay_50": {},
-    "issue_325_stay_0": {"stay": 0.0}, "issue_325_stay_100": {"stay": 1.0},
+FLOW_VARIANTS = {                         # справочные варианты с притоком квартала выпуска: доля денег, возврат купона, квартал выпуска
+    #                                       (`from`: деньги и распределения — в нём; в квартале центра — распределения и купон), вычет выпуска
+    #                                       (`deduct`: нет — деньги засчитаны в капитал норматива вопреки словам банка); по умолчанию — центр
+    "issue_none": {"deduct": False}, "issue_reg_only_162": {"stay": 1.0, "deduct": False}, "issue_300_stay_50": {}, "issue_400_stay_50": {},
+    "issue_max_stay_50": {}, "issue_300_stay_0": {"stay": 0.0}, "issue_300_stay_100": {"stay": 1.0}, "issue_q1_2027": {"from": "2027Q1"},
     "shareholder_distributions_0": {}, "shareholder_distributions_50": {}, "at1_coupon_2026_full_year": {"coupon": False},
 }
+# Вычет выпуска (решение ведущего Р10, уточняет Р2): вычет из капитала норматива = внесённая в оценку часть денег (доля денег × объём) с
+# квартала выпуска — в рублях пути вычета (deduction_rub) всех сценариев и обоих нормативов. Варианты, у которых вычет не тот, что в центре,
+# несут свои траектории deduction_rub (лист их пишет); прочие варианты с притоком (тот же объём и доля денег, распределения, купон) — вычет центра.
+ISSUE_DED_CARRIERS = ("issue_none", "issue_reg_only_162", "issue_400_stay_50", "issue_max_stay_50", "issue_300_stay_0", "issue_300_stay_100",
+                      "issue_q1_2027")
 STAY_AXIS_ENDS = (0.0, 1.0)               # ось доли денег: низ — ничего не создаёт стоимости (акции выпущены за ноль), верх — все деньги в капитале
 DTA_RELEASE_PER_YEAR = 0.00085
 DTA_RELEASE_FROM = 2029
@@ -197,6 +215,18 @@ DED_NORMS = ("n20_0", "n1_1")             # одна траектория на �
 DED_ROOT = "capital.reg_scenarios.{s}.deduction_pp.{n}"
 RUB_ROOT = "capital.reg_scenarios.{s}.deduction_rub.{n}"       # К1: вычет сценария в рублях (MODEL §4.11, прил. A № 23)
 FIXED_CHANGE = "volumes.other_assets_fixed_change"              # К2: путь постоянной части прочих активов (MODEL §4.3, прил. A № 24)
+ANCHOR_QUARTER = "2026Q3"                 # квартал якоря книги (meta.anchor_period; лист сверяет): ключ квартала якоря в путях вычета — ноль
+BALANCE_RATIO_QUARTERS = ("2025Q4", "2026Q1", "2026Q2", "2026Q3")   # решение ведущего Р8: отношения прочих активов и прочих обязательств к
+#                                           кредитам — среднее четырёх кварталов с равным весом (4К2025–3К2026) в определениях книги: прочие
+#                                           активы — растущая часть (с деньгами и обязательными резервами, без денег НПФ; без ОНА, гудвила и
+#                                           ассоциированных); прочие обязательства — без дивидендов к выплате и без обязательств выбывшей СК
+#                                           (ряды — вход balance_ratios, лист stage1/facts-2026Q3/sheets/books_balances_history.csv)
+SK_LIABILITIES = 344.7                    # Р9: обязательства выбывшей страховой компании на 30.06.2026, млрд ₽ (вход balance_ratios)
+SK_FUNDING_SHARE = 0.75                   # Р9: c / r = 0,75 — в прочих обязательствах остаётся 0,75 × L (фондирование книги без спреда СК)
+SK_RATE_EARN, SK_RATE_COST = 0.76, 0.58   # Р9: r ≈ 0,76 ключевой (падение ЧПД ядра на деньги СК), c ≈ 0,58 ключевой (финансовый расход СК, прим. 6)
+SK_KEY_WINDOW = 0.1570                    # Р9: ключевая 2027 года в клетке окна C (план перевывода 04.11.2026, п. 9)
+SK_NET_SPREAD = (SK_RATE_EARN - SK_RATE_COST) * SK_KEY_WINDOW * SK_LIABILITIES   # чистый спред СК 2027 года, млрд ₽ (9,741): на него
+#                                           уменьшается цель окна C шага misc — окно мерилось при СК в группе, ключ 2027 года выбытие не вбирает
 FIXED_CHANGE_DENSITY = 0.0                # вес риска приращения постоянной части прочих активов: уходит вычитаемый ОНА — 0 (решение № 4,
 #                                           п. 3.2; у якоря вес 0 стоит на вычитаемых ОНА, гудвиле и НМА — шаг anchor); суждение листа
 VOLUME_AXIS_PATH = "valuation.share_count_adj"           # первый путь оси объёма выпуска книги: концы оси — её числа
@@ -328,7 +358,8 @@ LINK_ENDS = {"02": 0.2, "10": 1.0}        # справочные вариант�
 LINK_KEYS = {"opex": "opex.volume_link", "fees": "fees.volume_link"}
 LOAN_SECTORS = ("corporate", "mortgage", "retail_other")
 NIM_KEY = "nii.nim_lt_target_mgmt"
-NIM_AXIS = (0.0294, 0.0315)               # ось уровня маржи — суждение (решение № 2, п. 2)
+NIM_AXIS = (0.028099541, 0.030255781)     # ось уровня маржи — суждение (решение № 2, п. 2: 2,94–3,15 % на якоре 2К); на якоре 3К — ось переноса
+#                                           вместе с ключом 2,9229 % (решение ведущего Р4: уровень маржи — по переносу; ось шаблона та же)
 # Реализованная передача ключевой в маржу (решение ведущего № 5, п. 3.4; заменяет слова решения № 2, п. 2 «ось — диапазон самой передачи»):
 # ключ книги — функция двух суждений: передача = измеренная × (1 − доля книги без процентного дохода). Измеренная — треугольник
 # −0,068 / −0,023 / +0,022 (длинная разность окон (C − L) / (14,5 − 7,75), лист calib-nii/r2; решение № 2, п. 1.2); доля книги — 0 / 0,5 / 1
@@ -346,15 +377,17 @@ TRANSMISSION_GRID = (4000, 0.000005)              # точек интеграл�
 TRANSMISSION_AXIS = (min(TRANSMISSION_MEASURED[0] * (1 - s) for s in (TRANSMISSION_BOOK_SHARE[0], TRANSMISSION_BOOK_SHARE[2])),
                      max(TRANSMISSION_MEASURED[2] * (1 - s) for s in (TRANSMISSION_BOOK_SHARE[0], TRANSMISSION_BOOK_SHARE[2])))
 #                                           носитель произведения (−0,068…+0,022): диапазон строки обратного расчёта — края свидетельств
-PHI_AXIS = (0.0, 0.76)                    # ось доли сжатия — решение ведущего № 3, раздел 4: правило стационара (0) … наклоны окна (0,76)
+PHI_AXIS = (0.0, 0.756982)                # ось доли сжатия — решение ведущего № 3, раздел 4: правило стационара (0) … наклоны окна (0,76); на якоре
+#                                           3К — ось переноса вместе с долей 0,376982 (решение ведущего Р4: доли раскладки — по переносу)
 SIGMA0_AXIS = (0.0, 1.0)                  # ось доли сдвига — лист calib-nii/r2
 WHOLESALE_MARGIN = 0.05                   # запас коридора доли оптового фондирования вокруг счёта ядра
 PB_FLOOR = 0.05                           # нижняя граница коридора P/B клетки: клетку у нуля и на полу гейт называет, а не прячет;
 #                                           доля терминала таких клеток — не число (знаменатель у нуля) и в её коридор не входит
 WINDOW_QUARTERS = ("2025Q4", "2026Q1", "2026Q2")   # окно C: концы кварталов для доли кредитов в процентных активах
-STEPS = ("bridge", "anchor", "payout", "issue", "relief", "realized", "near_spreads", "loans", "near", "misc", "level", "splits", "funds", "t2",
-         "deductions", "fees", "opex", "transmission", "corridors", "ends")
-LINKED = ("near", "misc", "funds", "t2", "deductions", "fees", "opex")
+STEPS = tuple(s for s in ("bridge", "anchor", "payout", "issue", "relief", "realized", "near_spreads", "loans", "near", "misc", "level", "splits",
+                           "funds", "t2", "deductions", "fees", "opex", "transmission", "corridors", "ends") if s != "near" or NEAR_FACT_PERIOD)
+LINKED = tuple(s for s in ("near", "misc", "funds", "t2", "deductions", "fees", "opex") if s != "near" or NEAR_FACT_PERIOD)
+#                                           без квартала с месячными фактами шага near нет (ключ — запись переноса книги)
 WAVE = "ядро ещё не исполняет ветви книги"
 CLOCK: dict[str, float] = {}
 
@@ -565,8 +598,24 @@ def step_anchor(eng: Engine, out: dict) -> None:
     deducted_grow = sum(c["deducted_from_capital"][name] for name in c["deducted_in_growing"])     # вычитаемое, растущее с бизнесом (НМА)
     grow = af.other_assets - fixed
     loans = sum(af.balances[b] for b, spec in book.get("nii.books").items() if spec.get("sector"))
-    ratio = round(grow / loans, 6)                              # растущие прочие активы к кредитным книгам якоря — числом книги
+    # отношения к кредитам — среднее четырёх кварталов с равным весом (решение ведущего Р8), прочие обязательства — плюс 0,75 × L выбывшей
+    # СК к кредитам якоря (Р9); квартал якоря ряда сверяется со снимком листа на фактах (одно определение)
+    rows = eng.inputs["balance_ratios"]["quarters"]
+    if str(book.get("meta.anchor_period")) != ANCHOR_QUARTER or BALANCE_RATIO_QUARTERS[-1] != ANCHOR_QUARTER:
+        raise RuntimeError(f"якорь книги {book.get('meta.anchor_period')} — не квартал листа {ANCHOR_QUARTER}: ряды отношений к кредитам не того якоря")
+    oa_q = {p: float(rows[p]["other_assets_growing"]) / float(rows[p]["loans"]) for p in BALANCE_RATIO_QUARTERS}
+    ol_q = {p: float(rows[p]["other_liabilities_core"]) / float(rows[p]["loans"]) for p in BALANCE_RATIO_QUARTERS}
+    ol_snap = (af.other_liabilities - float(rows[ANCHOR_QUARTER]["dividends_payable"]) - float(rows[ANCHOR_QUARTER]["disposed_insurer_liabilities"])) / loans
+    if abs(oa_q[ANCHOR_QUARTER] - grow / loans) > 5e-6 or abs(ol_q[ANCHOR_QUARTER] - ol_snap) > 5e-6:
+        raise RuntimeError(f"ряд отношений к кредитам на якоре ({oa_q[ANCHOR_QUARTER]:.6f} / {ol_q[ANCHOR_QUARTER]:.6f}) не равен снимку фактов "
+                           f"({grow / loans:.6f} / {ol_snap:.6f}): ряд и факты якоря из разных отчётов")
+    oa_exact = sum(oa_q.values()) / len(oa_q)
+    ol_core = sum(ol_q.values()) / len(ol_q)
+    ol_disposed = SK_FUNDING_SHARE * SK_LIABILITIES / loans
+    ratio = round(oa_exact, 6)                                  # растущие прочие активы к кредитным книгам — числом книги (среднее окна)
+    ol_ratio = round(ol_core + ol_disposed, 6)
     eng.overrides["volumes.other_assets_to_loans"] = ratio
+    eng.overrides["volumes.other_liabilities_to_loans"] = ol_ratio
     risky_grow, risky_fixed = grow - npf - cash - deducted_grow, fixed - (deducted - deducted_grow)
     if risky_grow < 0 or risky_fixed < 0:
         raise RuntimeError("разбиение прочих активов не вмещает деньги и активы НПФ в растущую часть или вычитаемое — в постоянную")
@@ -590,9 +639,14 @@ def step_anchor(eng: Engine, out: dict) -> None:
     dpreg = af.dividends_payable if af.n20_pre_dividend else 0.0
     ded20 = round(af.bv + dpreg - (1 - f) * af.fvoci_reserve + af.at1 + t2_0 - k_group, 3)
     eng.overrides["capital.n20.deductions_anchor"] = ded20
-    _, cell = eng.cell({"capital.n11.gap_pp": 0.0})
+    _, cell = eng.cell({"capital.n11.gap_pp": 0.0, "capital.n20.gap_pp": 0.0})
     gap11 = round(float(af.n11_bank) - float(cell.quarters["k11"][0]) / float(cell.quarters["rwa"][0]), 6)
     eng.overrides["capital.n11.gap_pp"] = gap11
+    # разность Н20.0: якорь воспроизводит напечатанный норматив группы (решение ведущего Р12; по образцу gap11): печать минус норматив по счёту
+    # ядра без разности (вычеты — формулой через капитал группы)
+    n20_free = float(cell.quarters["n20"][0])
+    gap20 = round(float(af.n20) - n20_free, 6)
+    eng.overrides["capital.n20.gap_pp"] = gap20
     eta = float(eng.facts.need("balance", "fixed_share_of_deductible"))    # доля вычета якоря, постоянная в рублях: одно число на оба норматива
     for path in SHARE_PATHS:
         eng.overrides[path] = eta
@@ -608,19 +662,25 @@ def step_anchor(eng: Engine, out: dict) -> None:
         risky_fixed_e = fixed_e - (deducted - deducted_grow + carried)
         risky_grow_e = grow_e - npf - cash - (deducted_grow - carried)
         w_e = float(c["rwa_other_assets"]) / (risky_fixed_e + risky_grow_e)
+        # отношение растущей части к кредитам на конце оси — то же правило (среднее окна Р8), сдвинутое переносом части на якоре
         share_axis[end] = {**{path: share for path in SHARE_PATHS},
-                           **dict(zip(SHARE_BALANCE_PATHS, (round(fixed_e, 1), round(grow_e / loans, 6), round(w_e * risky_grow_e / grow_e, 5),
-                                                            round(w_e * risky_fixed_e / fixed_e, 5))))}
+                           **dict(zip(SHARE_BALANCE_PATHS, (round(fixed_e, 1), round(oa_exact + (grow_e - grow) / loans, 6),
+                                                            round(w_e * risky_grow_e / grow_e, 5), round(w_e * risky_fixed_e / fixed_e, 5))))}
     _, cell = eng.cell()
     q = cell.quarters
     out["anchor"] = {"density": dens, "weight_risky_other": round(w, 5), "other_assets": af.other_assets, "other_growing": grow,
                      "other_fixed": fixed, "other_fixed_facts": float(eng.facts.need("balance", "other_assets_fixed")),
-                     "loans": loans, "other_to_loans": ratio,
+                     "loans": loans, "other_to_loans": ratio, "other_to_loans_anchor": round(grow / loans, 6),
+                     "other_liabilities_to_loans": ol_ratio,
+                     "balance_ratios": {"quarters": list(BALANCE_RATIO_QUARTERS), "other_assets": oa_q, "other_liabilities_core": ol_q,
+                                        "other_assets_mean": oa_exact, "other_liabilities_core_mean": ol_core,
+                                        "disposed_insurer": {"liabilities": SK_LIABILITIES, "share": SK_FUNDING_SHARE, "to_loans": ol_disposed},
+                                        "other_liabilities_anchor": round(af.other_liabilities / loans, 6)},
                      "zero_weight": {"npf": npf, "cash_and_reserves": cash, "deducted": round(deducted, 3),
                                      "deducted_growing": round(deducted_grow, 3), "deducted_fixed": round(deducted - deducted_grow, 3)},
                      "rwa_model": float(q["rwa"][0]), "rwa_fact": rwa_fact, "n20_model": float(q["n20"][0]),
                      "n20_group": k_group / rwa_fact, "n20_fact": float(af.n20), "n11_model": float(q["n11"][0]),
-                     "n11_fact": float(af.n11_bank), "ded20": ded20, "gap11": gap11, "t2_anchor": t2_0,
+                     "n11_fact": float(af.n11_bank), "ded20": ded20, "gap11": gap11, "gap20": gap20, "n20_without_gap": n20_free, "t2_anchor": t2_0,
                      "fixed_share": eta, "fixed_share_pool": {"fixed": pool_fixed, "growing": pool_grow},
                      "fixed_share_formula": round(pool_fixed / pool, 4), "fixed_rub": {"n20": round(eta * ded20, 1), "n11": round(eta * float(ctx.prep.cap.ded11_0), 1)},
                      "share_axis": share_axis}
@@ -628,12 +688,17 @@ def step_anchor(eng: Engine, out: dict) -> None:
     say(f"   # прочие активы {af.other_assets:.1f}: вес части, несущей риск, {w:.5f}; растущие {grow:.1f} (деньги и резервы {cash:.1f}, "
         f"активы НПФ {npf:.1f}, вычитаемые НМА {deducted_grow:.1f} — вес 0); постоянные {fixed:.1f} (вычитаемые гудвил и отложенный налоговый актив "
         f"{deducted - deducted_grow:.1f} — вес 0)")
-    say(f"volumes.other_assets_to_loans: {ratio}    # растущие прочие активы {grow:.1f} / кредитные книги {loans:.1f}")
+    say(f"volumes.other_assets_to_loans: {ratio}    # среднее {', '.join(BALANCE_RATIO_QUARTERS)} (Р8): "
+        + " / ".join(f"{v:.5f}" for v in oa_q.values()) + f"; снимок якоря {grow:.1f} / {loans:.1f} = {grow / loans:.6f}")
+    say(f"volumes.other_liabilities_to_loans: {ol_ratio}    # среднее без дивидендов к выплате и без обязательств выбывшей СК (Р8): "
+        + " / ".join(f"{v:.5f}" for v in ol_q.values()) + f" = {ol_core:.6f} + {SK_FUNDING_SHARE} × {SK_LIABILITIES} / {loans:.1f} = {ol_disposed:+.6f} (Р9); "
+        f"снимок якоря {af.other_liabilities / loans:.6f}")
     say(f"{SHARE_PATHS[0]}, {SHARE_PATHS[1]}: {eta}    # узел фактов; по балансу: {pool_fixed:.1f} / {pool:.1f} = {pool_fixed / pool:.4f}; "
         f"постоянная сумма Н20.0 {eta * ded20:.1f}, Н20.1 {eta * float(ctx.prep.cap.ded11_0):.1f} млрд ₽; ось {SHARE_AXIS[0]}…{SHARE_AXIS[1]}: сторона баланса "
         + " … ".join(" / ".join(f"{share_axis[end][p]}" for p in SHARE_BALANCE_PATHS) for end in ("low", "high")))
     say(f"   якорь: RWA {q['rwa'][0]:.2f} (факт {rwa_fact}); Н20.0 {100 * q['n20'][0]:.4f} % (капитал группы / RWA {100 * k_group / rwa_fact:.4f}; "
-        f"печать {100 * af.n20:.2f}); Н20.1 {100 * q['n11'][0]:.4f} % (факт {100 * af.n11_bank:.2f}); Ded20_0 {ded20}; gap11 {gap11:+.6f}")
+        f"печать {100 * af.n20:.2f}; без разности {100 * n20_free:.4f}); Н20.1 {100 * q['n11'][0]:.4f} % (факт {100 * af.n11_bank:.2f}); Ded20_0 {ded20}; "
+        f"gap20 {gap20:+.6f}; gap11 {gap11:+.6f}")
 
 
 def step_payout(eng: Engine, out: dict) -> None:
@@ -683,8 +748,13 @@ def step_issue(eng: Engine, out: dict) -> None:
         v_vol = issue_volume(n_iss, v_adj)
         stay = float(cfg.get("stay", ISSUE_STAY))
         coupon = AT1_COUPON_RETURN if cfg.get("coupon", True) else 0.0
-        variants[vid] = {"volume": v_vol, "stay": stay, "distributions": float(ov[ISSUE_FLOW]["LT"]), "coupon_return": coupon,
-                         "inflow": issue_inflow(v_vol, stay, float(ov[ISSUE_FLOW]["LT"]), coupon)}
+        v_dist = float(ov[ISSUE_FLOW]["LT"])
+        later = cfg.get("from")                                  # выпуск в другом квартале: в квартале центра — распределения и купон
+        variants[vid] = {"volume": v_vol, "stay": stay, "distributions": v_dist, "coupon_return": coupon,
+                         "inflow": issue_inflow(v_vol, 0.0 if later else stay, v_dist, coupon),
+                         "deduction": round(stay * v_vol, 2) if cfg.get("deduct", True) else 0.0, "deduction_from": later or ISSUE_FROM}
+        if later:
+            variants[vid]["inflow_later"] = {later: issue_inflow(v_vol, stay, v_dist, 0.0)}
     n_div = n_iss * (1.0 + adj)
     at_price = (1.0 - ISSUE_STAY) * volume
     out["issue"] = {"price": ISSUE_PRICE, "volume": volume, "shares_issued": round(n_iss * adj, 3), "share_count_adj": adj, "stay": ISSUE_STAY,
@@ -698,7 +768,10 @@ def step_issue(eng: Engine, out: dict) -> None:
             f"{volume_axis[e + '_volume']:.1f} млрд ₽ → приток {volume_axis[e][ISSUE_FLOW_PATH]}" for e in ("low", "high"))
         + "; ось доли денег: приток " + " … ".join(str(stay_axis[e][ISSUE_FLOW_PATH]) for e in ("low", "high"))
         + f"; вложение по своей цене — +{at_price:.1f} млрд ₽ = +{at_price * 1000.0 / n_div:.2f} ₽ на акцию к центру (арифметика)")
-    say("   варианты: " + "; ".join(f"{vid} {v['inflow']}" for vid, v in variants.items()))
+    out["issue"]["deduction"] = round(ISSUE_STAY * volume, 2)
+    say("   варианты: " + "; ".join(f"{vid} {v['inflow']}" + "".join(f" ({p} {x})" for p, x in (v.get("inflow_later") or {}).items())
+                                    + f", вычет {v['deduction']} с {v['deduction_from']}" for vid, v in variants.items())
+        + f"; вычет выпуска центра {ISSUE_STAY} × {volume} = {out['issue']['deduction']} с {ISSUE_FROM} (Р2, Р10)")
 
 
 def relief_traj(book, which: str, mix: bool) -> dict:
@@ -947,7 +1020,7 @@ def near_traj(d: float, sigma: dict | None = None, fade: dict | None = None) -> 
     `fade` — свои доли сдвига d (прежняя форма книги 0.4 — NEAR_OLD_FADE, без встречной σ0)."""
     fade = NEAR_FADE if fade is None else fade
     sigma = sigma or {}
-    traj = {NEAR_FACT_PERIOD: d}
+    traj = {NEAR_FACT_PERIOD: d} if NEAR_FACT_PERIOD else {}
     traj.update({q: round(d * share - (SIGMA0_FADE.get(q, 0.0) * float(sigma.get(q, 0.0)) if fade is NEAR_FADE else 0.0), 9)
                  for q, share in fade.items()})
     year = str(NEAR_LAST_YEAR)
@@ -955,6 +1028,23 @@ def near_traj(d: float, sigma: dict | None = None, fade: dict | None = None) -> 
     traj[year] = round(sum(qs) / len(qs), 9)
     traj.update({"LT": 0.0, "LT_from": NEAR_LAST_YEAR + 1})
     return traj
+
+
+def near_d(traj: dict) -> float:
+    """Сдвиг d пути общего сдвига: ключ квартала с месячными фактами; без него (шаг near не гоняется) — ключ первого квартала пути (доля d — 1)
+    записи книги (план перевывода 04.11.2026, п. 2: пары шага misc — из записи переноса)."""
+    return float(traj[NEAR_FACT_PERIOD] if NEAR_FACT_PERIOD else traj[NEAR_D_QUARTER])
+
+
+def near_no_sigma(traj: dict) -> dict:
+    """Путь общего сдвига без встречной σ0: кварталы года σ0 — доля d × d (ключ их года — их среднее); остальные ключи — пути `traj`."""
+    d = near_d(traj)
+    out = dict(traj)
+    out.update({q: round(d * NEAR_FADE[q], 9) for q in SIGMA0_FADE})
+    year = str(NEAR_LAST_YEAR)
+    if year in out:
+        out[year] = round(sum(out[q] for q in SIGMA0_FADE) / len(SIGMA0_FADE), 9)
+    return out
 
 
 def sigma0_part(eng: Engine, extra: dict | None = None) -> dict:
@@ -980,6 +1070,8 @@ def near_step(eng: Engine, extra: dict | None = None) -> dict:
 def step_near(eng: Engine, out: dict) -> None:
     """Общий сдвиг d: в квартале с месячными фактами модальная клетка печатает маржу фактов; встречная σ0 — вклад σ0 в маржу модальной
     клетки в год σ0 (решение № 5, п. 3.5); оба — до неподвижной точки (путь сдвига двигает баланс клетки на второй порядок)."""
+    if not NEAR_FACT_PERIOD:
+        raise RuntimeError("шаг near не гоняется: квартала с месячными фактами после якоря нет — ключ regimes.near_nim_shift — запись переноса")
     fact = fact_quarter(eng, NEAR_FACT_PERIOD)
     d = float(eng.value("regimes.near_nim_shift").get(NEAR_FACT_PERIOD, 0.0))
     sig = {q: 0.0 for q in SIGMA0_FADE}
@@ -1067,7 +1159,7 @@ def misc_pair(eng: Engine, extra: dict | None = None, names=("mid",)) -> dict:
     «ЧПД + прочие» этого года в клетке условий окна (знаменатель окна разбора) равна середине (и краям) окна C, — при подменах `extra`
     (путь маржи справочного варианта). → {имя: корень, "_window": окно, "_s": функция суммы}."""
     import facts_check as fc                                  # окно C и форма суммы — общие с листом приёмки (строка (б))
-    win = fc.window_c(eng.facts, eng.inputs["skeptic"])
+    raw = fc.window_c(eng.facts, eng.inputs["skeptic"])
     wide = fc.wide_of(eng.facts, eng.inputs)
     addback = float(eng.inputs["skeptic"]["other_provisions_addback"])
     have = eng.value(MISC_PATH)
@@ -1076,6 +1168,13 @@ def misc_pair(eng: Engine, extra: dict | None = None, names=("mid",)) -> dict:
     key_cell = (MISC_WORLD, MISC_REGIME, eng.modal_cell(book, ctx.posterior)[2])
     tl = ctx.timeline
     qs = tl.quarters_of_year(int(MISC_YEAR))
+    # Р9: окно C мерилось при СК в группе — цель окна уменьшается на чистый спред СК 2027 года в клетке окна (в её знаменателе окна разбора)
+    _, cell0 = eng.cell(extra, key=key_cell)
+    days = sum(tl.d(i) for i in qs)
+    denom = sum(float(cell0.quarters["iea_avg"][i]) * tl.d(i) for i in qs) / days * wide
+    sk_adj = SK_NET_SPREAD / denom * 365.0 / days
+    win = {**raw, **{k: raw[k] - sk_adj for k in ("low", "mid", "high")},
+           "raw": {k: raw[k] for k in ("low", "mid", "high")}, "sk_net_spread": SK_NET_SPREAD, "sk_adjustment": sk_adj, "denominator": denom}
 
     def s_of(x: float, nd: int | None = None) -> float:
         _, cell = eng.cell({**(extra or {}), MISC_PATH: misc_traj(have, x, nd)}, key=key_cell)
@@ -1147,7 +1246,7 @@ def misc_parts(eng: Engine, near: dict | None = None) -> list[dict]:
            if abs(v - float(books[b]["spread"][k])) > NEAR_RULE_TOL]
     if bad:
         raise RuntimeError("ближние ключи книг не воспроизводятся счётом листа calib-nii (вход nii_books.near_rule): " + "; ".join(bad[:6]))
-    no_sigma = near_traj(float(near[NEAR_FACT_PERIOD])) if centre else near
+    no_sigma = near_no_sigma(near) if centre else near
     year_keys = lambda t: {k: float(v) for k, v in t.items() if str(k).startswith(MISC_YEAR)}   # noqa: E731
     parts = [{"part": "sigma0", "words": MISC_PARTS_LEAD[0][1], "overrides": {"regimes.near_nim_shift": no_sigma} if centre else {},
               "shift": {k: v - year_keys(no_sigma)[k] for k, v in year_keys(near).items()} if centre else {}},
@@ -1256,7 +1355,9 @@ def step_misc(eng: Engine, out: dict) -> None:
                    "axis_bundle": axis_bundle, "lt_axis": lt_bundle, "variants": variants, "nii_next_year": nii_next, "nii_this_year": nii_this}
     say(f"{MISC_PATH}.{MISC_YEAR}: {key} (было {have[MISC_YEAR]}; пара к ближнему пути маржи; середина окна C): клетка {cell.label}, сумма «ЧПД + прочие» {MISC_YEAR} года в знаменателе окна "
         f"{100 * out['misc']['sum_at_key']:.3f} % = середина окна C {100 * win['mid']:.3f} % (без разового {100 * win['low']:.2f} %, с ним {100 * win['high']:.2f} %; "
-        f"при прежнем ключе — {100 * out['misc']['sum_was']:.3f} %); ось {out['misc']['axis']['low']} … {out['misc']['axis']['high']}")
+        f"при прежнем ключе — {100 * out['misc']['sum_was']:.3f} %); ось {out['misc']['axis']['low']} … {out['misc']['axis']['high']}; цель окна — за вычетом "
+        f"чистого спреда выбывшей СК 2027 года (Р9: ({SK_RATE_EARN} − {SK_RATE_COST}) × {SK_KEY_WINDOW} × {SK_LIABILITIES} = {SK_NET_SPREAD:.3f} млрд ₽ = "
+        f"{100 * win['sk_adjustment']:.4f} п.п. знаменателя {win['denominator']:.0f}; окно как мерено — {100 * win['raw']['mid']:.3f} %)")
     say(f"   пары к переходным частям пути ЧПД {MISC_YEAR} года (снятие накопительно; пара центра {roots['mid']:.2f}): "
         + "; ".join(f"{r['part']} {r['pair']:+.2f}" for r in by_part["parts"]) + f"; сумма {delta:+.2f} → пара пути без переходных частей {bare_pair:.2f}")
     say(f"{MISC_PATH} {', '.join(years)}: прямая к LT {lt:g} от пары без переходных частей {bare_pair:.2f} (ключ {key} минус разность пар {delta:.2f}; начало "
@@ -1327,8 +1428,9 @@ def step_funds(eng: Engine, out: dict) -> None:
 
 
 def t2_traj(eng: Engine, ctx, cell) -> dict:
+    from model.paths import Trajectory
     tl = ctx.timeline
-    t2_0 = float(eng.book.get("capital.n20.t2")[tl.period(0)])
+    t2_0 = float(Trajectory(eng.book.get("capital.n20.t2")).value(tl.anchor_year, int(tl.period(0)[-1])))   # значение книги в квартале якоря
     q_flat = tl.index(T2_FLAT_UNTIL)
     rwa = cell.quarters["rwa"]
     last_year = str(tl.last_year)
@@ -1462,10 +1564,36 @@ def issue_volume(n_iss: float, share_count_adj: float) -> float:
     return round(float(share_count_adj) * float(n_iss) * ISSUE_PRICE / 1000.0, 2)
 
 
+def issue_deductions(eng: Engine) -> dict:
+    """Вычет выпуска из капитала норматива (решения ведущего Р2, Р10) по книге: центр — доля денег × объём с квартала выпуска; концы связок
+    осей объёма и доли денег — вычет при объёме и доле денег конца (приращение — то же, что у притока квартала выпуска); справочные варианты
+    с притоком — внесённая часть денег варианта с его квартала выпуска (без вычета — варианты, где деньги засчитаны в капитал норматива)."""
+    book = eng.current()
+    af = eng.anchor_facts(eng.facts, book.get("nii.books"))
+    n_iss, adj = float(af.n_iss), float(book.get(VOLUME_AXIS_PATH))
+    volume = issue_volume(n_iss, adj)
+    vol_axis = next(ax for ax in book.get("valuation.uncertainty.axes") if ax["paths"][0] == VOLUME_AXIS_PATH)
+    axes = {"volume": {end: round(ISSUE_STAY * issue_volume(n_iss, float(vol_axis[end][VOLUME_AXIS_PATH])), 2) for end in ("low", "high")},
+            "stay": {end: round(stay * volume, 2) for end, stay in zip(("low", "high"), STAY_AXIS_ENDS)}}
+    have = {v["id"]: v for v in book.get("valuation.reference_variants")}
+    variants = {}
+    for vid, cfg in FLOW_VARIANTS.items():
+        if vid not in have:
+            continue
+        v_vol = issue_volume(n_iss, float(have[vid]["overrides"].get(VOLUME_AXIS_PATH, adj)))
+        variants[vid] = (round(float(cfg.get("stay", ISSUE_STAY)) * v_vol, 2) if cfg.get("deduct", True) else 0.0, cfg.get("from", ISSUE_FROM))
+    centre = (round(ISSUE_STAY * volume, 2), ISSUE_FROM)
+    odd = sorted(vid for vid, d in variants.items() if (d != centre) != (vid in ISSUE_DED_CARRIERS))
+    if odd or not set(ISSUE_DED_CARRIERS) <= set(variants):
+        raise RuntimeError("варианты с вычетом выпуска не того, что в центре, не равны перечню листа ISSUE_DED_CARRIERS: " + ", ".join(odd)
+                           + ("; нет в книге: " + ", ".join(sorted(set(ISSUE_DED_CARRIERS) - set(variants))) if not set(ISSUE_DED_CARRIERS) <= set(variants) else ""))
+    return {"centre": centre, "axes": axes, "variants": variants, "volume": volume}
+
+
 def _ded_inputs(eng: Engine) -> dict:
     book = eng.current()
     af = eng.anchor_facts(eng.facts, book.get("nii.books"))
-    return {"eta": float(eng.facts.need("balance", "fixed_share_of_deductible")), "rwa0": float(af.basel_rwa)}
+    return {"eta": float(eng.facts.need("balance", "fixed_share_of_deductible")), "rwa0": float(af.basel_rwa), "issue": issue_deductions(eng)}
 
 
 def _ded_of(tl, rwa, inp: dict, scenario_id: str, **change) -> dict:
@@ -1478,19 +1606,24 @@ def _ded_of(tl, rwa, inp: dict, scenario_id: str, **change) -> dict:
 
 def ded_series(tl, *, eta: float, rwa0: float, growth: float = DED_GROWTH_PER_Q, release: float = DTA_RELEASE_PER_YEAR,
                scenario=0.0, scenario_from: int = SCENARIO_DEDUCTION_FROM, by_quarter: bool = False,
-               growth_share: float | None = None, asset_share: float | str | None = None) -> dict[str, list[float]]:
+               growth_share: float | None = None, asset_share: float | str | None = None,
+               issue: tuple[float, str] | None = None) -> dict[str, list[float]]:
     """Ряды q = 0…Q на ключах пятого прохода ядра: `rub` — сумма в рублях, млрд ₽ (постоянная доля роста вычетов + высвобождение ОНА);
     `pp` — п.п. RWA (растущая часть роста вычетов + регуляторный вычет сценария); `change` — приращение постоянной части прочих
     активов к якорю, млрд ₽ (доля накопленного роста вычетов, которая — актив МСФО, оплаченный деньгами, + высвобождение ОНА теми же
     рублями); `release` — высвобождение ОНА, млрд ₽ (слагаемое (4) обеих сторон); `fixed` и `asset` — слагаемое (1) на стороне капитала
     (рублёвая доля роста вычетов) и на стороне баланса. `asset_share` по умолчанию — та же доля, что рублёвая доля роста вычетов (η либо
-    `growth_share`; решение № 5, п. 3.1: одно суждение на обеих сторонах); "eta" — η; число — справочное чтение."""
+    `growth_share`; решение № 5, п. 3.1: одно суждение на обеих сторонах); "eta" — η; число — справочное чтение. `issue` — вычет выпуска
+    (решения ведущего Р2, Р10): (сумма, млрд ₽; квартал выпуска) — в рублях пути вычета с квартала выпуска, только на стороне капитала
+    (ряд `issue`)."""
     parts = deduction_parts(tl, eta=eta, rwa0=rwa0, growth=growth, release=release, by_quarter=by_quarter, growth_share=growth_share)
     ruble_share = float(eta) if growth_share is None else float(growth_share)
     share = ruble_share if asset_share is None else float(eta) if asset_share == "eta" else float(asset_share)
-    out = {"rub": [0.0], "pp": [0.0], "change": [0.0], "release": [0.0], "fixed": [0.0], "asset": [0.0]}
+    q_issue = tl.index(issue[1]) if issue else tl.Q + 1
+    out = {"rub": [0.0], "pp": [0.0], "change": [0.0], "release": [0.0], "fixed": [0.0], "asset": [0.0], "issue": [0.0]}
     for q in range(1, tl.Q + 1):
-        out["rub"].append(parts["fixed"][q] + parts["release"][q])
+        out["issue"].append(float(issue[0]) if issue and q >= q_issue else 0.0)
+        out["rub"].append(parts["fixed"][q] + parts["release"][q] + out["issue"][q])
         out["pp"].append(parts["growing"][q] + scenario_at(scenario, scenario_from, tl.year(q)))
         out["change"].append(share * parts["grown_pp"][q] * rwa0 + parts["release"][q])
         out["release"].append(parts["release"][q])
@@ -1609,7 +1742,7 @@ def deduction_family(book, tl, inp: dict) -> dict:
     роста вычетов и ключи вычета на концах оси доли вычета якоря (η ведёт и долю слагаемого роста — решение № 4, п. 3.3) — на ключах
     центра; ключи справочных вариантов (что вариант несёт — `carries`)."""
     ids = [str(s) for s in book.get("capital.reg_scenarios.ids")]
-    base = {"eta": inp["eta"], "rwa0": inp["rwa0"]}
+    base = {"eta": inp["eta"], "rwa0": inp["rwa0"], "issue": inp["issue"]["centre"]}
 
     def series(s: str, **change) -> dict:
         mix = change.pop("relief_mix", True)
@@ -1676,7 +1809,28 @@ def deduction_family(book, tl, inp: dict) -> dict:
         variants[vid] = node
         both[vid] = e
     both["centre"] = se[ids[0]]
-    return {"centre": centre, "axis": axis, "share_axis": share_axis, "variants": variants, "_series": both, "_ends_series": ends_series}
+    # вычет выпуска одной формой с притоком (решение ведущего Р10): концы связок осей объёма и доли денег — рубли пути вычета всех сценариев
+    # и обоих нормативов с квартала выпуска при вычете конца (приращение — как у притока); варианты выпуска — своя внесённая часть денег
+    iss = inp["issue"]
+
+    def rub_ends(amount: float) -> dict:
+        out = {}
+        for s in ids:
+            rb = compact_traj(tl, series(s, issue=(amount, iss["centre"][1]))["rub"], 2, like=centre["rub"])
+            for n in DED_NORMS:
+                out.update({f"{RUB_ROOT.format(s=s, n=n)}.{k}": rb[k] for k in _bundle_keys(centre["rub"], tl)})
+        return out
+
+    issue_axes = {axis_name: {end: rub_ends(amount) for end, amount in ends_.items()} for axis_name, ends_ in iss["axes"].items()}
+    issue_variants = {}
+    for vid in ISSUE_DED_CARRIERS:
+        amount, start = iss["variants"][vid]
+        issue_variants[vid] = {RUB_ROOT.format(s=s, n=n): fit_traj(tl, series(s, issue=(amount, start))["rub"], 2, centre["rub"])
+                               for s in ids for n in DED_NORMS}
+    return {"centre": centre, "axis": axis, "share_axis": share_axis, "variants": variants, "issue_axes": issue_axes,
+            "issue_variants": issue_variants, "issue": {"centre": list(iss["centre"]), "axes": iss["axes"],
+                                                         "variants": {k: list(v) for k, v in iss["variants"].items()}},
+            "_series": both, "_ends_series": ends_series}
 
 
 def both_sides(tl, inp: dict, rub: dict, change: dict, *, asset_share: float | str | None = None, **par) -> dict:
@@ -1686,6 +1840,7 @@ def both_sides(tl, inp: dict, rub: dict, change: dict, *, asset_share: float | s
     высвобождения ОНА; `design1` — разность сторон слагаемого (1) по построению (у справочных чтений «регуляторный счёт» и «весь рост на
     балансе» — не ноль; в центре и у остальных — ноль); `sums` — суммы слагаемых обеих сторон в узловых кварталах."""
     from model.paths import Trajectory
+    par.setdefault("issue", inp["issue"]["centre"])            # вычет выпуска — только на стороне капитала: из сравнения сторон снимается
     e = ded_series(tl, eta=inp["eta"], rwa0=inp["rwa0"], asset_share=asset_share, **par)
     t_rub, t_ch = Trajectory(rub), Trajectory(change)
     out = {"term1": 0.0, "term4": 0.0, "design1": 0.0, "sums": {}}
@@ -1694,8 +1849,8 @@ def both_sides(tl, inp: dict, rub: dict, change: dict, *, asset_share: float | s
         y, n = tl.year(q), int(tl.period(q)[-1])
         if y == tl.last_year and par.get("by_quarter"):
             continue                                         # год last_period — ключом года (среднее кварталов) на обеих сторонах
-        cap1, bal1 = t_rub.value(y, n) - e["release"][q], t_ch.value(y, n) - e["release"][q]
-        cap4, bal4 = t_rub.value(y, n) - e["fixed"][q], t_ch.value(y, n) - e["asset"][q]
+        cap1, bal1 = t_rub.value(y, n) - e["release"][q] - e["issue"][q], t_ch.value(y, n) - e["release"][q]
+        cap4, bal4 = t_rub.value(y, n) - e["fixed"][q] - e["issue"][q], t_ch.value(y, n) - e["asset"][q]
         out["design1"] = max(out["design1"], abs(e["fixed"][q] - e["asset"][q]))
         out["term1"] = max(out["term1"], abs((cap1 - bal1) - (e["fixed"][q] - e["asset"][q])))   # за вычетом разности по построению
         out["term4"] = max(out["term4"], abs(cap4 - bal4))
@@ -1783,6 +1938,11 @@ def step_deductions(eng: Engine, out: dict) -> None:
         + "; ".join(f"{p}: (1) {s_['term1'][0]} / {s_['term1'][1]}, (4) {s_['term4'][0]} / {s_['term4'][1]}" for p, s_ in sides["centre"]["sums"].items())
         + f"; постоянная часть + путь не ниже {min(sign.values()):.1f} млрд ₽ (центр, концы осей, варианты); ноль в квартале якоря — "
         + ("да" if out["deductions"]["anchor_zero_ok"] else "НЕТ") + f"; RWA клетки {cell.label} {rwa[0]:.0f} → {rwa[q_end]:.0f} (справочно)")
+    iss = family["issue"]
+    say(f"   вычет выпуска (Р2, Р10): центр {iss['centre'][0]} с {iss['centre'][1]} (в рублях пути вычета {ISSUE_FROM} "
+        f"{se['rub'][tl.index(ISSUE_FROM)]:.2f}, из них рост вычетов {se['fixed'][tl.index(ISSUE_FROM)]:.2f}); концы связок — объём "
+        + " … ".join(str(iss["axes"]["volume"][e]) for e in ("low", "high")) + ", доля денег " + " … ".join(str(iss["axes"]["stay"][e]) for e in ("low", "high"))
+        + "; варианты: " + "; ".join(f"{vid} {iss['variants'][vid][0]} с {iss['variants'][vid][1]}" for vid in ISSUE_DED_CARRIERS))
 
 
 def fees_traj(have: dict, mid: float, lt: float) -> dict:
@@ -1819,40 +1979,38 @@ def step_fees(eng: Engine, out: dict) -> None:
     say(f"fees.growth_vs_wages: {FEES_KEYS[0]}–{FEES_KEYS[-1]} {mid:+.5f}; LT {lt:+.5f}")
 
 
-def opex_traj(base: dict, q3: float, q4: float, r1: float, r2: float, r3: float) -> dict:
-    d = dict(base)
-    year = NEAR_FACT_PERIOD[:4]
-    d[f"{year}Q3"], d[f"{year}Q4"] = q3, q4
+def opex_traj(base: dict, q4: float, r1: float, r2: float, r3: float) -> dict:
+    """Траектория реального роста расходов: 4-й квартал года якоря, группы лет и LT — корни; ключ 3-го квартала года якоря закрыт якорем
+    3К2026 и не пишется (план перевывода 04.11.2026, п. 3)."""
+    d = {k: v for k, v in base.items() if k != f"{OPEX_YEAR}Q3"}
+    d[OPEX_Q4] = q4
     d.update({k: r1 for k in OPEX_GROUPS[0]})
     d.update({k: r2 for k in OPEX_GROUPS[1]})
     d["LT"] = r3
-    return d
+    order = lambda k: (9999, 9) if k in ("LT", "LT_from") else (int(str(k)[:4]), int(str(k)[-1]) if "Q" in str(k) else 0)   # noqa: E731
+    return {k: d[k] for k in sorted(d, key=order)}
 
 
 def opex_goals(eng: Engine, ratio_q4: float = OPEX_Q4_RATIO) -> dict:
-    """Цели кварталов года якоря: квартал с месячными фактами — месяцы × 3 / число месяцев; четвёртый — среднее первых
-    трёх × сезонное отношение."""
-    q3 = fact_quarter(eng, NEAR_FACT_PERIOD)["opex"]
+    """Цель 4-го квартала года якоря: среднее первых трёх кварталов по фактам (pnl_quarterly; 3К2026 — якорь, факт 147,6) × сезонное
+    отношение (план перевывода 04.11.2026, п. 3)."""
     pnl = eng.facts.file("pnl_quarterly")["quarters"]
-    year = NEAR_FACT_PERIOD[:4]
-    first = [abs(float(pnl[f"{year}Q{n}"]["opex"]["v"])) for n in (1, 2)]
-    mean = (sum(first) + q3) / 3
-    return {"q3": q3, "q4": mean * ratio_q4, "mean_q1_q3": mean, "ratio_q4": ratio_q4, "year": sum(first) + q3 + mean * ratio_q4}
+    first = [abs(float(pnl[f"{OPEX_YEAR}Q{n}"]["opex"]["v"])) for n in (1, 2, 3)]
+    mean = sum(first) / 3
+    return {"q1_q3": first, "q3": first[2], "q4": mean * ratio_q4, "mean_q1_q3": mean, "ratio_q4": ratio_q4, "year": sum(first) + mean * ratio_q4}
 
 
 def _opex_start(eng: Engine) -> tuple:
     have = eng.value("opex.real_growth")
-    year = NEAR_FACT_PERIOD[:4]
-    return (float(have[f"{year}Q3"]), float(have[f"{year}Q4"]), float(have[OPEX_GROUPS[0][0]]), float(have[OPEX_GROUPS[1][0]]), float(have["LT"]))
+    return (float(have[OPEX_Q4]), float(have[OPEX_GROUPS[0][0]]), float(have[OPEX_GROUPS[1][0]]), float(have["LT"]))
 
 
 def _opex_roots(eng: Engine, goals: dict, level: float, start: tuple, which: str = "all", extra: dict | None = None) -> tuple:
-    """Корни расходов: кварталы года якоря — уровни `goals`; группы лет и LT — расходы к средним активам слоя `level`.
+    """Корни расходов: 4-й квартал года якоря — уровень `goals`; группы лет и LT — расходы к средним активам слоя `level`.
     `which`: all — все корни по времени; q4 — только корень 4-го квартала; group1 — только корень первой группы лет.
-    `extra` — подмены справочного варианта, под которые ищутся корни."""
+    `extra` — подмены справочного варианта, под которые ищутся корни. → (4-й квартал, группа 1, группа 2, LT)."""
     base = eng.value("opex.real_growth")
     book = eng.current()
-    tl_year = int(NEAR_FACT_PERIOD[:4])
     lt_years = gate_years(book)
 
     def run_of(roots):
@@ -1860,37 +2018,35 @@ def _opex_roots(eng: Engine, goals: dict, level: float, start: tuple, which: str
         ov["opex.real_growth"] = opex_traj(base, *roots)
         return eng.grid(ov)
 
-    def quarter(roots, qn: int) -> float:
+    def quarter(roots) -> float:
         run = run_of(roots)
-        return layer_opex_q(eng, run, run.ctx.timeline.index(f"{tl_year}Q{qn}"))
+        return layer_opex_q(eng, run, run.ctx.timeline.index(OPEX_Q4))
 
     def ratio(roots, years) -> float:
         run = run_of(roots)
         prob = market_prob(run)
         return sum(to_assets(eng, run, prob, "opex", y) for y in years) / len(years)
 
-    q3, q4, r1, r2, r3 = start
-    if which in ("all",):
-        q3 = bisect(lambda x: quarter((x, q4, r1, r2, r3), 3) - goals["q3"], -0.25, 0.25, tol=1e-6)
+    q4, r1, r2, r3 = start
     if which in ("all", "q4"):
-        q4 = bisect(lambda x: quarter((q3, x, r1, r2, r3), 4) - goals["q4"], -0.25, 0.35, tol=1e-6)
+        q4 = bisect(lambda x: quarter((x, r1, r2, r3)) - goals["q4"], -0.25, 0.35, tol=1e-6)
     if which in ("all", "group1"):
-        r1 = bisect(lambda x: ratio((q3, q4, x, r2, r3), (int(OPEX_GROUPS[0][-1]),)) - level, -0.10, 0.12, tol=1e-9)
+        r1 = bisect(lambda x: ratio((q4, x, r2, r3), (int(OPEX_GROUPS[0][-1]),)) - level, -0.10, 0.12, tol=1e-9)
     if which == "all":
-        r2 = bisect(lambda x: ratio((q3, q4, r1, x, r3), (int(OPEX_GROUPS[1][-1]),)) - level, -0.10, 0.12, tol=1e-9)
-        r3 = bisect(lambda x: ratio((q3, q4, r1, r2, x), lt_years) - level, -0.06, 0.06, tol=1e-9)
-    return q3, q4, r1, r2, r3
+        r2 = bisect(lambda x: ratio((q4, r1, x, r3), (int(OPEX_GROUPS[1][-1]),)) - level, -0.10, 0.12, tol=1e-9)
+        r3 = bisect(lambda x: ratio((q4, r1, r2, x), lt_years) - level, -0.06, 0.06, tol=1e-9)
+    return q4, r1, r2, r3
 
 
 def step_opex(eng: Engine, out: dict) -> None:
     goals = opex_goals(eng)
     roots = _opex_roots(eng, goals, OPEX_TO_ASSETS, _opex_start(eng))
     eng.overrides["opex.real_growth"] = opex_traj(eng.value("opex.real_growth"), *roots)
-    out["opex"] = {"goal": OPEX_TO_ASSETS, "goals_anchor_year": {k: round(v, 3) for k, v in goals.items()},
-                   "roots": dict(zip(("q3", "q4", "group1", "group2", "lt"), roots))}
-    say(f"opex.real_growth: {NEAR_FACT_PERIOD} {roots[0]:+.5f} (цель {goals['q3']:.1f}); 4-й квартал {roots[1]:+.5f} (цель {goals['q4']:.1f} = среднее "
-        f"{goals['mean_q1_q3']:.1f} × {goals['ratio_q4']}); {OPEX_GROUPS[0][0]}–{OPEX_GROUPS[0][-1]} {roots[2]:+.5f}; "
-        f"{OPEX_GROUPS[1][0]}–{OPEX_GROUPS[1][-1]} {roots[3]:+.5f}; LT {roots[4]:+.5f}")
+    out["opex"] = {"goal": OPEX_TO_ASSETS, "goals_anchor_year": {k: (round(v, 3) if isinstance(v, float) else v) for k, v in goals.items()},
+                   "roots": dict(zip(("q4", "group1", "group2", "lt"), roots))}
+    say(f"opex.real_growth: {OPEX_Q4} {roots[0]:+.5f} (цель {goals['q4']:.2f} = среднее {OPEX_YEAR}К1–К3 по фактам "
+        + " / ".join(f"{v:.1f}" for v in goals["q1_q3"]) + f" = {goals['mean_q1_q3']:.2f} × {goals['ratio_q4']}); "
+        f"{OPEX_GROUPS[0][0]}–{OPEX_GROUPS[0][-1]} {roots[1]:+.5f}; {OPEX_GROUPS[1][0]}–{OPEX_GROUPS[1][-1]} {roots[2]:+.5f}; LT {roots[3]:+.5f}")
 
 
 # ------------------------------------------------------------------ после сходимости
@@ -2000,12 +2156,12 @@ def step_ends(eng: Engine, out: dict) -> None:
     # ось уровня расходов: сдвиг корня первой группы лет под концы оси уровня
     axis = {}
     for end, level in zip(("low", "high"), OPEX_AXIS):
-        axis[end] = round(_opex_roots(eng, goals, level, start, which="group1")[2] - start[2], 4)
+        axis[end] = round(_opex_roots(eng, goals, level, start, which="group1")[1] - start[1], 4)
     ends["opex_axis"] = dict(axis, levels=list(OPEX_AXIS))
     # ось сезонного отношения расходов 4-го квартала и вариант «по всему ряду»
     q4 = {}
     for name, ratio in (("low", OPEX_Q4_AXIS[0]), ("high", OPEX_Q4_AXIS[1]), ("whole_series", OPEX_Q4_WHOLE_SERIES)):
-        q4[name] = round(_opex_roots(eng, opex_goals(eng, ratio), OPEX_TO_ASSETS, start, which="q4")[1], 4)
+        q4[name] = round(_opex_roots(eng, opex_goals(eng, ratio), OPEX_TO_ASSETS, start, which="q4")[0], 4)
     ends["opex_q4"] = dict(q4, ratios={"low": OPEX_Q4_AXIS[0], "high": OPEX_Q4_AXIS[1], "whole_series": OPEX_Q4_WHOLE_SERIES})
     # ось уровня комиссий и вариант «уровень года якоря»
     have = eng.value("fees.growth_vs_wages")
@@ -2026,9 +2182,9 @@ def step_ends(eng: Engine, out: dict) -> None:
     fees_pair = ends["fees_level_anchor_year"]["overrides"]
     for _ in range(2):
         o_roots = _opex_roots(eng, goals, opex_level0, start, extra=dict(fees_pair))
-        opex_pair = {f"opex.real_growth.{y}": round(o_roots[2], 4) for y in OPEX_GROUPS[0]}
-        opex_pair.update({f"opex.real_growth.{y}": round(o_roots[3], 4) for y in OPEX_GROUPS[1]})
-        opex_pair["opex.real_growth.LT"] = round(o_roots[4], 4)
+        opex_pair = {f"opex.real_growth.{y}": round(o_roots[1], 4) for y in OPEX_GROUPS[0]}
+        opex_pair.update({f"opex.real_growth.{y}": round(o_roots[2], 4) for y in OPEX_GROUPS[1]})
+        opex_pair["opex.real_growth.LT"] = round(o_roots[3], 4)
         f_mid, f_lt = _fees_roots(eng, level0, level0, centre, extra=dict(opex_pair))
         fees_pair = dict({f"fees.growth_vs_wages.{y}": round(f_mid, 4) for y in FEES_KEYS}, **{"fees.growth_vs_wages.LT": round(f_lt, 4)})
     pair = dict(fees_pair, **opex_pair)
@@ -2044,15 +2200,14 @@ def step_ends(eng: Engine, out: dict) -> None:
                 "opex_lt": round(sum(to_assets(eng, run_p, prob_p, "opex", y) for y in gate_years(eng.current())) / len(gate_years(eng.current())), 7)}}
     # справочные варианты связи с объёмом: корни под те же уровни устава при связи 0,2 и 1,0 (иначе уровень съезжает)
     links = {}
-    year0 = NEAR_FACT_PERIOD[:4]
     for tag, link in LINK_ENDS.items():
         f_mid, f_lt = _fees_roots(eng, FEES_TO_ASSETS, FEES_TO_ASSETS, centre, {LINK_KEYS["fees"]: link})
         links[f"fees_{tag}"] = {"link": link, "overrides": dict({f"fees.growth_vs_wages.{y}": round(f_mid, 4) for y in FEES_KEYS},
                                                                **{"fees.growth_vs_wages.LT": round(f_lt, 4)})}
         roots = _opex_roots(eng, goals, OPEX_TO_ASSETS, start, extra={LINK_KEYS["opex"]: link})
-        o = {f"opex.real_growth.{year0}Q3": round(roots[0], 4), f"opex.real_growth.{year0}Q4": round(roots[1], 4), "opex.real_growth.LT": round(roots[4], 4)}
-        o.update({f"opex.real_growth.{y}": round(roots[2], 4) for y in OPEX_GROUPS[0]})
-        o.update({f"opex.real_growth.{y}": round(roots[3], 4) for y in OPEX_GROUPS[1]})
+        o = {f"opex.real_growth.{OPEX_Q4}": round(roots[0], 4), "opex.real_growth.LT": round(roots[3], 4)}
+        o.update({f"opex.real_growth.{y}": round(roots[1], 4) for y in OPEX_GROUPS[0]})
+        o.update({f"opex.real_growth.{y}": round(roots[2], 4) for y in OPEX_GROUPS[1]})
         links[f"opex_{tag}"] = {"link": link, "overrides": o}
     for name, node in links.items():                          # уровни, которые дают записанные (округлённые) корни варианта
         key = LINK_KEYS[name.split("_")[0]]
@@ -2114,7 +2269,7 @@ def step_ends(eng: Engine, out: dict) -> None:
     ends["misc_forks"] = {"point": base.point, "point_by_cells": sum(P[c.key] * base.cell_price(c) for c in base.cells), "forks": forks}
     # справочные варианты ближнего пути маржи (решение № 5, п. 3.5): путь варианта и ключ прочих доходов 2027 года, выведенный парой к нему
     near_c = eng.value("regimes.near_nim_shift")
-    d = float(near_c[NEAR_FACT_PERIOD])
+    d = near_d(near_c)
     misc_c = eng.value(MISC_PATH)
     lt_c, lt_from_c = float(misc_c["LT"]), int(misc_c["LT_from"])
     near_v = {}
@@ -2216,7 +2371,9 @@ def written(eng: Engine, steps: list[str]) -> dict:
         keys["capital.rwa.density"] = dict(eng.value("capital.rwa.density"))
         keys["capital.n20.deductions_anchor"] = float(eng.value("capital.n20.deductions_anchor"))
         keys["capital.n11.gap_pp"] = float(eng.value("capital.n11.gap_pp"))
+        keys["capital.n20.gap_pp"] = float(eng.value("capital.n20.gap_pp"))
         keys["volumes.other_assets_to_loans"] = float(eng.value("volumes.other_assets_to_loans"))
+        keys["volumes.other_liabilities_to_loans"] = float(eng.value("volumes.other_liabilities_to_loans"))
         keys["volumes.other_assets_fixed"] = float(eng.value("volumes.other_assets_fixed"))
         for path in SHARE_PATHS:
             keys[path] = float(eng.value(path))
@@ -2234,7 +2391,7 @@ def written(eng: Engine, steps: list[str]) -> dict:
         keys[TRANSMISSION_PATH] = round(float(eng.value(TRANSMISSION_PATH)), 6)
     if "near" in steps:
         have = eng.value("regimes.near_nim_shift")
-        d = float(have[NEAR_FACT_PERIOD])
+        d = near_d(have)
         sig = {q: (NEAR_FADE[q] * d - float(have[q])) / SIGMA0_FADE[q] for q in SIGMA0_FADE}    # вклад σ0 — из записанной траектории
         keys["regimes.near_nim_shift"] = near_traj(round(d, 5), {q: round(v, 5) for q, v in sig.items()})
     if "misc" in steps:
@@ -2273,18 +2430,17 @@ def frozen_check(eng: Engine, out: dict, steps: list[str]) -> None:
     world, key = str(book.get("nii.transmission.level_world")), float(book.get(NIM_KEY))
     stationary = float(eng.bridge.to_mgmt_nim(float(ctx.transmission.nss[world])))
     fc.update(nim_stationary=round(stationary, 9), nim_stationary_ok=abs(stationary - key) <= 1e-9)
-    fact = fact_quarter(eng, NEAR_FACT_PERIOD)
-    q1 = tl.index(NEAR_FACT_PERIOD)
-    fc.update(near_nim=round(nim_mgmt_q(eng, cell, q1), 7), near_nim_fact=round(fact["nim"], 7),
-              near_nii_ratio=round(float(q["nii"][q1]) / fact["nii"], 5))
+    if NEAR_FACT_PERIOD:                                        # квартал с месячными фактами после якоря (на якоре 3К2026 его нет)
+        fact = fact_quarter(eng, NEAR_FACT_PERIOD)
+        q1 = tl.index(NEAR_FACT_PERIOD)
+        fc.update(near_nim=round(nim_mgmt_q(eng, cell, q1), 7), near_nim_fact=round(fact["nim"], 7),
+                  near_nii_ratio=round(float(q["nii"][q1]) / fact["nii"], 5))
     if "near" in steps:                                         # приёмка ступени маржи на границе года σ0 (решение № 5, п. 3.5)
         st = near_step(eng)
         fc.update(near_step_cell=round(st["cell"], 7), near_step_books=round(st["books"], 7),
                   near_step_excess=round(max(0.0, abs(st["cell"]) - abs(st["books"])), 7))
     goals = opex_goals(eng)
-    year = int(NEAR_FACT_PERIOD[:4])
-    fc.update(opex_q3=round(layer_opex_q(eng, run, tl.index(f"{year}Q3")), 3), opex_q3_goal=round(goals["q3"], 3),
-              opex_q4=round(layer_opex_q(eng, run, tl.index(f"{year}Q4")), 3), opex_q4_goal=round(goals["q4"], 3))
+    fc.update(opex_q4=round(layer_opex_q(eng, run, tl.index(OPEX_Q4)), 3), opex_q4_goal=round(goals["q4"], 3))
     lt_years = gate_years(book)
     oa = {str(y): to_assets(eng, run, prob, "opex", y) for y in range(tl.anchor_year, tl.last_year + 1)}
     fa = {str(y): to_assets(eng, run, prob, "fees", y) for y in range(tl.anchor_year, tl.last_year + 1)}
@@ -2310,7 +2466,7 @@ def frozen_check(eng: Engine, out: dict, steps: list[str]) -> None:
         err_pp = err_rub = err_ch = 0.0
         last = [i for i in range(tl.Q + 1) if tl.year(i) == tl.last_year]
         for s in book.get("capital.reg_scenarios.ids"):
-            e = ded_series(tl, eta=inp["eta"], rwa0=inp["rwa0"], scenario=scenario_of(book, tl, str(s)))
+            e = ded_series(tl, eta=inp["eta"], rwa0=inp["rwa0"], scenario=scenario_of(book, tl, str(s)), issue=inp["issue"]["centre"])
             for n in DED_NORMS:
                 t_pp, t_rub = Trajectory(eng.value(DED_ROOT.format(s=s, n=n))), Trajectory(eng.value(RUB_ROOT.format(s=s, n=n)))
                 for i in range(tl.Q + 1):
@@ -2332,9 +2488,10 @@ def frozen_check(eng: Engine, out: dict, steps: list[str]) -> None:
         fc["both_sides_term4"] = round(sides["term4"], 6)
         fc["both_sides_error"] = round(max(sides["term1"], sides["term4"]), 6)
     out["frozen_check"] = fc
+    near_words = (f"маржа {NEAR_FACT_PERIOD} {100 * fc['near_nim']:.3f} % (факт {100 * fc['near_nim_fact']:.2f}), ЧПД к факту {fc['near_nii_ratio']:.3f}; "
+                  if NEAR_FACT_PERIOD else "квартала с месячными фактами после якоря нет; ")
     say(f"на записанных ключах: якорь RWA {fc['rwa_anchor_error']:+.3f} к факту, Н20.0 {100 * fc['n20_anchor']:.4f} %, Н20.1 {100 * fc['n11_anchor']:.4f} %; "
-        f"маржа {NEAR_FACT_PERIOD} {100 * fc['near_nim']:.3f} % (факт {100 * fc['near_nim_fact']:.2f}), ЧПД к факту {fc['near_nii_ratio']:.3f}; расходы кварталов "
-        f"{fc['opex_q3']:.1f} / {fc['opex_q4']:.1f} (цели {fc['opex_q3_goal']:.1f} / {fc['opex_q4_goal']:.1f}); расходы к активам "
+        + near_words + f"расходы {OPEX_Q4} {fc['opex_q4']:.2f} (цель {fc['opex_q4_goal']:.2f}); расходы к активам "
         f"{100 * fc['opex_goal_year_1']:.3f} / {100 * fc['opex_goal_year_2']:.3f} / {100 * fc['opex_lt']:.3f} %; комиссии {100 * fc['fees_goal_year']:.3f} / "
         f"{100 * fc['fees_lt']:.3f} %; отклонение доли дополнительного капитала до {100 * fc['t2_share_error']:.4f} п.п.")
 

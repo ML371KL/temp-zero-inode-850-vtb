@@ -1,13 +1,13 @@
 {
  "meta": {
-  "version": "0.9",
+  "version": "0.9+2026Q3",
   "schema": "vtb-v1",
   "date": "2026-10-13",
-  "facts_date": "2026-06-30",
-  "anchor_period": "2026Q2",
-  "first_period": "2026Q3",
+  "facts_date": "2026-09-30",
+  "anchor_period": "2026Q3",
+  "first_period": "2026Q4",
   "last_period": "2036Q4",
-  "valuation_date": "2026-10-13",
+  "valuation_date": "2026-10-30",
   "curve_as_of": "2026-10-28",
   "market_price": {
    "VTBR": 56.11
@@ -972,7 +972,28 @@
    "window_obs": 4,
    "floor_share": 0.33,
    "shrink_by_se": true,
-   "observations": []
+   "observations": [
+    {
+     "period": "2026Q3",
+     "cor": 0.01,
+     "nim": 0.027,
+     "se_cor": 0.0,
+     "se_nim": 0.0,
+     "basis": "mgmt",
+     "mu_cor": {
+      "soft": 0.008977803402,
+      "norm": 0.009975119411,
+      "downturn": 0.010972435421,
+      "crisis": 0.010972435421
+     },
+     "mu_nim": {
+      "soft": 0.02652057791,
+      "norm": 0.02652057791,
+      "downturn": 0.02652057791,
+      "crisis": 0.02652057791
+     }
+    }
+   ]
   }
  },
  "regimes": {
@@ -984,15 +1005,18 @@
   ],
   "cor_basis": "mgmt",
   "near_nim_shift": {
-   "2026Q3": -0.001,
-   "2026Q4": -0.001,
-   "2027Q1": -0.00298,
-   "2027Q2": -0.0025725,
-   "2027Q3": -0.00181,
-   "2027Q4": -0.000935,
-   "2027": -0.002074375,
-   "LT": 0.0,
-   "LT_from": 2028
+   "2026Q4": -0.0005383,
+   "2027Q1": -0.0027073,
+   "2027Q2": -0.0023879,
+   "2027Q3": -0.0016773,
+   "2027Q4": -0.0008369,
+   "2027": -0.0019023500000000001,
+   "2028": 5.48e-05,
+   "2029": 2.22e-05,
+   "2030": 9.1e-06,
+   "2031": 3.9e-06,
+   "2032": 1.8e-06,
+   "LT": 0.0
   },
   "soft": {
    "name": "Мягкая посадка",
@@ -1110,7 +1134,8 @@
   "segment_relative": {
    "enabled": true,
    "corporate": 0.7,
-   "retail": 1.8
+   "retail": 1.8,
+   "corporate_share_ref": 0.725508800606
   },
   "fv_loans_factor": 0,
   "fv_loans_ref": "norm",
@@ -1293,19 +1318,19 @@
    }
   },
   "transmission": {
-   "target": -0.0115,
+   "target": -0.043029,
    "reference_world": "H",
    "level_world": "N",
    "fd_step": 0.01,
    "weights": "anchor"
   },
-  "nim_lt_target_mgmt": 0.0305,
-  "sigma0_split": 0.5,
-  "phi_split": 0.38,
+  "nim_lt_target_mgmt": 0.029229,
+  "sigma0_split": 0.496793,
+  "phi_split": 0.376982,
   "sigma0_from": 2027,
   "retail_current_share": {
-   "c_ref": "anchor",
-   "key_ref": "anchor",
+   "c_ref": 0.26,
+   "key_ref": 0.146181,
    "psi": 0.64,
    "rho": 0.2,
    "bounds": [
@@ -1380,25 +1405,25 @@
   "liquid_min_share": 0.143,
   "securities_share_of_liquid": 0.773,
   "other_assets_to_loans": 0.229505,
-  "other_assets_fixed": 1408.2,
+  "other_assets_fixed": 1423.31,
   "other_assets_fixed_change": {
-   "2026Q2": 0.0,
-   "2026Q3": 15.11,
-   "2026Q4": 30.22,
-   "2027Q1": 45.34,
-   "2027Q2": 60.45,
-   "2027Q3": 75.56,
-   "2027Q4": 90.67,
-   "2028Q1": 105.78,
-   "2028Q2": 120.89,
-   "2028Q3": 136.01,
-   "2028Q4": 151.12,
-   "2029Q1": 129.94,
-   "2029Q2": 129.94,
-   "2029Q3": 129.94,
-   "2029Q4": 129.94,
-   "2036": -18.31,
-   "LT": -18.31,
+   "2026Q2": -15.11,
+   "2026Q3": 0.0,
+   "2026Q4": 15.11,
+   "2027Q1": 30.23,
+   "2027Q2": 45.34,
+   "2027Q3": 60.45,
+   "2027Q4": 75.56,
+   "2028Q1": 90.67,
+   "2028Q2": 105.78,
+   "2028Q3": 120.9,
+   "2028Q4": 136.01,
+   "2029Q1": 114.83,
+   "2029Q2": 114.83,
+   "2029Q3": 114.83,
+   "2029Q4": 114.83,
+   "2036": -33.42,
+   "LT": -33.42,
    "LT_from": 2036
   },
   "other_liabilities_to_loans": "anchor",
@@ -1456,10 +1481,10 @@
    "LT": 0.0
   },
   "misc_net_real": {
-   "2026": 195.0,
-   "2027": 162.9,
-   "2028": 91.2,
-   "2029": 45.6,
+   "2026": 198.161704,
+   "2027": 165.541239,
+   "2028": 92.678704,
+   "2029": 46.339352,
    "LT": 0.0,
    "LT_from": 2030
   },
@@ -1926,7 +1951,7 @@
    }
   },
   "n20": {
-   "deductions_anchor": 603.537,
+   "deductions_anchor": 783.367,
    "fvoci_recognition": 0.7,
    "t2": {
     "2026Q2": 339.1,
@@ -1969,15 +1994,15 @@
    "t2_premium": {
     "enabled": true,
     "spread": 0.025,
-    "base": "anchor"
+    "base": 339.1
    },
-   "gap_pp": 0.0,
-   "deductions_fixed_share": 0.6065
+   "gap_pp": 0.005361192652,
+   "deductions_fixed_share": 0.467271649814
   },
   "n11": {
    "deductions_anchor": "anchor",
-   "gap_pp": 0.000345,
-   "deductions_fixed_share": 0.6065,
+   "gap_pp": 0.000694454078,
+   "deductions_fixed_share": 0.638585624129,
    "audit_cutoffs": [
     1,
     2,
@@ -1987,9 +2012,9 @@
   },
   "at1_share": {
    "enabled": true,
-   "from": "2026Q3",
+   "from": "2026Q4",
    "spread": 0.04,
-   "base": "anchor"
+   "base": 368.0
   },
   "at1_coupon": {
    "enabled": true,
@@ -1999,13 +2024,13 @@
   },
   "rwa": {
    "density": {
-    "corp_loans": 0.827296,
-    "mortgage": 0.4137,
-    "consumer_loans": 1.4676,
-    "securities": 0.1241,
-    "liquidity": 0.19555,
-    "other_assets": 0.46339,
-    "other_assets_fixed": 0.62517,
+    "corp_loans": 0.818277,
+    "mortgage": 0.40919,
+    "consumer_loans": 1.4516,
+    "securities": 0.122747,
+    "liquidity": 0.193418,
+    "other_assets": 0.458338,
+    "other_assets_fixed": 0.61179,
     "other_assets_fixed_change": 0.0
    },
    "density_drift_rate": -0.028,
@@ -2141,8 +2166,8 @@
      "paths": [
       "nii.nim_lt_target_mgmt"
      ],
-     "low": 0.0294,
-     "high": 0.0315,
+     "low": 0.028099541,
+     "high": 0.030255781,
      "dist": "triangular",
      "unit": "pct"
     },
@@ -2152,8 +2177,8 @@
      "paths": [
       "nii.transmission.target"
      ],
-     "low": -0.03872,
-     "high": 0.01062,
+     "low": -0.071021006,
+     "high": -0.020281639,
      "dist": "triangular",
      "unit": "number"
     },
@@ -2164,7 +2189,7 @@
       "nii.phi_split"
      ],
      "low": 0.0,
-     "high": 0.76,
+     "high": 0.756982,
      "dist": "triangular",
      "unit": "share"
     },
@@ -2416,14 +2441,14 @@
       "other.misc_net_real.2029"
      ],
      "low": {
-      "other.misc_net_real.LT": -65.0,
-      "other.misc_net_real.2028": 69.53,
-      "other.misc_net_real.2029": 2.27
+      "other.misc_net_real.LT": -66.053901,
+      "other.misc_net_real.2028": 70.65735,
+      "other.misc_net_real.2029": 2.306805
      },
      "high": {
-      "other.misc_net_real.LT": 70.0,
-      "other.misc_net_real.2028": 114.53,
-      "other.misc_net_real.2029": 92.27
+      "other.misc_net_real.LT": 71.134971,
+      "other.misc_net_real.2028": 116.386973,
+      "other.misc_net_real.2029": 93.766053
      },
      "dist": "triangular",
      "unit": "bn"
@@ -2437,14 +2462,14 @@
       "other.misc_net_real.2029"
      ],
      "low": {
-      "other.misc_net_real.2027": 89.0,
-      "other.misc_net_real.2028": 41.93,
-      "other.misc_net_real.2029": 20.97
+      "other.misc_net_real.2027": 90.443034,
+      "other.misc_net_real.2028": 42.609847,
+      "other.misc_net_real.2029": 21.310005
      },
      "high": {
-      "other.misc_net_real.2027": 236.9,
-      "other.misc_net_real.2028": 140.53,
-      "other.misc_net_real.2029": 70.27
+      "other.misc_net_real.2027": 240.741065,
+      "other.misc_net_real.2028": 142.808534,
+      "other.misc_net_real.2029": 71.409348
      },
      "dist": "triangular",
      "unit": "bn"
@@ -2850,12 +2875,12 @@
       "volumes.other_assets_fixed_change.LT"
      ],
      "low": {
-      "capital.n20.deductions_fixed_share": 0.4,
-      "capital.n11.deductions_fixed_share": 0.4,
-      "volumes.other_assets_fixed": 1065.4,
+      "capital.n20.deductions_fixed_share": 0.308175861378,
+      "capital.n11.deductions_fixed_share": 0.421161170077,
+      "volumes.other_assets_fixed": 1075.37,
       "volumes.other_assets_to_loans": 0.243173,
-      "capital.rwa.density.other_assets": 0.45869,
-      "capital.rwa.density.other_assets_fixed": 0.70415,
+      "capital.rwa.density.other_assets": 0.453689,
+      "capital.rwa.density.other_assets_fixed": 0.690016,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q3": 0.0006,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q4": 0.0012,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q1": 0.0018,
@@ -3090,30 +3115,30 @@
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2029Q4": 78.49,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2036": -69.77,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.LT": -69.77,
-      "volumes.other_assets_fixed_change.2026Q3": 9.97,
-      "volumes.other_assets_fixed_change.2026Q4": 19.93,
-      "volumes.other_assets_fixed_change.2027Q1": 29.9,
-      "volumes.other_assets_fixed_change.2027Q2": 39.87,
-      "volumes.other_assets_fixed_change.2027Q3": 49.83,
-      "volumes.other_assets_fixed_change.2027Q4": 59.8,
-      "volumes.other_assets_fixed_change.2028Q1": 69.77,
-      "volumes.other_assets_fixed_change.2028Q2": 79.73,
-      "volumes.other_assets_fixed_change.2028Q3": 89.7,
-      "volumes.other_assets_fixed_change.2028Q4": 99.67,
-      "volumes.other_assets_fixed_change.2029Q1": 78.49,
-      "volumes.other_assets_fixed_change.2029Q2": 78.49,
-      "volumes.other_assets_fixed_change.2029Q3": 78.49,
-      "volumes.other_assets_fixed_change.2029Q4": 78.49,
-      "volumes.other_assets_fixed_change.2036": -69.77,
-      "volumes.other_assets_fixed_change.LT": -69.77
+      "volumes.other_assets_fixed_change.2026Q3": 0.0,
+      "volumes.other_assets_fixed_change.2026Q4": 9.96,
+      "volumes.other_assets_fixed_change.2027Q1": 19.93,
+      "volumes.other_assets_fixed_change.2027Q2": 29.9,
+      "volumes.other_assets_fixed_change.2027Q3": 39.86,
+      "volumes.other_assets_fixed_change.2027Q4": 49.83,
+      "volumes.other_assets_fixed_change.2028Q1": 59.8,
+      "volumes.other_assets_fixed_change.2028Q2": 69.76,
+      "volumes.other_assets_fixed_change.2028Q3": 79.73,
+      "volumes.other_assets_fixed_change.2028Q4": 89.7,
+      "volumes.other_assets_fixed_change.2029Q1": 68.52,
+      "volumes.other_assets_fixed_change.2029Q2": 68.52,
+      "volumes.other_assets_fixed_change.2029Q3": 68.52,
+      "volumes.other_assets_fixed_change.2029Q4": 68.52,
+      "volumes.other_assets_fixed_change.2036": -79.74,
+      "volumes.other_assets_fixed_change.LT": -79.74
      },
      "high": {
-      "capital.n20.deductions_fixed_share": 0.8,
-      "capital.n11.deductions_fixed_share": 0.8,
-      "volumes.other_assets_fixed": 1729.5,
+      "capital.n20.deductions_fixed_share": 0.616351722756,
+      "capital.n11.deductions_fixed_share": 0.842322340154,
+      "volumes.other_assets_fixed": 1749.43,
       "volumes.other_assets_to_loans": 0.216698,
-      "capital.rwa.density.other_assets": 0.45414,
-      "capital.rwa.density.other_assets_fixed": 0.6242,
+      "capital.rwa.density.other_assets": 0.449189,
+      "capital.rwa.density.other_assets_fixed": 0.610362,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q3": 0.0002,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q4": 0.0004,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q1": 0.0006,
@@ -3348,22 +3373,22 @@
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2029Q4": 178.15,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2036": 29.9,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.LT": 29.9,
-      "volumes.other_assets_fixed_change.2026Q3": 19.93,
-      "volumes.other_assets_fixed_change.2026Q4": 39.87,
-      "volumes.other_assets_fixed_change.2027Q1": 59.8,
-      "volumes.other_assets_fixed_change.2027Q2": 79.73,
-      "volumes.other_assets_fixed_change.2027Q3": 99.67,
-      "volumes.other_assets_fixed_change.2027Q4": 119.6,
-      "volumes.other_assets_fixed_change.2028Q1": 139.53,
-      "volumes.other_assets_fixed_change.2028Q2": 159.46,
-      "volumes.other_assets_fixed_change.2028Q3": 179.4,
-      "volumes.other_assets_fixed_change.2028Q4": 199.33,
-      "volumes.other_assets_fixed_change.2029Q1": 178.15,
-      "volumes.other_assets_fixed_change.2029Q2": 178.15,
-      "volumes.other_assets_fixed_change.2029Q3": 178.15,
-      "volumes.other_assets_fixed_change.2029Q4": 178.15,
-      "volumes.other_assets_fixed_change.2036": 29.9,
-      "volumes.other_assets_fixed_change.LT": 29.9
+      "volumes.other_assets_fixed_change.2026Q3": 0.0,
+      "volumes.other_assets_fixed_change.2026Q4": 19.94,
+      "volumes.other_assets_fixed_change.2027Q1": 39.87,
+      "volumes.other_assets_fixed_change.2027Q2": 59.8,
+      "volumes.other_assets_fixed_change.2027Q3": 79.74,
+      "volumes.other_assets_fixed_change.2027Q4": 99.67,
+      "volumes.other_assets_fixed_change.2028Q1": 119.6,
+      "volumes.other_assets_fixed_change.2028Q2": 139.53,
+      "volumes.other_assets_fixed_change.2028Q3": 159.47,
+      "volumes.other_assets_fixed_change.2028Q4": 179.4,
+      "volumes.other_assets_fixed_change.2029Q1": 158.22,
+      "volumes.other_assets_fixed_change.2029Q2": 158.22,
+      "volumes.other_assets_fixed_change.2029Q3": 158.22,
+      "volumes.other_assets_fixed_change.2029Q4": 158.22,
+      "volumes.other_assets_fixed_change.2036": 9.97,
+      "volumes.other_assets_fixed_change.LT": 9.97
      },
      "dist": "triangular",
      "unit": "share"
@@ -3621,7 +3646,9 @@
       "volumes.other_assets_fixed_change.2029Q3",
       "volumes.other_assets_fixed_change.2029Q4",
       "volumes.other_assets_fixed_change.2036",
-      "volumes.other_assets_fixed_change.LT"
+      "volumes.other_assets_fixed_change.LT",
+      "volumes.other_assets_fixed",
+      "capital.rwa.density.other_assets_fixed"
      ],
      "low": {
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q3": 0.0,
@@ -3873,7 +3900,9 @@
       "volumes.other_assets_fixed_change.2029Q3": -21.18,
       "volumes.other_assets_fixed_change.2029Q4": -21.18,
       "volumes.other_assets_fixed_change.2036": -169.43,
-      "volumes.other_assets_fixed_change.LT": -169.43
+      "volumes.other_assets_fixed_change.LT": -169.43,
+      "volumes.other_assets_fixed": 1408.2,
+      "capital.rwa.density.other_assets_fixed": 0.618355
      },
      "high": {
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q3": 0.000787,
@@ -4110,22 +4139,24 @@
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2029Q4": 281.06,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.2036": 132.8,
       "capital.reg_scenarios.relief.deduction_rub.n1_1.LT": 132.8,
-      "volumes.other_assets_fixed_change.2026Q3": 30.22,
-      "volumes.other_assets_fixed_change.2026Q4": 60.45,
-      "volumes.other_assets_fixed_change.2027Q1": 90.67,
-      "volumes.other_assets_fixed_change.2027Q2": 120.89,
-      "volumes.other_assets_fixed_change.2027Q3": 151.12,
-      "volumes.other_assets_fixed_change.2027Q4": 181.34,
-      "volumes.other_assets_fixed_change.2028Q1": 211.56,
-      "volumes.other_assets_fixed_change.2028Q2": 241.79,
-      "volumes.other_assets_fixed_change.2028Q3": 272.01,
-      "volumes.other_assets_fixed_change.2028Q4": 302.23,
-      "volumes.other_assets_fixed_change.2029Q1": 281.06,
-      "volumes.other_assets_fixed_change.2029Q2": 281.06,
-      "volumes.other_assets_fixed_change.2029Q3": 281.06,
-      "volumes.other_assets_fixed_change.2029Q4": 281.06,
-      "volumes.other_assets_fixed_change.2036": 132.8,
-      "volumes.other_assets_fixed_change.LT": 132.8
+      "volumes.other_assets_fixed_change.2026Q3": 0.0,
+      "volumes.other_assets_fixed_change.2026Q4": 30.23,
+      "volumes.other_assets_fixed_change.2027Q1": 60.45,
+      "volumes.other_assets_fixed_change.2027Q2": 90.67,
+      "volumes.other_assets_fixed_change.2027Q3": 120.9,
+      "volumes.other_assets_fixed_change.2027Q4": 151.12,
+      "volumes.other_assets_fixed_change.2028Q1": 181.34,
+      "volumes.other_assets_fixed_change.2028Q2": 211.57,
+      "volumes.other_assets_fixed_change.2028Q3": 241.79,
+      "volumes.other_assets_fixed_change.2028Q4": 272.01,
+      "volumes.other_assets_fixed_change.2029Q1": 250.84,
+      "volumes.other_assets_fixed_change.2029Q2": 250.84,
+      "volumes.other_assets_fixed_change.2029Q3": 250.84,
+      "volumes.other_assets_fixed_change.2029Q4": 250.84,
+      "volumes.other_assets_fixed_change.2036": 102.58,
+      "volumes.other_assets_fixed_change.LT": 102.58,
+      "volumes.other_assets_fixed": 1438.42,
+      "capital.rwa.density.other_assets_fixed": 0.605363
      },
      "dist": "triangular",
      "unit": "pp"
@@ -4324,12 +4355,12 @@
       "nii.nim_lt_target_mgmt"
      ],
      "search": [
-      0.015,
-      0.045
+      0.013313894,
+      0.044117325
      ],
      "range": [
-      0.0294,
-      0.0315
+      0.028099541,
+      0.030255781
      ],
      "unit": "%"
     },
@@ -4340,12 +4371,12 @@
       "nii.transmission.target"
      ],
      "search": [
-      -0.3,
-      0.3
+      -0.339711356,
+      0.277305676
      ],
      "range": [
-      -0.068,
-      0.022
+      -0.101131437,
+      -0.008578882
      ],
      "unit": ""
     },
@@ -4377,7 +4408,7 @@
    ]
   },
   "next_report": {
-   "period": "2026Q3",
+   "period": "2026Q4",
    "cor_values": [
     0.007,
     0.009,
@@ -5591,7 +5622,9 @@
       "2036": -169.43,
       "LT": -169.43,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1408.2,
+     "capital.rwa.density.other_assets_fixed": 0.618354
     }
    },
    {
@@ -5898,25 +5931,27 @@
       "LT_from": 2036
      },
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 30.22,
-      "2026Q4": 60.45,
-      "2027Q1": 90.67,
-      "2027Q2": 120.89,
-      "2027Q3": 151.12,
-      "2027Q4": 181.34,
-      "2028Q1": 211.56,
-      "2028Q2": 241.79,
-      "2028Q3": 272.01,
-      "2028Q4": 302.23,
-      "2029Q1": 281.06,
-      "2029Q2": 281.06,
-      "2029Q3": 281.06,
-      "2029Q4": 281.06,
-      "2036": 132.8,
-      "LT": 132.8,
+      "2026Q2": -30.22,
+      "2026Q3": 0.0,
+      "2026Q4": 30.23,
+      "2027Q1": 60.45,
+      "2027Q2": 90.67,
+      "2027Q3": 120.9,
+      "2027Q4": 151.12,
+      "2028Q1": 181.34,
+      "2028Q2": 211.57,
+      "2028Q3": 241.79,
+      "2028Q4": 272.01,
+      "2029Q1": 250.84,
+      "2029Q2": 250.84,
+      "2029Q3": 250.84,
+      "2029Q4": 250.84,
+      "2036": 102.58,
+      "LT": 102.58,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1438.42,
+     "capital.rwa.density.other_assets_fixed": 0.605363
     }
    },
    {
@@ -6085,23 +6120,23 @@
       "LT_from": 2036
      },
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 15.11,
-      "2026Q4": 30.22,
-      "2027Q1": 45.34,
-      "2027Q2": 60.45,
-      "2027Q3": 75.56,
-      "2027Q4": 90.67,
-      "2028Q1": 105.78,
-      "2028Q2": 120.89,
-      "2028Q3": 136.01,
-      "2028Q4": 151.12,
-      "2029Q1": 151.12,
-      "2029Q2": 151.12,
-      "2029Q3": 151.12,
-      "2029Q4": 151.12,
-      "2036": 151.12,
-      "LT": 151.12,
+      "2026Q2": -15.11,
+      "2026Q3": 0.0,
+      "2026Q4": 15.11,
+      "2027Q1": 30.23,
+      "2027Q2": 45.34,
+      "2027Q3": 60.45,
+      "2027Q4": 75.56,
+      "2028Q1": 90.67,
+      "2028Q2": 105.78,
+      "2028Q3": 120.9,
+      "2028Q4": 136.01,
+      "2029Q1": 136.01,
+      "2029Q2": 136.01,
+      "2029Q3": 136.01,
+      "2029Q4": 136.01,
+      "2036": 136.01,
+      "LT": 136.01,
       "LT_from": 2036
      }
     }
@@ -6272,23 +6307,23 @@
       "LT_from": 2036
      },
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 15.11,
-      "2026Q4": 30.22,
-      "2027Q1": 45.34,
-      "2027Q2": 60.45,
-      "2027Q3": 75.56,
-      "2027Q4": 90.67,
-      "2028Q1": 105.78,
-      "2028Q2": 120.89,
-      "2028Q3": 136.01,
-      "2028Q4": 151.12,
-      "2029Q1": 108.76,
-      "2029Q2": 108.76,
-      "2029Q3": 108.76,
-      "2029Q4": 108.76,
-      "2036": -187.74,
-      "LT": -187.74,
+      "2026Q2": -15.11,
+      "2026Q3": 0.0,
+      "2026Q4": 15.11,
+      "2027Q1": 30.23,
+      "2027Q2": 45.34,
+      "2027Q3": 60.45,
+      "2027Q4": 75.56,
+      "2028Q1": 90.67,
+      "2028Q2": 105.78,
+      "2028Q3": 120.9,
+      "2028Q4": 136.01,
+      "2029Q1": 93.65,
+      "2029Q2": 93.65,
+      "2029Q3": 93.65,
+      "2029Q4": 93.65,
+      "2036": -202.85,
+      "LT": -202.85,
       "LT_from": 2036
      }
     }
@@ -6651,47 +6686,47 @@
       "LT_from": 2036
      },
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 15.11,
-      "2026Q4": 30.22,
-      "2027Q1": 45.34,
-      "2027Q2": 60.45,
-      "2027Q3": 75.56,
-      "2027Q4": 90.67,
-      "2028Q1": 105.78,
-      "2028Q2": 120.89,
-      "2028Q3": 136.01,
-      "2028Q4": 151.12,
-      "2029Q1": 145.82,
-      "2029Q2": 140.53,
-      "2029Q3": 135.23,
-      "2029Q4": 129.94,
-      "2030Q1": 124.64,
-      "2030Q2": 119.35,
-      "2030Q3": 114.05,
-      "2030Q4": 108.76,
-      "2031Q1": 103.46,
-      "2031Q2": 98.17,
-      "2031Q3": 92.88,
-      "2031Q4": 87.58,
-      "2032Q1": 82.29,
-      "2032Q2": 76.99,
-      "2032Q3": 71.7,
-      "2032Q4": 66.4,
-      "2033Q1": 61.11,
-      "2033Q2": 55.81,
-      "2033Q3": 50.52,
-      "2033Q4": 45.22,
-      "2034Q1": 39.93,
-      "2034Q2": 34.63,
-      "2034Q3": 29.34,
-      "2034Q4": 24.04,
-      "2035Q1": 18.75,
-      "2035Q2": 13.45,
-      "2035Q3": 8.16,
-      "2035Q4": 2.87,
-      "2036": -10.37,
-      "LT": -10.37,
+      "2026Q2": -15.11,
+      "2026Q3": 0.0,
+      "2026Q4": 15.11,
+      "2027Q1": 30.23,
+      "2027Q2": 45.34,
+      "2027Q3": 60.45,
+      "2027Q4": 75.56,
+      "2028Q1": 90.67,
+      "2028Q2": 105.78,
+      "2028Q3": 120.9,
+      "2028Q4": 136.01,
+      "2029Q1": 130.71,
+      "2029Q2": 125.42,
+      "2029Q3": 120.12,
+      "2029Q4": 114.83,
+      "2030Q1": 109.53,
+      "2030Q2": 104.24,
+      "2030Q3": 98.94,
+      "2030Q4": 93.65,
+      "2031Q1": 88.35,
+      "2031Q2": 83.06,
+      "2031Q3": 77.77,
+      "2031Q4": 72.47,
+      "2032Q1": 67.18,
+      "2032Q2": 61.88,
+      "2032Q3": 56.59,
+      "2032Q4": 51.29,
+      "2033Q1": 46.0,
+      "2033Q2": 40.7,
+      "2033Q3": 35.41,
+      "2033Q4": 30.11,
+      "2034Q1": 24.82,
+      "2034Q2": 19.52,
+      "2034Q3": 14.23,
+      "2034Q4": 8.93,
+      "2035Q1": 3.64,
+      "2035Q2": -1.66,
+      "2035Q3": -6.95,
+      "2035Q4": -12.24,
+      "2036": -25.48,
+      "LT": -25.48,
       "LT_from": 2036
      }
     }
@@ -7000,25 +7035,27 @@
       "LT_from": 2036
      },
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 24.92,
-      "2026Q4": 49.83,
-      "2027Q1": 74.75,
-      "2027Q2": 99.67,
-      "2027Q3": 124.58,
-      "2027Q4": 149.5,
-      "2028Q1": 174.41,
-      "2028Q2": 199.33,
-      "2028Q3": 224.25,
-      "2028Q4": 249.16,
-      "2029Q1": 227.98,
-      "2029Q2": 227.98,
-      "2029Q3": 227.98,
-      "2029Q4": 227.98,
-      "2036": 79.73,
-      "LT": 79.73,
+      "2026Q2": -24.92,
+      "2026Q3": 0.0,
+      "2026Q4": 24.91,
+      "2027Q1": 49.83,
+      "2027Q2": 74.75,
+      "2027Q3": 99.66,
+      "2027Q4": 124.58,
+      "2028Q1": 149.49,
+      "2028Q2": 174.41,
+      "2028Q3": 199.33,
+      "2028Q4": 224.24,
+      "2029Q1": 203.06,
+      "2029Q2": 203.06,
+      "2029Q3": 203.06,
+      "2029Q4": 203.06,
+      "2036": 54.81,
+      "LT": 54.81,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1433.12,
+     "capital.rwa.density.other_assets_fixed": 0.607602
     }
    },
    {
@@ -7343,7 +7380,9 @@
       "2036": -169.43,
       "LT": -169.43,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1408.2,
+     "capital.rwa.density.other_assets_fixed": 0.618354
     }
    },
    {
@@ -7370,7 +7409,9 @@
       "2036": -169.43,
       "LT": -169.43,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1408.2,
+     "capital.rwa.density.other_assets_fixed": 0.618354
     }
    },
    {
@@ -7379,25 +7420,27 @@
     "note": "решение № 4, п. 3.2 (развилка «природа роста вычетов»): на стороне баланса путь постоянной части прочих активов растёт в 3К2026–4К2028 на весь накопленный рост вычетов (1,0 п.п. × RWA якоря), затем — высвобождение ОНА; вес риска — вычитаемый актив, 0; сторона капитала — центр (доля η в рублях): стороны разного состава — справочно; путь — по счёту листа (шаг deductions)",
     "overrides": {
      "volumes.other_assets_fixed_change": {
-      "2026Q2": 0.0,
-      "2026Q3": 24.92,
-      "2026Q4": 49.83,
-      "2027Q1": 74.75,
-      "2027Q2": 99.67,
-      "2027Q3": 124.58,
-      "2027Q4": 149.5,
-      "2028Q1": 174.41,
-      "2028Q2": 199.33,
-      "2028Q3": 224.25,
-      "2028Q4": 249.16,
-      "2029Q1": 227.98,
-      "2029Q2": 227.98,
-      "2029Q3": 227.98,
-      "2029Q4": 227.98,
-      "2036": 79.73,
-      "LT": 79.73,
+      "2026Q2": -24.92,
+      "2026Q3": 0.0,
+      "2026Q4": 24.91,
+      "2027Q1": 49.83,
+      "2027Q2": 74.75,
+      "2027Q3": 99.66,
+      "2027Q4": 124.58,
+      "2028Q1": 149.49,
+      "2028Q2": 174.41,
+      "2028Q3": 199.33,
+      "2028Q4": 224.24,
+      "2029Q1": 203.06,
+      "2029Q2": 203.06,
+      "2029Q3": 203.06,
+      "2029Q4": 203.06,
+      "2036": 54.81,
+      "LT": 54.81,
       "LT_from": 2036
-     }
+     },
+     "volumes.other_assets_fixed": 1433.12,
+     "capital.rwa.density.other_assets_fixed": 0.607602
     }
    },
    {

@@ -1,10 +1,10 @@
 {
  "basis": "IFRS",
  "profit_basis": "reported",
- "as_of": "2026-06-30",
+ "as_of": "2026-09-30",
  "unit": "млрд ₽ за квартал; key_avg — доля единицы",
  "sign": "как в отчётности: расходы, резервы, налог — со знаком минус; dia и at1_coupon — величиной; тождество pbt = nii + llp_debt_fa + fees_net + insurance_net + noncore_net + opex + misc_net; ni = pbt + tax",
- "note": "прибыль движка — отчётная прибыль акционеров банка по МСФО (ni_shareholders); кварталы — колонки Databook 6М2026 (редакция 6M2026: прошлые периоды пересчитаны); 4-й квартал Databook печатает прямо, тождество «год − (1К + 2К + 3К)» проверяет check_facts.py; pbt движка включает убыток после налога от дочерних компаний, приобретённых для перепродажи (0…−1,4 в квартал), отчётные строки — в reported",
+ "note": "прибыль движка — отчётная прибыль акционеров банка по МСФО (ni_shareholders); кварталы — колонки Databook 6М2026 (редакция 6M2026: прошлые периоды пересчитаны); 4-й квартал Databook печатает прямо, тождество «год − (1К + 2К + 3К)» проверяет check_facts.py; pbt движка включает убыток после налога от дочерних компаний, приобретённых для перепродажи (0…−1,4 в квартал), отчётные строки — в reported; 3К2026 — колонка 3кв'26 файла эмитента 9М2026 (financial_data_supplement_0926_rus.xlsx; колонки 1–2К2026 файла совпадают с Databook 6М2026)",
  "quarters": {
   "2023Q1": {
    "nii": {
@@ -1571,6 +1571,126 @@
     "ni": {
      "v": 92.6,
      "src": "2026Q2_ifrs_databook.xlsx, 2.P&L!B50, sha256 0a08006704b1144c"
+    }
+   }
+  },
+  "2026Q3": {
+   "nii": {
+    "v": 219.8,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B12, sha256 80fb1b97365623f7"
+   },
+   "fees_net": {
+    "v": 102.4,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B15, sha256 80fb1b97365623f7"
+   },
+   "llp_debt_fa": {
+    "v": -62.7,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B13, sha256 80fb1b97365623f7"
+   },
+   "insurance_net": {
+    "v": 2.0,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B28, sha256 80fb1b97365623f7",
+    "calc": "выручка по страхованию 44,7 + расходы по страхованию −42,7 (форма Сбера: результат страховых услуг; результат инвестирования активов НПФ и финансовые расходы — в misc_net)"
+   },
+   "misc_net": {
+    "v": 117.3,
+    "calc": "pbt − (nii + fees_net + llp_debt_fa + insurance_net + noncore_net + opex) = 231,2 − (219,8 + 102,4 + −62,7 + 2,0 + 0 + −147,6); внутри — доход от выбытия дочерних компаний 24,6 (страховой бизнес РБ), операции с финансовыми инструментами 68,2, с валютой 36,3",
+    "estimated": true
+   },
+   "noncore_net": {
+    "v": 0.0,
+    "calc": "непрофильного блока нет: вся прибыль группы — прибыль движка",
+    "estimated": true
+   },
+   "opex": {
+    "v": -147.6,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B43, sha256 80fb1b97365623f7"
+   },
+   "pbt": {
+    "v": 231.2,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B45, sha256 80fb1b97365623f7",
+    "calc": "прибыль до налогообложения 231,9 + убыток после налога от дочерних компаний, приобретённых для перепродажи, −0,7 — чтобы держалось ni = pbt + tax",
+    "estimated": true
+   },
+   "tax": {
+    "v": -48.9,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B46, sha256 80fb1b97365623f7",
+    "estimated": true
+   },
+   "ni": {
+    "v": 182.3,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B49, sha256 80fb1b97365623f7",
+    "estimated": true
+   },
+   "ni_shareholders": {
+    "v": 177.0,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B51, sha256 80fb1b97365623f7",
+    "calc": "напечатанное значение файла эмитента (0,1 млрд ₽); пометка оценки — по заданию дня отчёта (pnl.estimated)",
+    "estimated": true
+   },
+   "ni_nci": {
+    "v": 5.3,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B52, sha256 80fb1b97365623f7",
+    "estimated": true
+   },
+   "dia": {
+    "v": 19.7,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B11, sha256 80fb1b97365623f7",
+    "calc": "величиной (в отчёте — со знаком минус); внутри nii"
+   },
+   "at1_coupon": {
+    "v": 5.4,
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 8, sha256 d571826a1f1354f4",
+    "calc": "выплаты по бессрочным инструментам за квартал, величиной: 9М2026 24,0 − 6М2026 18,6"
+   },
+   "ni_ordinary": {
+    "v": 171.6,
+    "calc": "ni_shareholders − at1_coupon: прибыль обыкновенных акционеров (база прибыли на акцию)"
+   },
+   "key_avg": {
+    "v": 0.140707,
+    "calc": "sheets/key_rate_quarterly.csv: средняя ключевая ставка Банка России за квартал по календарным дням (92 дн.), проценты → доли"
+   },
+   "other_income_bank": {
+    "v": 122.5,
+    "calc": "«прочие операционные доходы» в определении банка = ЧОД до резервов − ЧПД − комиссии = insurance_net + misc_net − прочие резервы −2,5 − убыток перепродажи −0,7; сверка: файл эмитента, 1.Ключевые показатели!E14 — 122,5"
+   },
+   "other_provisions": {
+    "v": -2.5,
+    "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B22, sha256 80fb1b97365623f7",
+    "calc": "резервы по обязательствам кредитного характера и прочим активам −2,4 + по искам −0,1 (внутри misc_net)"
+   },
+   "one_offs": [
+    {
+     "component": "disposals",
+     "item": "доход от выбытия дочерних компаний: страховой бизнес розницы (обязательства СК по модели «иной, чем ПРП» 344,7 → 0 за квартал; доход РБ от выбытия 24,4 за 9М2026, прим. 2, с. 13)",
+     "amount": {
+      "v": 24.6,
+      "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B21, sha256 80fb1b97365623f7",
+      "calc": "строка «Доходы/(расходы) от выбытия дочерних и ассоциированных компаний» 3кв'26; названное разовое — правилом 2К2026 (как выбытие 4К2024)"
+     }
+    }
+   ],
+   "reported": {
+    "pbt": {
+     "v": 231.9,
+     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B45, sha256 80fb1b97365623f7"
+    },
+    "tax": {
+     "v": -48.9,
+     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B46, sha256 80fb1b97365623f7"
+    },
+    "np_after_tax": {
+     "v": 183.0,
+     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B47, sha256 80fb1b97365623f7"
+    },
+    "np_resale_subs": {
+     "v": -0.7,
+     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B48, sha256 80fb1b97365623f7"
+    },
+    "ni": {
+     "v": 182.3,
+     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B49, sha256 80fb1b97365623f7"
     }
    }
   }

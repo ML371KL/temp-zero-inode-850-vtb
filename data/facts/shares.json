@@ -1,34 +1,36 @@
 {
  "basis": "IFRS",
- "as_of": "2026-06-30",
+ "as_of": "2026-09-30",
  "unit": "млн шт. (после консолидации 5000:1 от 11.07.2024); номинал — ₽",
  "issued_total": {
   "v": 12927.766417,
-  "src": "2026Q2_ifrs_fs.pdf, с. 31, sha256 9bef55d9357d5f6d; GM_2026-06-30_agm_voting_report.pdf, с. 5, sha256 9e7df8864fa1f26b",
-  "calc": "размещённые обыкновенные акции 12 927 766 416,63 (в отчётности округлено до 12 927 766 417); делитель дивиденда на акцию"
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "размещённые обыкновенные акции 12 927 766 417 (прим. 22; в решении ГОСА — 12 927 766 416,63); делитель дивиденда на акцию; допэмиссии в 3К2026 не было"
  },
  "issued_ordinary": {
   "v": 12927.766417,
-  "src": "2026Q2_ifrs_fs.pdf, с. 31, sha256 9bef55d9357d5f6d; GM_2026-06-30_agm_voting_report.pdf, с. 5, sha256 9e7df8864fa1f26b",
-  "calc": "все размещённые акции — обыкновенные (привилегированные конвертированы 29.04.2026)"
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "все размещённые акции — обыкновенные"
  },
  "issued_preferred": {
   "v": 0.0,
-  "src": "2026Q2_ifrs_fs.pdf, с. 31, sha256 9bef55d9357d5f6d; GM_2026-06-30_agm_voting_report.pdf, с. 5, sha256 9e7df8864fa1f26b",
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
   "calc": "привилегированных акций после 29.04.2026 нет"
  },
  "treasury_ordinary": {
-  "v": 79.783634,
-  "src": "2026Q2_ifrs_fs.pdf, с. 31, sha256 9bef55d9357d5f6d; GM_2026-06-30_agm_voting_report.pdf, с. 5, sha256 9e7df8864fa1f26b",
-  "calc": "обыкновенные акции, удерживаемые компаниями группы: 79 783 634"
+  "v": 79.783636,
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "обыкновенные акции, удерживаемые компаниями группы: 79 783 636 (на 30.06.2026 — 79 783 634)"
  },
  "outstanding_total": {
-  "v": 12847.982783,
-  "calc": "issued_total − treasury_ordinary (в отчётности — 12 847 982 783)"
+  "v": 12847.982781,
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "в отчётности — 12 847 982 781"
  },
  "outstanding_ordinary": {
-  "v": 12847.982783,
-  "calc": "issued_ordinary − treasury_ordinary"
+  "v": 12847.982781,
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "= outstanding_total"
  },
  "outstanding_preferred": {
   "v": null,
@@ -42,11 +44,6 @@
   "v": 50.0,
   "src": "2026Q2_ifrs_fs.pdf, с. 31, sha256 9bef55d9357d5f6d; GM_2026-06-30_agm_voting_report.pdf, с. 5, sha256 9e7df8864fa1f26b",
   "calc": "номинал обыкновенной акции, ₽"
- },
- "weighted_avg_2Q2026": {
-  "v": 10907.26028,
-  "src": "2026Q2_ifrs_fs.pdf, с. 20, sha256 9bef55d9357d5f6d",
-  "calc": "средневзвешенное число обыкновенных акций в обращении за 2К2026 (конвертация внутри квартала)"
  },
  "by_ticker": {
   "VTBR": {
@@ -218,5 +215,10 @@
    },
    "note": "решение ГОСА 30.06.2026 увеличить уставный капитал на 314,6 млрд ₽ (6 292 651 866 × 50 ₽); событие без изменения числа акций; ориентир менеджмента 300–400 млрд ₽ [НП: vtb-capital-shares]"
   }
- ]
+ ],
+ "weighted_avg_3Q2026": {
+  "v": 12847.982781,
+  "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 32, sha256 d571826a1f1354f4",
+  "calc": "число акций в обращении в 3К2026 не менялось (±2 акции)"
+ }
 }

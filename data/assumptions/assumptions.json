@@ -1424,7 +1424,7 @@
    "LT": -33.42,
    "LT_from": 2036
   },
-  "other_liabilities_to_loans": 0.086679,
+  "other_liabilities_to_loans": 0.096815,
   "link_base": "iea"
  },
  "fees": {
@@ -1481,9 +1481,9 @@
   "misc_net_real": {
    "2026": 713.803,
    "2027": 165.541239,
-   "2028": 97.826037,
-   "2029": 56.634019,
-   "LT": 15.442,
+   "2028": 92.678704,
+   "2029": 46.339352,
+   "LT": 0.0,
    "LT_from": 2030
   },
   "misc_quarter_shares": {
@@ -2439,14 +2439,14 @@
       "other.misc_net_real.2029"
      ],
      "low": {
-      "other.misc_net_real.LT": -50.611901,
-      "other.misc_net_real.2028": 75.804683,
-      "other.misc_net_real.2029": 12.601472
+      "other.misc_net_real.LT": -66.053901,
+      "other.misc_net_real.2028": 70.65735,
+      "other.misc_net_real.2029": 2.306805
      },
      "high": {
-      "other.misc_net_real.LT": 86.576971,
-      "other.misc_net_real.2028": 121.534306,
-      "other.misc_net_real.2029": 104.06072
+      "other.misc_net_real.LT": 71.134971,
+      "other.misc_net_real.2028": 116.386973,
+      "other.misc_net_real.2029": 93.766053
      },
      "dist": "triangular",
      "unit": "bn"
@@ -2461,13 +2461,13 @@
      ],
      "low": {
       "other.misc_net_real.2027": 90.443034,
-      "other.misc_net_real.2028": 47.75718,
-      "other.misc_net_real.2029": 31.604672
+      "other.misc_net_real.2028": 42.609847,
+      "other.misc_net_real.2029": 21.310005
      },
      "high": {
       "other.misc_net_real.2027": 240.741065,
-      "other.misc_net_real.2028": 147.955867,
-      "other.misc_net_real.2029": 81.704015
+      "other.misc_net_real.2028": 142.808534,
+      "other.misc_net_real.2029": 71.409348
      },
      "dist": "triangular",
      "unit": "bn"

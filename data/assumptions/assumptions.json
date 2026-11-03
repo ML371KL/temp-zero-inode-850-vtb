@@ -1932,7 +1932,7 @@
    }
   },
   "n20": {
-   "deductions_anchor": 783.367,
+   "deductions_anchor": 667.2,
    "fvoci_recognition": 0.7,
    "t2": {
     "2026Q2": 339.1,
@@ -1977,13 +1977,13 @@
     "spread": 0.025,
     "base": 339.1
    },
-   "gap_pp": 0.005361192652,
-   "deductions_fixed_share": 0.467271649814
+   "gap_pp": -0.000231,
+   "deductions_fixed_share": 0.6076
   },
   "n11": {
    "deductions_anchor": "anchor",
-   "gap_pp": 0.000694454078,
-   "deductions_fixed_share": 0.638585624129,
+   "gap_pp": -0.000297,
+   "deductions_fixed_share": 0.6076,
    "audit_cutoffs": [
     1,
     2,
@@ -2005,13 +2005,13 @@
   },
   "rwa": {
    "density": {
-    "corp_loans": 0.818277,
-    "mortgage": 0.40919,
-    "consumer_loans": 1.4516,
-    "securities": 0.122747,
-    "liquidity": 0.193418,
-    "other_assets": 0.458338,
-    "other_assets_fixed": 0.61179,
+    "corp_loans": 0.828196,
+    "mortgage": 0.4137,
+    "consumer_loans": 1.4676,
+    "securities": 0.1241,
+    "liquidity": 0.23376,
+    "other_assets": 0.42883,
+    "other_assets_fixed": 0.54217,
     "other_assets_fixed_change": 0.0
    },
    "density_drift_rate": -0.028,
@@ -2850,12 +2850,12 @@
       "volumes.other_assets_fixed_change.LT"
      ],
      "low": {
-      "capital.n20.deductions_fixed_share": 0.308175861,
-      "capital.n11.deductions_fixed_share": 0.42116117,
-      "volumes.other_assets_fixed": 1075.37,
+      "capital.n20.deductions_fixed_share": 0.4,
+      "capital.n11.deductions_fixed_share": 0.4,
+      "volumes.other_assets_fixed": 1001.1,
       "volumes.other_assets_to_loans": 0.254613,
-      "capital.rwa.density.other_assets": 0.453689,
-      "capital.rwa.density.other_assets_fixed": 0.690016,
+      "capital.rwa.density.other_assets": 0.4252,
+      "capital.rwa.density.other_assets_fixed": 0.60692,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q4": 0.0006,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q1": 0.0012,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q2": 0.0018,
@@ -3091,12 +3091,12 @@
       "volumes.other_assets_fixed_change.LT": -80.8
      },
      "high": {
-      "capital.n20.deductions_fixed_share": 0.616351723,
-      "capital.n11.deductions_fixed_share": 0.84232234,
-      "volumes.other_assets_fixed": 1749.43,
+      "capital.n20.deductions_fixed_share": 0.8,
+      "capital.n11.deductions_fixed_share": 0.8,
+      "volumes.other_assets_fixed": 1675.5,
       "volumes.other_assets_to_loans": 0.228172,
-      "capital.rwa.density.other_assets": 0.449189,
-      "capital.rwa.density.other_assets_fixed": 0.610362,
+      "capital.rwa.density.other_assets": 0.4216,
+      "capital.rwa.density.other_assets_fixed": 0.54717,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2026Q4": 0.0002,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q1": 0.0004,
       "capital.reg_scenarios.schedule.deduction_pp.n20_0.2027Q2": 0.0006,

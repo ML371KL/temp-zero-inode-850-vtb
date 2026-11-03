@@ -1143,9 +1143,10 @@ def misc_traj(have: dict, key: float, nd: int | None = 1, line: dict | None = No
 
 
 def misc_variant_lt(eng: Engine, vid: str) -> float:
-    """LT справочного варианта уровня прочих доходов (его траектория прочих доходов — суждение варианта)."""
+    """LT справочного варианта уровня прочих доходов (суждение варианта; подмены — по ключам 2027–2029 и LT, ключ 2026 года — центра:
+    книга 1.0, решение ведущего 04.11.2026)."""
     v = next(v for v in eng.book.get("valuation.reference_variants") if v["id"] == vid)
-    return float(v["overrides"][MISC_PATH]["LT"])
+    return float(v["overrides"][f"{MISC_PATH}.LT"])
 
 
 def misc_axis_ends(eng: Engine, path: str) -> dict:

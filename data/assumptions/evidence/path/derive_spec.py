@@ -313,11 +313,11 @@ WRITES = (
        "corridor": [(sheet.MISC_LT_PATH, None, None, "долгосрочный уровень — суждение книги (решение № 2, п. 1.1): " + NOT_DERIVED),
                     (f"{sheet.MISC_PATH}.20*", -400.0, 600.0, "ключ прямой на конце оси LT: доля приращения LT")]}
       for end in ("low", "high")),
-    *({"step": "misc", "address": VARIANTS + ({"id": vid}, "overrides", sheet.MISC_PATH, sheet.MISC_YEAR), "source": ("keys", sheet.MISC_PATH, sheet.MISC_YEAR),
+    *({"step": "misc", "address": VARIANTS + ({"id": vid}, "overrides", f"{sheet.MISC_PATH}.{sheet.MISC_YEAR}"), "source": ("keys", sheet.MISC_PATH, sheet.MISC_YEAR),
        "unit": 0.1, "deadband": DEADBAND_UNITS, "rule": f"справочный вариант {vid}: ближний ключ прочих доходов — тот же, что у центра",
        "corridor": [("", -200.0, 400.0, "как у ключа центра")]}
       for vid in sheet.MISC_VARIANTS),
-    *({"step": "misc", "address": VARIANTS + ({"id": vid}, "overrides", sheet.MISC_PATH, y), "source": ("misc", "variants", vid, y),
+    *({"step": "misc", "address": VARIANTS + ({"id": vid}, "overrides", f"{sheet.MISC_PATH}.{y}"), "source": ("misc", "variants", vid, y),
        "unit": 0.1, "deadband": DEADBAND_UNITS,
        "rule": f"справочный вариант {vid}: прочие доходы {y} года — прямая от того же начала, что у центра, к своему LT (решение № 7, п. 2.4)",
        "corridor": [("", -200.0, 500.0, "между началом прямой центра и LT варианта (до 400)")]}
@@ -663,8 +663,8 @@ REMINDERS = (
     "слова комментариев шаблона у переписанных ключей несут числа прежнего вывода — сверить руками",
     "якорь 3К2026 (план перевывода 04.11.2026): шага near нет — ключ regimes.near_nim_shift остаётся записью переноса, пары шага misc берут из "
     "неё путь и сдвиг d; с месячными фактами 4К2026 — квартал в NEAR_FACT_PERIOD листа и шаг near снова в фазе центра",
-    "якорь 3К2026: путь маржи бэктеста книг (вход backtest_path) — запись листа calib-nii на якоре 2К; строка 1(г) листа приёмки судит кварталы "
-    "после якоря — новый путь на составе 3К пересчитывает лист calib-nii",
+    "путь маржи бэктеста книг (вход backtest_path) стоит на якоре 3К2026 (лист calib-nii, backtest_q3.py, 04.11.2026: кварталы 2026К4–2028К3); "
+    "при новом якоре его пересчитывает тот же лист на ставках и составе нового якоря — строка 1(г) листа приёмки судит кварталы после якоря",
     "ближние ключи спредов книг команда не выводит: при новом якоре их пересчитывает лист calib-nii (near_path.py), запись — inputs/vtb_r2_inputs.json",
     "решение № 7, п. 2.4: снятие остатка якоря 2027 года из начала прямой прочих 2028–2029 стоит на числах калибровки calib-nii (вход "
     "nii_books.near_rule: a, s, остаток, у бумаг — ρ окна и ставка якоря); при новом якоре их пересчитывает лист calib-nii вместе с ближними "

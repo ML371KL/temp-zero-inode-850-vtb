@@ -1615,11 +1615,13 @@
    "tax": {
     "v": -48.9,
     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B46, sha256 80fb1b97365623f7",
+    "calc": "напечатанное значение файла эмитента (0,1 млрд ₽); пометка оценки — по заданию дня отчёта (pnl.estimated)",
     "estimated": true
    },
    "ni": {
     "v": 182.3,
     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B49, sha256 80fb1b97365623f7",
+    "calc": "напечатанное значение файла эмитента (0,1 млрд ₽); пометка оценки — по заданию дня отчёта (pnl.estimated)",
     "estimated": true
    },
    "ni_shareholders": {
@@ -1631,6 +1633,7 @@
    "ni_nci": {
     "v": 5.3,
     "src": "financial_data_supplement_0926_rus.xlsx, 2.P&L!B52, sha256 80fb1b97365623f7",
+    "calc": "напечатанное значение файла эмитента (0,1 млрд ₽); пометка оценки — по заданию дня отчёта (pnl.estimated)",
     "estimated": true
    },
    "dia": {

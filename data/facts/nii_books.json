@@ -25,7 +25,7 @@
    },
    "interest_q": {
     "v": 640.590268,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "кредиты всего (прим. 3, с. 15: кредиты по АС 907,5 + финаренда 12,7 + 13 % строки ПСД 113,1 + 10 % строки ССЧПУ 23,8 − обратное репо по ключевой + 0,5 п.п.) минус кредиты ФЛ (сегмент РБ, прим. 2, с. 13: 9М − 6М); лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -50,7 +50,7 @@
    },
    "interest_q": {
     "v": 171.168988,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "кредиты ФЛ (прим. 2, сегмент РБ: процентные доходы минус доходы от прочих сегментов, минус купоны бумаг СК и обратное репо ФЛ; 9М − 6М) минус прочие кредиты ФЛ; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -75,7 +75,7 @@
    },
    "interest_q": {
     "v": 106.209463,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "суждение: ставка 18,5 % (16,5–20,5) × средний остаток — число 2К2026, перенос его не пересматривает; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -100,7 +100,7 @@
    },
    "interest_q": {
     "v": 141.745,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "прим. 3, с. 15: инвестиционные ФА по АС 35,5 + 75 % строки ПСД 113,1 + 90 % строки ССЧПУ 23,8; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -125,7 +125,7 @@
    },
    "interest_q": {
     "v": 51.486281,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "прим. 3, с. 15: средства в банках 18,6 + 12 % строки ПСД 113,1 + обратное репо по ключевой + 0,5 п.п.; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -150,7 +150,7 @@
    },
    "interest_q": {
     "v": 41.644544,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "суждение: ставка 4,5 % (2,5–6,5) × средний остаток — число 2К2026, перенос его не пересматривает; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -175,7 +175,7 @@
    },
    "interest_q": {
     "v": 292.434985,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "средства ФЛ (середина трансфертной оценки по сегменту РБ и единой ставки средств клиентов; сегменты 9М − 6М) минус текущие счета; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -200,7 +200,7 @@
    },
    "interest_q": {
     "v": 349.020471,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "прим. 3, с. 15: средства клиентов 683,1 минус средства ФЛ; лист sheets/nii_split_q3.csv",
     "estimated": true
    },
@@ -225,7 +225,7 @@
    },
    "interest_q": {
     "v": 183.2,
-    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, 13 и 15, sha256 d571826a1f1354f4",
+    "src": "rus-vtb-group-ifrs-as-of-30-september-2026.pdf, с. 13 и 15, sha256 d571826a1f1354f4",
     "calc": "прим. 3, с. 15: средства банков и прочие заёмные 138,5 + выпущенные бумаги 32,2 + субординированная задолженность 12,5; лист sheets/nii_split_q3.csv"
    },
    "rate_anchor": {

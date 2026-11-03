@@ -250,12 +250,14 @@ WRITES = (
       for w in sheet.RELIEF_RETURN),
     # ---- realized: реализованная передача ключевой в маржу (решение № 5, п. 3.4)
     {"step": "realized", "address": tuple(sheet.TRANSMISSION_PATH.split(".")), "source": _key(sheet.TRANSMISSION_PATH), "unit": 1e-6, "mark": True,
-     "rule": "реализованная передача — произведение середин двух суждений без округления: измеренная × (1 − доля книги без процентного дохода)",
+     "rule": "реализованная передача — произведение середин двух суждений без округления: измеренная × (1 − доля книги без процентного дохода); "
+             "ключ — на весах якоря, при котором передача решателя на средних весах окна Р8 равна реализованной (книга 1.0, решение ведущего Р13)",
      "corridor": [("", sheet.TRANSMISSION_AXIS[0], sheet.TRANSMISSION_AXIS[1], "центр внутри носителя произведения (−0,068…+0,022): дальше — "
                                                                              "сомножители записаны не теми числами")]},
     *({"step": "realized", "address": AXES + (TRANSMISSION_AXIS, end), "source": ("realized", "axis", end), "unit": 1e-5,
        "rule": f"ось реализованной передачи, конец {end}: {'P10' if end == 'low' else 'P90'} оси, как её разыгрывает движок (медиана у центра книги), "
-               f"равен {'P10' if end == 'low' else 'P90'} произведения двух независимых треугольников (правило подбора — в шапке листа)",
+               f"равен {'P10' if end == 'low' else 'P90'} произведения двух независимых треугольников (правило подбора — в шапке листа); "
+               "на весах якоря — сдвиг на разность «ключ − реализованная» (Р13)",
        "corridor": [("", sheet.TRANSMISSION_AXIS[0], 0.0, "нижний конец — между краем носителя и нулём")] if end == "low"
        else [("", -0.02, sheet.TRANSMISSION_AXIS[1], "верхний конец — выше центра и не выше края носителя")]}
       for end in ("low", "high")),
@@ -570,8 +572,8 @@ def relations(record: dict, template: dict) -> list[str]:
     bad = []
     keys, ends = record.get("keys") or {}, record.get("ends") or {}
     rz = record.get("realized")
-    if rz is not None and not rz["axis"]["low"] < rz["centre"] < rz["axis"]["high"]:
-        bad.append(f"центр реализованной передачи {rz['centre']} не внутри концов оси {rz['axis']['low']}…{rz['axis']['high']}")
+    if rz is not None and not rz["axis"]["low"] < rz.get("target", rz["centre"]) < rz["axis"]["high"]:
+        bad.append(f"ключ передачи {rz.get('target', rz['centre'])} не внутри концов оси {rz['axis']['low']}…{rz['axis']['high']}")
     tr = record.get("transmission")
     if tr is not None:
         target = tr["rows"]["centre"]["target"]

@@ -373,5 +373,55 @@
     "other_liabilities_core": 2167.5
    }
   }
+ },
+ "transmission_weights": {
+  "source": "решение ведущего Р13 (книга 1.0, 04.11.2026, DECISIONS-1.0-fix2.md): веса книг ЧПД к процентным активам — среднее с равным весом кварталов окна Р8 (4К2025–3К2026), на которых идёт путь после Р8 (пассивы / процентные активы: якорь 1,0407, среднее 1,0234). Остатки книг на концы кварталов — лист vtb-850-handoff/stage1/facts-2026Q3/sheets/books_balances_history.csv (sha256 a27dccfa085b9d19…), строки book; книга liquidity — только доходные размещения (решение B2): средства в банках + обратное репо с юридическими и с физическими лицами − средства НПФ в банках (на 30.09.2026 — 1 206,9, как в фактах). Квартал якоря ряда лист сверяет с остатками книг фактов (nii_books.books.*.balance_close)",
+  "unit": "млрд ₽",
+  "quarters": {
+   "2025Q4": {
+    "corp_loans": 17130.8,
+    "mortgage": 4690.6,
+    "consumer_loans": 2454.4,
+    "securities": 5406.0,
+    "liquidity": 1381.0,
+    "retail_current": 3643.6,
+    "retail_term": 10370.1,
+    "corp_funds": 13882.0,
+    "wholesale": 3833.7
+   },
+   "2026Q1": {
+    "corp_loans": 17826.9,
+    "mortgage": 4649.8,
+    "consumer_loans": 2336.4,
+    "securities": 5786.9,
+    "liquidity": 1403.5,
+    "retail_current": 3550.2,
+    "retail_term": 10104.5,
+    "corp_funds": 14169.3,
+    "wholesale": 4911.1
+   },
+   "2026Q2": {
+    "corp_loans": 18198.3,
+    "mortgage": 4592.0,
+    "consumer_loans": 2293.2,
+    "securities": 6169.1,
+    "liquidity": 1442.7,
+    "retail_current": 3591.2,
+    "retail_term": 10221.2,
+    "corp_funds": 13742.7,
+    "wholesale": 5425.7
+   },
+   "2026Q3": {
+    "corp_loans": 18711.9,
+    "mortgage": 4531.9,
+    "consumer_loans": 2262.2,
+    "securities": 5875.0,
+    "liquidity": 1206.9,
+    "retail_current": 3751.9,
+    "retail_term": 10144.0,
+    "corp_funds": 14485.1,
+    "wholesale": 5534.0
+   }
+  }
  }
 }

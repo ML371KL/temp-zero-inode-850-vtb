@@ -1318,7 +1318,7 @@
    }
   },
   "transmission": {
-   "target": -0.0115,
+   "target": -0.030828,
    "reference_world": "H",
    "level_world": "N",
    "fd_step": 0.01,
@@ -1478,9 +1478,9 @@
   },
   "misc_net_real": {
    "2026": 719.3,
-   "2027": 122.4,
-   "2028": 70.9,
-   "2029": 35.4,
+   "2027": 139.9,
+   "2028": 82.5,
+   "2029": 41.3,
    "LT": 0.0,
    "LT_from": 2030
   },
@@ -1944,16 +1944,16 @@
     "2030Q2": 381.5,
     "2030Q3": 389.0,
     "2030Q4": 396.8,
-    "2031Q1": 405.1,
+    "2031Q1": 405.0,
     "2031Q2": 413.4,
     "2031Q3": 421.5,
     "2031Q4": 430.0,
     "2032Q1": 438.9,
     "2032Q2": 448.0,
     "2032Q3": 456.8,
-    "2032Q4": 466.1,
+    "2032Q4": 466.0,
     "2033Q1": 474.2,
-    "2033Q2": 482.5,
+    "2033Q2": 482.4,
     "2033Q3": 490.2,
     "2033Q4": 498.6,
     "2034Q1": 507.3,
@@ -1961,7 +1961,7 @@
     "2034Q3": 524.4,
     "2034Q4": 533.4,
     "2035Q1": 542.7,
-    "2035Q2": 552.2,
+    "2035Q2": 552.1,
     "2035Q3": 561.0,
     "2035Q4": 570.6,
     "2036": 595.5,
@@ -2157,8 +2157,8 @@
      "paths": [
       "nii.transmission.target"
      ],
-     "low": -0.03872,
-     "high": 0.01062,
+     "low": -0.05804,
+     "high": -0.00871,
      "dist": "triangular",
      "unit": "number"
     },
@@ -2422,13 +2422,13 @@
      ],
      "low": {
       "other.misc_net_real.LT": -66.053901,
-      "other.misc_net_real.2028": 48.88,
-      "other.misc_net_real.2029": -8.64
+      "other.misc_net_real.2028": 60.48,
+      "other.misc_net_real.2029": -2.74
      },
      "high": {
       "other.misc_net_real.LT": 71.134971,
-      "other.misc_net_real.2028": 94.61,
-      "other.misc_net_real.2029": 82.82
+      "other.misc_net_real.2028": 106.21,
+      "other.misc_net_real.2029": 88.72
      },
      "dist": "triangular",
      "unit": "bn"
@@ -2442,14 +2442,14 @@
       "other.misc_net_real.2029"
      ],
      "low": {
-      "other.misc_net_real.2027": 45.8,
-      "other.misc_net_real.2028": 19.83,
-      "other.misc_net_real.2029": 9.87
+      "other.misc_net_real.2027": 63.3,
+      "other.misc_net_real.2028": 31.43,
+      "other.misc_net_real.2029": 15.77
      },
      "high": {
-      "other.misc_net_real.2027": 197.8,
-      "other.misc_net_real.2028": 121.17,
-      "other.misc_net_real.2029": 60.53
+      "other.misc_net_real.2027": 215.3,
+      "other.misc_net_real.2028": 132.77,
+      "other.misc_net_real.2029": 66.43
      },
      "dist": "triangular",
      "unit": "bn"
@@ -2485,7 +2485,7 @@
       "opex.real_growth.2029",
       "opex.real_growth.2030"
      ],
-     "low": -0.0126,
+     "low": -0.0127,
      "high": 0.0136,
      "dist": "triangular",
      "unit": "pp"
@@ -5029,9 +5029,9 @@
   "reference_variants": [
    {
     "id": "margin_level_c_all_worlds",
-    "title": "Уровень окна 2026 года во всех мирах: 2,9 %, передача 0",
+    "title": "Уровень окна 2026 года во всех мирах: 2,9 % (2,77 % на составе баланса 30.09.2026), передача 0",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.029,
+     "nii.nim_lt_target_mgmt": 0.02773,
      "nii.transmission.target": 0.0
     }
    },
@@ -5075,23 +5075,23 @@
    },
    {
     "id": "nim_level_plus_01",
-    "title": "Уровень маржи мира N выше на 0,1 п.п.: 3,15 %",
+    "title": "Уровень маржи мира N выше на 0,1 п.п.: 3,02 %",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.0315
+     "nii.nim_lt_target_mgmt": 0.030229
     }
    },
    {
     "id": "nim_level_minus_01",
-    "title": "Уровень маржи мира N ниже на 0,1 п.п.: 2,95 %",
+    "title": "Уровень маржи мира N ниже на 0,1 п.п.: 2,82 %",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.0295
+     "nii.nim_lt_target_mgmt": 0.028229
     }
    },
    {
     "id": "margin_r1_numbers",
-    "title": "Маржа по числам первого круга: уровень 3,1 %, передача −0,03",
+    "title": "Маржа по числам первого круга: уровень 3,1 % (2,97 % на составе баланса 30.09.2026), передача −0,03",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.031,
+     "nii.nim_lt_target_mgmt": 0.02973,
      "nii.transmission.target": -0.03
     }
    },
@@ -5111,9 +5111,9 @@
       "LT": 0.0,
       "LT_from": 2028
      },
-     "other.misc_net_real.2027": 61.7,
-     "other.misc_net_real.2028": 70.7,
-     "other.misc_net_real.2029": 35.4
+     "other.misc_net_real.2027": 79.2,
+     "other.misc_net_real.2028": 82.4,
+     "other.misc_net_real.2029": 41.2
     }
    },
    {
@@ -5131,9 +5131,9 @@
       "LT": 0.0,
       "LT_from": 2028
      },
-     "other.misc_net_real.2027": 70.4,
-     "other.misc_net_real.2028": 70.8,
-     "other.misc_net_real.2029": 35.4
+     "other.misc_net_real.2027": 87.9,
+     "other.misc_net_real.2028": 82.5,
+     "other.misc_net_real.2029": 41.2
     }
    },
    {
@@ -5141,8 +5141,8 @@
     "title": "Прочие доходы 2028–2029 годов наследуют пары к переходным частям пути ЧПД 2027 года (форма книги 0.6): прямая к LT от ключа 2027 года минус одна пара к встречной σ0",
     "note": "решение № 7, п. 2.4: центр — пара к переходной части сходит вместе с ней (прямая от пары к пути без всех переходных частей 2027 года); вариант — прежнее правило книги 0.6 (решение № 6, п. 2.2): пары к сдвигу d, к половине остатка якоря книг, к остатку книги бумаг и к сходу опта переходят в 2028 год (2/3) и 2029 год (1/3); ключ 2027 года — центра (шаг misc листа вывода; пишет команда)",
     "overrides": {
-     "other.misc_net_real.2028": 48.4,
-     "other.misc_net_real.2029": 24.2
+     "other.misc_net_real.2028": 60.1,
+     "other.misc_net_real.2029": 30.0
     }
    },
    {
@@ -5169,9 +5169,9 @@
     "id": "misc_lt_110",
     "title": "Прочие доходы долгосрочно 110 млрд ₽ в год: буквальная середина годовых значений 2023–2026",
     "overrides": {
-     "other.misc_net_real.2027": 122.4,
-     "other.misc_net_real.2028": 107.5,
-     "other.misc_net_real.2029": 108.8,
+     "other.misc_net_real.2027": 139.9,
+     "other.misc_net_real.2028": 119.2,
+     "other.misc_net_real.2029": 114.6,
      "other.misc_net_real.LT": 110.0
     }
    },
@@ -5179,9 +5179,9 @@
     "id": "misc_lt_196",
     "title": "Прочие доходы долгосрочно 196 млрд ₽ в год: среднее четырёх лет 2023–2026",
     "overrides": {
-     "other.misc_net_real.2027": 122.4,
-     "other.misc_net_real.2028": 136.2,
-     "other.misc_net_real.2029": 166.1,
+     "other.misc_net_real.2027": 139.9,
+     "other.misc_net_real.2028": 147.9,
+     "other.misc_net_real.2029": 171.9,
      "other.misc_net_real.LT": 196.0
     }
    },
@@ -5189,9 +5189,9 @@
     "id": "misc_lt_230",
     "title": "Прочие доходы долгосрочно 230 млрд ₽ в год: темп восьми месяцев 2026 года",
     "overrides": {
-     "other.misc_net_real.2027": 122.4,
-     "other.misc_net_real.2028": 147.5,
-     "other.misc_net_real.2029": 188.8,
+     "other.misc_net_real.2027": 139.9,
+     "other.misc_net_real.2028": 159.2,
+     "other.misc_net_real.2029": 194.6,
      "other.misc_net_real.LT": 230.0
     }
    },
@@ -5199,9 +5199,9 @@
     "id": "misc_lt_400",
     "title": "Прочие доходы долгосрочно 400 млрд ₽ в год: план банка",
     "overrides": {
-     "other.misc_net_real.2027": 122.4,
-     "other.misc_net_real.2028": 204.2,
-     "other.misc_net_real.2029": 302.1,
+     "other.misc_net_real.2027": 139.9,
+     "other.misc_net_real.2028": 215.9,
+     "other.misc_net_real.2029": 307.9,
      "other.misc_net_real.LT": 400.0
     }
    },
@@ -7250,14 +7250,12 @@
       "2036": -171.71,
       "LT": -171.71,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1408.2,
-     "capital.rwa.density.other_assets_fixed": 0.618354
+     }
     }
    },
    {
     "id": "k2_double",
-    "title": "Рост вычетов 0,8 п.п. в год с 3К2026 по 4К2028",
+    "title": "Рост вычетов 0,8 п.п. в год с 4К2026 по 4К2028",
     "note": "верх оси роста вычетов; траектории — той же формой, что центр (по счёту ядра)",
     "overrides": {
      "capital.reg_scenarios.schedule.deduction_rub.n20_0": {
@@ -7560,9 +7558,7 @@
       "2036": 104.46,
       "LT": 104.46,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1438.42,
-     "capital.rwa.density.other_assets_fixed": 0.605363
+     }
     }
    },
    {
@@ -8620,9 +8616,7 @@
       "2036": 55.55,
       "LT": 55.55,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1433.12,
-     "capital.rwa.density.other_assets_fixed": 0.607602
+     }
     }
    },
    {
@@ -8930,9 +8924,7 @@
       "2036": -171.71,
       "LT": -171.71,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1408.2,
-     "capital.rwa.density.other_assets_fixed": 0.618354
+     }
     }
    },
    {
@@ -8958,15 +8950,13 @@
       "2036": -171.71,
       "LT": -171.71,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1408.2,
-     "capital.rwa.density.other_assets_fixed": 0.618354
+     }
     }
    },
    {
     "id": "ded_growth_asset_all",
     "title": "Природа роста вычетов 2026–2028 годов: весь рост — актив МСФО",
-    "note": "решение № 4, п. 3.2 (развилка «природа роста вычетов»): на стороне баланса путь постоянной части прочих активов растёт в 3К2026–4К2028 на весь накопленный рост вычетов (1,0 п.п. × RWA якоря), затем — высвобождение ОНА; вес риска — вычитаемый актив, 0; сторона капитала — центр (доля η в рублях): стороны разного состава — справочно; путь — по счёту листа (шаг deductions)",
+    "note": "решение № 4, п. 3.2 (развилка «природа роста вычетов»): на стороне баланса путь постоянной части прочих активов растёт в 4К2026–4К2028 на весь накопленный рост вычетов (1,0 п.п. × RWA якоря), затем — высвобождение ОНА; вес риска — вычитаемый актив, 0; сторона капитала — центр (доля η в рублях): стороны разного состава — справочно; путь — по счёту листа (шаг deductions)",
     "overrides": {
      "volumes.other_assets_fixed_change": {
       "2026Q3": 0.0,
@@ -8986,9 +8976,7 @@
       "2036": 55.55,
       "LT": 55.55,
       "LT_from": 2036
-     },
-     "volumes.other_assets_fixed": 1433.12,
-     "capital.rwa.density.other_assets_fixed": 0.607602
+     }
     }
    },
    {
@@ -9269,10 +9257,10 @@
     "overrides": {
      "opex.volume_link": 1.0,
      "opex.real_growth.2026Q4": 0.0852,
-     "opex.real_growth.2027": -0.0185,
-     "opex.real_growth.2028": -0.0185,
-     "opex.real_growth.2029": -0.0185,
-     "opex.real_growth.2030": -0.0185,
+     "opex.real_growth.2027": -0.0186,
+     "opex.real_growth.2028": -0.0186,
+     "opex.real_growth.2029": -0.0186,
+     "opex.real_growth.2030": -0.0186,
      "opex.real_growth.2031": -0.0034,
      "opex.real_growth.2032": -0.0034,
      "opex.real_growth.LT": -0.0023
@@ -9646,7 +9634,7 @@
    ],
    "M": [
     0.05,
-    0.6
+    0.45
    ]
   },
   "roe_range": [
@@ -9667,10 +9655,10 @@
   ],
   "roe_k_spread": {
    "range": [
-    -0.05,
+    -0.06,
     0.02
    ],
-   "max_world_gap": 0.03
+   "max_world_gap": 0.05
   },
   "terminal_share": [
    0.2,

@@ -2759,7 +2759,7 @@ def _fail_lines(bad: list[dict]) -> str:
 KNOWN_ROW_CLASSES = {
     "cut_annual": "дивиденд, срезанный до запаса, в годовой ветви: у обеих моделей решение срезано до запаса — малой "
                   "разности норматива; правило «или ≤ 0,3 п.п. × RWA квартала решения» М§17 есть только у квартальной "
-                  "ветви",
+                  "ветви (и DPS того же решения — та же разность на акцию)",
     "small_stake": "DPS клетки с малой долей нынешних акций: допуск DPS на акции своего года не покрывает разность числа "
                    "акций, которую разрешает допуск доли (0,05 / s)",
     "recap_one": "взнос у порога у одной модели (и взнос обеих моделей, принятый только абсолютным полом 0,3 п.п. × RWA): "
@@ -2799,6 +2799,15 @@ def _known_row_class(row: dict, rows: list[dict], ctl: dict, run) -> str | None:
     if row["group"] == "dps":
         d = c["decisions"].get(year)
         y = d.get("decision_year", year + 1) if d else year + 1
+        # DPS решения, срезанного годовой ветвью: та же относительная разность, что у строки дивиденда года решения той же
+        # клетки (до допуска доли акций), — не новая разность, а строка класса cut_annual на акцию (книга 0.9, клетки N/soft)
+        for r in rows:
+            mr = _ROW_YEAR_CELL.search(r["what"])
+            if (r is not row and r["group"] == "div" and not r["ok"] and mr and int(mr.group(1)) == y
+                    and "/".join(mr.groups()[1:]) == tag and r["diff_rel"] is not None and row["diff_rel"] is not None
+                    and abs(row["diff_rel"] - r["diff_rel"]) <= TOL_STAKE
+                    and _known_row_class(r, rows, ctl, run) == "cut_annual"):
+                return "cut_annual"
         if y not in years:
             return None
         stakes = [c["stake"][years.index(y)]]

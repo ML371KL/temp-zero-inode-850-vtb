@@ -381,10 +381,12 @@ def test_bank_language_and_market_identities(built):
     assert d["governance"]["sum_signed"] == d["governance"]["discount"]
 
 
-@pytest.mark.xfail(strict=True, reason=(
+@pytest.mark.xfail(strict=False, reason=(
     "дефект ядра (model/payload.py, дерево ROE): roe считается произведением roa и leverage, округлённых до 1e-9, но "
     "последний проход выпуска (9 значащих цифр, П§0.3 «прочее») переокругляет leverage ≥ 10 до 1e-7 — у книги ВТБ "
-    "(рычаг ≈ 15) хранимые roa × leverage и roe расходятся на ~1e-9 > EPS; у образца (рычаг < 10) не проявлялось"))
+    "(рычаг ≈ 15) хранимые roa × leverage и roe расходятся на ~1e-9 > EPS; у образца (рычаг < 10) не проявлялось. "
+    "Расхождение зависит от чисел книги: у 0.8 оно больше 1e-9, у 0.9 (миры 1.7) — в пределах (XPASS), поэтому "
+    "метка не строгая, пока дефект не исправлен в ядре"))
 def test_roe_tree_is_the_product_of_the_stored_numbers(built):
     """Дерево ROE: roe — произведение хранимых roa и leverage (комментарий ядра) — до хранимой точности 1e-9."""
     _, d = built

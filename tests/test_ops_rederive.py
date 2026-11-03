@@ -25,6 +25,7 @@ BOOK = ROOT / "data" / "assumptions"
 SHEET_DIR = BOOK / "evidence" / "path"
 TODAY = dt.date(2031, 2, 3)                      # дата пометки в тестах: в шаблоне её быть не может
 BOOK_VERSION = "0.9"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
+NIM_2027_EXPLAINED = 0.0255                       # книга 0.9: низ объяснённого отклонения строки 1(а) (решение ведущего 29.10.2026)
 TRACKED = ("assumptions_template.yaml", "assumptions.yaml", "assumptions.json", "evidence/path/out/derive_out.json",
            "evidence/path/out/derive_out.txt", "evidence/path/out/derive_start.json")
 
@@ -797,12 +798,11 @@ def test_the_decisions_of_round_six_stand_in_book_06():
     rows = fc.rows_of(R.Tree().book_yaml, R.Tree().facts)["rows"]
     row = next(r for r in rows if r["name"].startswith(f"1(а) маржа {sheet.MISC_YEAR} года на режиме «нормализация»"))
     assert (row["low"], row["high"]) == fc.NIM_WINDOW == (0.026, 0.032), row
-    # книга 0.9 (миры 1.7): маржа 2027 года ниже окна — объяснённое отклонение (решение ведущего 29.10.2026, docs/DECISIONS.md,
-    # часть 8): ключевая 2027 года во всех мирах записи 1.7 выше условий окна. Строка остаётся «НЕТ» и красным флагом перевода;
-    # здесь держится, что отклонение не выросло молча (не ниже 2,55 %) и записано в журнале решений с числом
-    if not row["ok"]:
-        part8 = (R.ROOT / "docs" / "DECISIONS.md").read_text(encoding="utf-8").split("## Часть 8.", 1)[1].split("\n## ", 1)[0]
-        assert 0.0255 <= row["value"] < fc.NIM_WINDOW[0] and "2,56 %" in part8 and "2,65 %" in part8, row
+    # книга 0.9 (миры 1.7): маржа 2027 года ниже окна — объяснённое отклонение (решение ведущего 29.10.2026, журнал решений,
+    # часть 8; текст сверяет test_the_explained_deviation_of_the_2027_margin_is_in_the_decisions): ключевая 2027 года во всех
+    # мирах записи 1.7 выше условий окна. Строка остаётся «НЕТ» и красным флагом перевода; здесь держится, что отклонение
+    # не выросло молча — маржа не ниже 2,55 %
+    assert row["ok"] or NIM_2027_EXPLAINED <= row["value"] < fc.NIM_WINDOW[0], row
     assert "смесь заголовка" in row["words"] and "модальная клетка" in row["words"]
 
 
@@ -1172,3 +1172,13 @@ def test_the_acceptance_sheets_of_the_description_are_run_printed_and_flagged(fa
     assert any("не отработал" in f for f in R.flags_of(dict(now, acceptance=failed, marginal=None)))
     spec.ACCEPTANCE = ()
     assert R.acceptance_numbers(tree, spec, work / "book.yaml", work) == []
+
+
+@pytest.mark.docs
+def test_the_explained_deviation_of_the_2027_margin_is_in_the_decisions():
+    """Книга 0.9: строка приёмки 1(а) (маржа 2027 года на режиме «нормализация» 2,56 % при окне C 2,6–3,2 %) — объяснённое
+    отклонение по решению ведущего 29.10.2026; журнал решений (часть 8) называет его числами — было и стало — и причиной."""
+    text = (R.ROOT / "docs" / ("DECISIONS" + ".md")).read_text(encoding="utf-8")
+    part8 = text.split("## Часть 8.", 1)[1].split("## Открытые вопросы", 1)[0]
+    for word in ("1(а)", "2,56 %", "2,65 %", "2,6–3,2", "объяснённое отклонение", "Ключевая 2027 года"):
+        assert word in part8, word

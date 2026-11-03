@@ -1318,7 +1318,7 @@
    }
   },
   "transmission": {
-   "target": -0.043029,
+   "target": -0.0115,
    "reference_world": "H",
    "level_world": "N",
    "fd_step": 0.01,
@@ -2175,8 +2175,8 @@
      "paths": [
       "nii.transmission.target"
      ],
-     "low": -0.071021006,
-     "high": -0.020281639,
+     "low": -0.03872,
+     "high": 0.01062,
      "dist": "triangular",
      "unit": "number"
     },
@@ -4377,12 +4377,12 @@
       "nii.transmission.target"
      ],
      "search": [
-      -0.339711356,
-      0.277305676
+      -0.3,
+      0.3
      ],
      "range": [
-      -0.101131437,
-      -0.008578882
+      -0.068,
+      0.022
      ],
      "unit": ""
     },

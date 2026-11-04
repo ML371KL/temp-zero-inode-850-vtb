@@ -28,6 +28,8 @@ SHA_RE = re.compile(r"sha256 ([0-9a-f]{16})")
 PERIOD_RE = re.compile(r"^\d{4}Q4$")
 RECORD_AFTER_DECISION = (10, 20)     # дней от решения собрания до даты реестра (закон об АО, ст. 42 п. 5)
 FIRST_ANCHOR = "2026Q2"
+THIRD_QUARTER_ANCHOR = "2026Q3"       # первый перенос якоря: решения те же, дивиденд за 2025 год уже выплачен
+ANCHORS_2026 = (FIRST_ANCHOR, THIRD_QUARTER_ANCHOR)
 # Имена полей и методов ответов брокерского API и пути к образцам ответов: в данных и документах о фактах их нет.
 # Слова собраны из частей: сам тест — не «имя поля» для общего теста гигиены.
 API_WORDS = tuple(a + b for a, b in (
@@ -79,7 +81,7 @@ def test_history_is_one_row_per_decision_keyed_by_the_profit_year():
         assert r["dps"]["v"] > 0 and r["pool_declared"]["v"] > 0
     before = load("dividends")["history_before"]
     assert [r["year"] for r in before] == sorted(r["year"] for r in before) and max(r["year"] for r in before) < min(years)
-    if load("anchor")["period"] == FIRST_ANCHOR:
+    if load("anchor")["period"] in ANCHORS_2026:
         got = [(r["year"], r["dps"]["v"]) for r in h]
         assert got == [(2024, 25.58), (2025, 9.71)], "решения ГОСА 30.06.2025 и 30.06.2026"
         assert [r["dps"]["v"] for r in before if r["year"] >= 2021] == [0.0, 0.0, 0.0], "за 2021–2023 годы не выплачивались"
@@ -112,7 +114,7 @@ def test_pool_is_dps_times_issued_shares_of_the_decision_day():
         n = issued_on(r["decided_date"])
         assert abs(r["pool_declared"]["v"] - r["dps"]["v"] * n / 1000) < 0.001, r["year"]
         assert r["pool_all_classes"]["v"] >= r["pool_declared"]["v"] - 1e-9, r["year"]
-    if load("anchor")["period"] == FIRST_ANCHOR:
+    if load("anchor")["period"] in ANCHORS_2026:
         last = load("dividends")["history"][-1]
         assert abs(last["pool_declared"]["v"] - 125.529) < 0.001          # 125 528 611 905,49 ₽ — решение ГОСА 30.06.2026
         n_out = load("shares")["outstanding_total"]["v"]
@@ -192,6 +194,8 @@ def test_register_seed_records():
         got = [(r["year"], r["dps"]["v"], r["status"], r["record_date"]) for r in d["register_seed"]]
         assert got == [(2025, 9.71, "paid", "2026-07-20")]
         assert closed_through() == "2025Q4", "собрание 30.06.2026 — в день якоря"
+    if a["period"] == THIRD_QUARTER_ANCHOR:
+        assert closed_through() == "2025Q4", "решений о дивиденде в 3К2026 нет"
 
 
 def test_closed_years_carry_a_history_row():
@@ -226,9 +230,9 @@ def test_policy_floor_and_the_payout_of_complete_years():
         payout = r["pool_all_classes"]["v"] / rec["ni_group"]["v"]
         assert abs(payout - r["payout_of_ni_group"]["v"]) < 0.001, r["year"]
         assert payout >= pol["payout_min"]["v"] - 1e-9, f"{r['year']}: выплата {payout:.4f} ниже минимума политики"
-    if load("anchor")["period"] == FIRST_ANCHOR:
+    if load("anchor")["period"] in ANCHORS_2026:
         assert {r["year"]: r["payout_of_ni_group"]["v"] for r in d["history"]} == {2024: 0.5, 2025: 0.25}
-        assert d["years"]["2026"]["complete"] is False and d["years"]["2026"]["through"] == FIRST_ANCHOR
+        assert d["years"]["2026"]["complete"] is False and d["years"]["2026"]["through"] == load("anchor")["period"]
 
 
 # ------------------------------------------------------------------ брокерский календарь — только сверка

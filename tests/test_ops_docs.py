@@ -523,6 +523,12 @@ def _first_refusals() -> dict[str, date]:
     until = [date.fromisoformat(str(note["valid_until"])) for note in notes.values()]
     if until:
         out["explanations"] = min(until) + timedelta(days=1)
+    # нормативы якоря стоят оценкой (слот фактов с пометкой estimated): срок замены фактом формы 0409805 на дату якоря
+    capital = json.loads((ROOT / "data" / "facts" / "capital.json").read_text(encoding="utf-8"))
+    if any(isinstance(capital.get(s), dict) and capital[s].get("estimated") is True for s in ("n20_0", "n1_1_bank")):
+        forms = [e for e in events if e.get("kind") == "form805" and str(e.get("covers") or "") == anchor]
+        if forms:
+            out["form"] = start(forms[0]) + timedelta(days=int(days["capital_form"]) + 1)
     return out
 
 
@@ -534,12 +540,17 @@ def test_the_manual_dates_the_nearest_build_refusals():
     text = (ROOT / "docs" / ("MANUAL" + ".md")).read_text(encoding="utf-8")
     terms = text.split("### 10.9.", 1)[1].split("\n---", 1)[0]
     block = terms.split("**Календарь ближайших отказов сборки**", 1)[1].split("**Проверка на любую дату**", 1)[0]
-    rows = {m.group(1): line for line in block.splitlines() if (m := re.match(r"\| (\d{2}\.\d{2}\.\d{4}) \| ", line))}
+    lines = [(m.group(1), line) for line in block.splitlines() if (m := re.match(r"\| (\d{2}\.\d{2}\.\d{4}) \| ", line))]
     first = _first_refusals()
-    assert set(first) == {"worlds", "ifrs", "explanations"}, first
+    assert {"worlds", "ifrs", "explanations"} <= set(first) <= {"worlds", "ifrs", "explanations", "form"}, first
     day = {name: value.strftime("%d.%m.%Y") for name, value in first.items()}
-    assert list(rows) == [d.strftime("%d.%m.%Y") for d in sorted(first.values())], (list(rows), day)
-    worlds, notes, report = rows[day["worlds"]], rows[day["explanations"]], rows[day["ifrs"]]
+    assert [d for d, _ in lines] == [d.strftime("%d.%m.%Y") for d in sorted(first.values())], ([d for d, _ in lines], day)
+    mark = {"worlds": "`worlds_after_cbr`", "ifrs": "`ifrs_fact`", "explanations": "`valid_until`", "form": "`capital_form`"}
+    rows = {}
+    for name in first:                         # срок — строка своей даты со своим ключом книги (две строки могут делить день)
+        [line] = [line for d, line in lines if d == day[name] and mark[name] in line]
+        rows[name] = line
+    worlds, notes, report = rows["worlds"], rows["explanations"], rows["ifrs"]
     for word in ("`worlds_after_cbr`", "раздел 10.5", "`manual_input_overdue`", "data/assumptions/gate_explanations.yaml",
                  "не дальше"):
         assert word in worlds, word

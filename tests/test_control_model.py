@@ -3196,9 +3196,12 @@ def _book_with_observations(book: dict, spec: dict) -> dict:
     return b2
 
 
+# Сценарии, у которых вне допуска только строки известных классов (книга 1.0): у остальных строк вне допуска нет — отметка снята
+OBS_KNOWN_ROWS = ("нау-каст-cor", "закрытый-квартал", "окно-1")
+
+
 @pytest.mark.ci_only
-@known_rows_xfail
-@pytest.mark.parametrize("name", list(OBS_SCENARIOS))
+@pytest.mark.parametrize("name", [pytest.param(n, marks=known_rows_xfail) if n in OBS_KNOWN_ROWS else n for n in OBS_SCENARIOS])
 def test_control_matches_core_with_observations(inputs, name):
     """Ветка A-P2u, которую книга держит пустой: апостериорные вероятности режимов (окно, пол, замороженные
     μ наблюдения квартала якоря) и точка."""
@@ -3278,9 +3281,15 @@ def test_control_matches_core_bridge_before_ex_date(inputs):
     book, facts = inputs
     hist = facts["dividends"]["history"][-1]
     dates = ("record_date", "last_buy_date", "ex_date", "pay_date")
-    if all(hist.get(k) for k in dates):
+    if all(hist.get(k) for k in dates) and str(hist["ex_date"]) > str(book["meta"]["facts_date"]):
         rec = {"year": hist["year"], "dps": cm._c_nodeval(hist["dps_ordinary"]), "status": "declared",
                **{k: hist[k] for k in dates}, "sources": ["сверка М§17"]}
+    elif all(hist.get(k) for k in dates):
+        # решение последнего года истории отсечено до якоря (якорь 3К2026: дивиденд за 2025 год выплачен в августе) — мост
+        # на решении года якоря тем же DPS: даты — от конца квартала собрания года после года якоря
+        year = int(str(book["meta"]["anchor_period"])[:4])
+        agm_end = cm.c_q_last_day(year + 1, int(book["dividends"]["calendar"]["agm_quarter"]))
+        rec = _declared(year, cm._c_nodeval(hist["dps_ordinary"]), agm_end)
     else:
         # строка истории без дат записи: даты — от конца квартала собрания года после года прибыли
         year = int(cm._c_nodeval(hist["year"]))

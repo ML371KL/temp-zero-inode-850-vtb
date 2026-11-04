@@ -991,8 +991,21 @@ def test_the_real_book_reanchors_on_its_expected_report(tmp_path):
 
     Точка кандидата на ожидаемом отчёте (строка «выпуклость») — в доле шага печати, пока рост в закрываемом
     квартале не урезан ни в одной клетке; иначе отчёт несёт среднее остатков клеток с разной долей прироста, и
-    граница — шаг печати (docs/REANCHOR.md §5)."""
+    граница — шаг печати (docs/REANCHOR.md §5).
+
+    Закрываемый квартал — квартал решения о взносе акционеров, и взнос в нём стоит хоть в одной клетке (книга 1.0: якорь 3К2026,
+    закрывается 4К2026): инструмент на книге как есть отказывает с причиной §3.16 (ожидаемый отчёт не несёт капитал и акции по
+    пути клетки) — это и держится; механика и остальное — на той же книге без взноса (форма теста цепочки 3К → 4К)."""
     book, facts = real_book_or_skip()
+    rec = book.opt("capital.recapitalization")
+    first = str(book.get("meta.first_period"))
+    plain = False
+    if rec and rec.get("enabled") and int(first[-1]) == int(rec["decision_quarter"]):
+        try:
+            scene_of(book, facts)
+        except R.ReportError as exc:
+            assert "квартал решения о взносе" in str(exc), exc
+            book, plain = book.with_overrides({"capital.recapitalization.enabled": False}), True
     s = scene_of(book, facts)
     step = float(book.get("valuation.headline.print_step"))
     mech = R.cell_mechanics(book, facts, s.run_plus, s.obs, s.v)
@@ -1037,6 +1050,12 @@ def test_the_real_book_reanchors_on_its_expected_report(tmp_path):
         assert gate is None or str(gate["world"]) != lv["world"] or ("nim_stationary" in checks["gates"]) == fired_before
     template = R.TEMPLATE
     if template.exists():
-        patched = R.patch_template(template.read_text(encoding="utf-8"), s.cand)
+        text = template.read_text(encoding="utf-8")
+        if plain:                                     # шаблон той же книги без взноса (первое «enabled» блока докапитализации)
+            head, sep, tail = text.partition("\n  recapitalization:")
+            block, mark, rest = tail.partition("\n    enabled: true")
+            assert sep and mark, "блок докапитализации шаблона"
+            text = head + sep + block + "\n    enabled: false" + rest
+        patched = R.patch_template(text, s.cand)
         assert patched.count("#") >= template.read_text(encoding="utf-8").count("#") - 5
         assert "#{{WORLDS}}" in patched and "#{{WORLDS_BANK}}" in patched

@@ -4,8 +4,10 @@
 акционеров — прибыль движка, вся прибыль группы — база дивиденда и ROE банка, прибыль обыкновенных акционеров);
 капитал банковской группы по форме 0409805; акции и корпоративные события (консолидация 5000:1, конвертация
 привилегированных акций, зарегистрированный выпуск по 87 ₽); мосты упр. ↔ движок; гайденс; календарь; аналоги.
-Числа якоря 30.06.2026 названы по документам (Databook 6М2026, отчётность за 6М2026, расшифровка звонка 28.07.2026,
-форма 0409805) и проверяются только на этом якоре; остальное — тождества, не зависящие от квартала.
+Числа якоря названы по документам и проверяются только на своём якоре: 30.06.2026 — Databook 6М2026, отчётность за
+6М2026, расшифровка звонка 28.07.2026, форма 0409805; 30.09.2026 — файл финансовых данных эмитента 9М2026, отчётность
+за 9М2026 (прим. 28 — нормативы группы, напечатанные эмитентом: формы 0409805 на якорь ещё нет), презентация 9М2026.
+Остальное — тождества, не зависящие от квартала.
 """
 
 from __future__ import annotations
@@ -26,6 +28,8 @@ pytestmark = pytest.mark.tact          # быстрые (≈1 с): тождес�
 ROOT = Path(__file__).resolve().parents[1]
 FACTS = ROOT / "data" / "facts"
 FIRST_ANCHOR = "2026Q2"                # якорь первой книги ВТБ: числа документов проверяются только на нём
+THIRD_QUARTER_ANCHOR = "2026Q3"        # первый перенос якоря (отчёт за 9М2026): свои числа документов
+RATES_CARRY_FROM = "2026Q3"            # с этого якоря ставки книг активов несут остаток ЧПД (SCHEMA.md §3, REANCHOR §3.6)
 
 
 def load(name: str) -> dict:
@@ -55,6 +59,16 @@ def on_first_anchor() -> bool:
     return anchor_period() == FIRST_ANCHOR
 
 
+def on_third_quarter_anchor() -> bool:
+    return anchor_period() == THIRD_QUARTER_ANCHOR
+
+
+def anchor_form_pending() -> bool:
+    """Формы 0409805 на дату якоря ещё нет: календарь несёт её выход за квартал якоря неподтверждённым событием."""
+    return any(e["kind"] == "form805" and e["covers"] == anchor_period() and e["confirmed"] is False
+               for e in load("calendar")["events"])
+
+
 ROUND = 0.15                           # строки отчётности напечатаны с одним знаком: сумма нескольких строк — до 0,15
 
 
@@ -73,6 +87,10 @@ def test_balance_identity_by_books():
         assert v(b["total_assets"]) == 38506.8 and v(b["total_liabilities"]) == 35685.5
         assert abs(sum(books[x] for x in LOAN_BOOKS) - 25083.5) < 1e-6
         assert abs(v(b["other_assets"]) - 7165.0) < 1e-6 and abs(v(b["other_liabilities"]) - 2579.2) < 1e-6
+    if on_third_quarter_anchor():                  # файл эмитента 9М2026, «3.Баланс »: итог активов B32, обязательств B46
+        assert v(b["total_assets"]) == 39095.9 and v(b["total_liabilities"]) == 36082.5
+        assert abs(sum(books[x] for x in LOAN_BOOKS) - 25506.0) < 1e-6
+        assert abs(v(b["other_assets"]) - 7916.6) < 1e-6 and abs(v(b["other_liabilities"]) - 2167.5) < 1e-6
 
 
 def test_other_assets_parts_and_the_fixed_part():
@@ -131,6 +149,9 @@ def test_equity_components():
     if on_first_anchor():                          # Databook «3.Баланс »: B55, B51, B56, B57
         assert (v(e["shareholders"]), v(e["at1"]), v(e["nci"]), v(e["total"]), v(e["bv_common"])) == \
             (2770.2, 368.0, 51.1, 2821.3, 2402.2)
+    if on_third_quarter_anchor():                  # файл эмитента 9М2026 «3.Баланс »: B55, B51, B56, B57
+        assert (v(e["shareholders"]), v(e["at1"]), v(e["nci"]), v(e["total"]), v(e["bv_common"])) == \
+            (2960.7, 377.0, 52.7, 3013.4, 2583.7)
 
 
 def test_dividends_payable_is_the_declared_annual_dividend():
@@ -152,6 +173,8 @@ def test_dividends_payable_is_the_declared_annual_dividend():
     if on_first_anchor():
         assert v(n) == 125.5 and b["dividends_payable_year"] == 2025 and periods == ["2025Q4"]
         assert abs(9.71 * v(load("shares")["issued_total"]) / 1000 - 125.529) < 0.001     # решение ГОСА 30.06.2026
+    if on_third_quarter_anchor():                  # дивиденд за 2025 год выплачен 03.08.2026 — до якоря; решений в 3К2026 нет
+        assert v(n) == 0.0 and periods == [] and not open_rows
 
 
 def test_prev_year_end_loans_by_segment():
@@ -160,7 +183,7 @@ def test_prev_year_end_loans_by_segment():
     year_end = f"{int(anchor_period()[:4]) - 1}Q4"
     assert p["as_of"] == b["history"][year_end]["date"]
     assert abs(v(p["loans_corporate"]) + v(p["loans_retail"]) - v(b["history"][year_end]["loans"])) < 1e-6
-    if on_first_anchor():
+    if p["as_of"] == "2025-12-31":                 # якоря 2026 года: конец 2025 года по Databook 6М2026
         assert abs(v(p["loans_corporate"]) - 17130.8) < 1e-6 and abs(v(p["loans_retail"]) - 7145.0) < 1e-6
         # в определении банка (с обратным репо 70,4 и 147,4) — 17 201,2 и 7 292,4: валовые кредиты отчёта на 31.12.2025
         assert abs(17201.2 + 7292.4 - v(b["history"][year_end]["loans_gross_reported"])) < 1e-6
@@ -205,26 +228,36 @@ def test_nii_books_close_equals_balance():
 
 
 def test_nii_books_rates_and_total():
+    """Ставка книги — проценты книги к среднему остатку (act/365). С якоря `RATES_CARRY_FROM` ставки книг активов несут
+    и остаток ЧПД вне книг (`rates_carry_residual: true`, REANCHOR §3.6): проценты книги актива × (1 + остаток /
+    проценты активов); тогда ставки книг сами дают ЧПД без остатка. Ставки пассивов — без поправки на обеих ветвях."""
     nb = load("nii_books")
     days = v(nb["days"])
-    inc = exp = iea = 0.0
+    carry = nb["rates_carry_residual"]
+    assert isinstance(carry, bool) and carry is (anchor_period() >= RATES_CARRY_FROM), "правило ставок якоря — по параметру"
+    inc = sum(v(nb["books"][x]["interest_q"]) for x in ASSET_BOOKS)
+    scale = 1 + v(nb["other_interest_net_q"]) / inc if carry else 1.0
+    exp = iea = carried = 0.0
     for name in BOOKS:
         row = nb["books"][name]
         assert v(row["interest_q"]) > 0, f"{name}: проценты — величиной"
-        # ставка = проценты / средний остаток × 365 / дни — с точностью записи процентов (0,01 млрд ₽)
+        k = scale if name in ASSET_BOOKS else 1.0
+        # ставка = проценты (× доля остатка у книг активов) / средний остаток × 365 / дни — с точностью записи
+        # процентов (0,01 млрд ₽)
         tol = 0.005 / v(row["balance_avg"]) * 365 / days + 2e-6
-        assert abs(v(row["rate_anchor"]) - v(row["interest_q"]) / v(row["balance_avg"]) * 365 / days) < tol, name
+        assert abs(v(row["rate_anchor"]) - v(row["interest_q"]) * k / v(row["balance_avg"]) * 365 / days) < tol, name
         if name in ASSET_BOOKS:
-            inc += v(row["interest_q"])
             iea += v(row["balance_avg"])
+            carried += v(row["rate_anchor"]) * v(row["balance_avg"]) * days / 365
         else:
             exp += v(row["interest_q"])
     assert abs(inc - v(nb["interest_assets_q"])) < 1e-6 and abs(exp - v(nb["interest_liabilities_q"])) < 1e-6
     total = inc - exp - v(nb["dia_q"]) + v(nb["other_interest_net_q"])
     assert abs(total - v(nb["nii_q"])) <= ROUND, f"проценты книг {total:.3f} ≠ ЧПД {v(nb['nii_q'])}"
+    by_rates = carried - exp - v(nb["dia_q"]) + (0.0 if carry else v(nb["other_interest_net_q"]))
+    assert abs(by_rates - v(nb["nii_q"])) <= ROUND, f"ставки книг дают ЧПД {by_rates:.3f} ≠ {v(nb['nii_q'])}"
     assert abs(v(nb["iea_avg"]) - iea) < 1e-6
     assert abs(v(nb["nim_eng_q"]) - v(nb["nii_q"]) * 365 / days / iea) < 2e-6
-    assert nb["rates_carry_residual"] is False
     q = load("pnl_quarterly")["quarters"][anchor_period()]
     assert v(nb["nii_q"]) == v(q["nii"]) and v(nb["dia_q"]) == v(q["dia"])
     b = load("balance")["books"]
@@ -233,6 +266,10 @@ def test_nii_books_rates_and_total():
         assert (round(inc, 1), round(exp, 1), v(nb["dia_q"]), v(nb["other_interest_net_q"]), v(nb["nii_q"])) == \
             (1115.7, 883.7, 19.4, -3.8, 208.8), "1 115,7 − 883,7 − 19,4 − 3,8 = 208,8"
         assert abs(v(nb["nim_eng_q"]) - 0.025889) < 6e-7 and v(nb["current_share_anchor"]) == 0.26
+    if on_third_quarter_anchor():                  # ЧПД 219,8 и страхование вкладов 19,7 — файл эмитента 9М2026 «2.P&L» B12, B11
+        assert (round(inc, 1), round(exp, 1), v(nb["dia_q"]), v(nb["other_interest_net_q"]), v(nb["nii_q"])) == \
+            (1111.2, 866.3, 19.7, -5.4, 219.8), "1 111,2 − 866,3 − 19,7 − 5,4 = 219,8"
+        assert abs(v(nb["nim_eng_q"]) - 0.026715) < 6e-7 and round(v(nb["current_share_anchor"]), 3) == 0.27
 
 
 def test_key_average_of_the_anchor_quarter():
@@ -241,11 +278,15 @@ def test_key_average_of_the_anchor_quarter():
     assert "sha256" in nb["key_avg_anchor_q"]["src"]
     if on_first_anchor():                          # средняя ключевая 2К2026 по календарным дням — 14,6181 %
         assert abs(v(nb["key_avg_anchor_q"]) - 0.146181) < 1e-6
+    if on_third_quarter_anchor():                  # средняя ключевая 3К2026 по календарным дням — 14,0707 %
+        assert abs(v(nb["key_avg_anchor_q"]) - 0.140707) < 1e-6
 
 
 # ------------------------------------------------------------------ ОПУ: отчётный базис и три прибыли
 
 LINES = ("nii", "llp_debt_fa", "fees_net", "insurance_net", "noncore_net", "opex", "misc_net")
+# строки прибыли квартала, которые пометка `pnl.estimated` делает оценкой (сборщик и перенос якоря — одним списком)
+PROFIT_LINES = ("ni_shareholders", "ni", "ni_nci", "pbt", "tax", "misc_net", "noncore_net")
 
 
 def test_pnl_identities():
@@ -290,7 +331,18 @@ def test_three_profits_on_the_anchor():
     a = q[anchor_period()]
     m = load("mgmt_quarterly")["quarters"][anchor_period()]
     assert v(a["ni_shareholders"]) == v(m["np_shareholders"]) and v(a["ni"]) == v(m["np"])
-    assert "P&L!" in a["ni_shareholders"]["src"] and a["ni_shareholders"].get("estimated") is not True
+    assert "P&L!" in a["ni_shareholders"]["src"], "прибыль движка — строка файла эмитента"
+    # прибыль квартала, напечатанная до файла с точными рядами, несёт пометку оценки (`pnl.estimated`, REANCHOR §1.8):
+    # пометка одна на все строки прибыли квартала и названа словами; без неё — ни на одной строке
+    flags = {k: a[k].get("estimated") is True for k in PROFIT_LINES}
+    if flags["ni_shareholders"]:
+        assert all(flags.values()), f"пометка оценки — не на всех строках прибыли: {flags}"
+        assert "напечатанное значение" in a["ni_shareholders"]["calc"]
+    else:
+        assert not any(flags.values()), f"пометка оценки без пометки прибыли акционеров: {flags}"
+    for p, row in q.items():
+        if p != anchor_period():
+            assert not [k for k in PROFIT_LINES if row[k].get("estimated") is True], f"{p}: оценка прибыли — только на якоре"
     if on_first_anchor():                          # Databook «2.P&L»: B46, B49, B50, B52, B53; отчёт за 6М2026, с. 20
         assert (v(a["ni_shareholders"]), v(a["ni"]), v(a["ni_nci"]), v(a["tax"])) == (88.1, 92.6, 4.5, -18.4)
         assert (v(a["reported"]["pbt"]), v(a["reported"]["np_resale_subs"])) == (111.3, -0.3) and abs(v(a["pbt"]) - 111.0) < 1e-9
@@ -299,6 +351,14 @@ def test_three_profits_on_the_anchor():
         assert abs(sum(v(q[f"2025Q{k}"]["ni"]) for k in range(1, 5)) - 502.1) <= 0.001
         assert abs(sum(v(q[p]["ni_shareholders"]) for p in ("2026Q1", "2026Q2")) - 216.1) <= 0.001
         assert abs(sum(v(q[p]["ni"]) for p in ("2026Q1", "2026Q2")) - 225.2) <= 0.001
+    if on_third_quarter_anchor():                  # файл эмитента 9М2026 «2.P&L»: B45–B49, B51, B52; отчёт за 9М2026, с. 8
+        assert (v(a["ni_shareholders"]), v(a["ni"]), v(a["ni_nci"]), v(a["tax"])) == (177.0, 182.3, 5.3, -48.9)
+        assert (v(a["reported"]["pbt"]), v(a["reported"]["np_resale_subs"])) == (231.9, -0.7) and abs(v(a["pbt"]) - 231.2) < 1e-9
+        assert v(a["at1_coupon"]) == 5.4 and abs(v(a["ni_ordinary"]) - 171.6) < 1e-9
+        assert abs(sum(v(q[f"2025Q{k}"]["ni_shareholders"]) for k in range(1, 5)) - 483.7) <= 0.001
+        assert abs(sum(v(q[f"2025Q{k}"]["ni"]) for k in range(1, 5)) - 502.1) <= 0.001
+        assert abs(sum(v(q[f"2026Q{k}"]["ni_shareholders"]) for k in range(1, 4)) - 393.1) <= 0.001
+        assert abs(sum(v(q[f"2026Q{k}"]["ni"]) for k in range(1, 4)) - 407.5) <= 0.001
 
 
 def test_profit_of_the_dividend_years():
@@ -317,14 +377,20 @@ def test_profit_of_the_dividend_years():
     if on_first_anchor():
         got = {y: (v(r["ni_shareholders"]), v(r["ni_group"])) for y, r in d["years"].items()}
         assert got == {"2024": (535.3, 551.4), "2025": (483.7, 502.1), "2026": (216.1, 225.2)}
+    if on_third_quarter_anchor():
+        got = {y: (v(r["ni_shareholders"]), v(r["ni_group"])) for y, r in d["years"].items()}
+        assert got == {"2024": (535.3, 551.4), "2025": (483.7, 502.1), "2026": (393.1, 407.5)}
 
 
 # ------------------------------------------------------------------ капитал
 
 def test_capital_slots_of_the_banking_group():
     """Слоты ядра — капитал банковской группы по форме 0409805: базовый (CET1 ядра) + добавочный + дополнительный (T2
-    ядра) = собственные средства; три знаменателя раскрыты, нормативы воспроизводятся делением; Н20.0 якоря — до
-    вычета дивиденда, объявленного до якоря и выплаченного после."""
+    ядра) = собственные средства; три знаменателя раскрыты, нормативы воспроизводятся делением (с точностью записи
+    норматива: форма — 0,01 п.п.; напечатанный эмитентом до выхода формы — 0,1 п.п., сказано в calc); Н20.0 якоря —
+    до вычета дивиденда, объявленного до якоря и выплаченного после. Ряд формы кончается якорем, а пока формы на якорь
+    нет (её выход — неподтверждённое событие календаря), — прошлым кварталом, и базовый капитал якоря — уровень
+    последней формы с пометкой оценки (REANCHOR §3.10)."""
     c, b = load("capital"), load("balance")
     g = c["group_capital"]
     assert abs(v(g["base"]) + v(g["additional"]) + v(g["supplementary"]) - v(g["total"])) <= 0.002
@@ -332,9 +398,15 @@ def test_capital_slots_of_the_banking_group():
     assert v(c["bank_base_capital"]) == v(g["base"]) == v(c["basel"]["cet1"]) and v(c["t2_recognized"]) == v(g["supplementary"])
     bs = c["basel"]
     assert v(bs["rwa"]) == v(bs["rwa_n20_0"])
-    assert abs(v(g["total"]) / v(bs["rwa_n20_0"]) - v(c["n20_0"]["value"])) < 5e-5
-    assert abs(v(g["base"]) / v(bs["rwa_n20_1"]) - v(c["n1_1_bank"]["value"])) < 5e-5
-    assert abs(v(g["tier1"]) / v(bs["rwa_n20_2"]) - v(c["n20_2"])) < 5e-5
+
+    def tol(node: dict) -> float:
+        printed = "округлено до 0,1 п.п." in (node.get("calc") or "")
+        assert not printed or anchor_form_pending(), "норматив, напечатанный эмитентом, — только пока формы на якорь нет"
+        return 0.0005 + 1e-9 if printed else 5e-5
+
+    assert abs(v(g["total"]) / v(bs["rwa_n20_0"]) - v(c["n20_0"]["value"])) < tol(c["n20_0"]["value"])
+    assert abs(v(g["base"]) / v(bs["rwa_n20_1"]) - v(c["n1_1_bank"]["value"])) < tol(c["n1_1_bank"]["value"])
+    assert abs(v(g["tier1"]) / v(bs["rwa_n20_2"]) - v(c["n20_2"])) < tol(c["n20_2"])
     assert abs(v(bs["total_ratio"]) - v(g["total"]) / v(bs["rwa"])) < 1e-6
     assert abs(v(c["at1"]["regulatory_amount"]) - v(g["additional"])) < 1e-9
     assert v(c["at1"]["amount"]) == v(b["equity"]["at1"]) and v(c["at1"]["coupon_quarter"]) == 4
@@ -343,7 +415,12 @@ def test_capital_slots_of_the_banking_group():
     assert c["n20_0"]["pre_dividend"] is (v(b["dividends_payable"]) > 0) and has_text(c["n20_0"]["pre_dividend_note"])
     assert v(c["n1_1_bank"]["value"]) < v(c["n20_2"]) < v(c["n20_0"]["value"])
     last = c["history"][-1]
-    assert last["period"] == anchor_period() and v(last["n20_0"]) == v(c["n20_0"]["value"]) and v(last["n20_1"]) == v(c["n1_1_bank"]["value"])
+    if anchor_form_pending():
+        assert last["period"] == q_prev(anchor_period()), "ряд формы — до последней вышедшей формы"
+        assert v(c["bank_base_capital"]) == v(last["capital_base"]) and c["bank_base_capital"].get("estimated") is True
+    else:
+        assert last["period"] == anchor_period() and v(last["n20_0"]) == v(c["n20_0"]["value"]) and \
+            v(last["n20_1"]) == v(c["n1_1_bank"]["value"])
     assert [h["period"] for h in c["history"]] == sorted(h["period"] for h in c["history"])
     for h in c["history"]:
         assert abs(v(h["capital_base"]) + v(h["capital_additional"]) + v(h["capital_supplementary"]) - v(h["capital_total"])) <= 0.002, h["period"]
@@ -355,6 +432,11 @@ def test_capital_slots_of_the_banking_group():
         assert round(v(prev["capital_total"]), 1) == 2495.4 and round(v(prev["capital_supplementary"]), 1) == 550.9
         assert round(v(prev["capital_base"]) + v(prev["capital_additional"]), 1) == 1944.5
         assert c["n20_0"]["estimated"] is False and c["n1_1_bank"]["estimated"] is False
+    if on_third_quarter_anchor():                  # отчётность за 9М2026, прим. 28 (с. 44): напечатано эмитентом, формы ещё нет
+        assert (v(c["n20_0"]["value"]), v(c["n1_1_bank"]["value"]), v(c["n20_2"])) == (0.105, 0.071, 0.086)
+        assert (v(g["total"]), v(g["tier1"]), v(g["supplementary"])) == (2657.2, 2164.1, 493.1)
+        assert (v(bs["rwa_n20_0"]), v(bs["rwa_n20_1"]), v(bs["rwa_n20_2"])) == (25251.2, 25314.9, 25199.1)
+        assert c["n20_0"]["estimated"] is False and c["n1_1_bank"]["estimated"] is False and c["n20_0"]["pre_dividend"] is False
 
 
 def test_perpetual_instruments_and_their_coupon():
@@ -373,6 +455,8 @@ def test_perpetual_instruments_and_their_coupon():
     assert abs(sum(v(a["by_quarter"][x]) for x in ytd) - v(a["coupon_paid_ytd"])) < 1e-6
     if on_first_anchor():                          # отчётность за 6М2026: с. 20 (18,6 за 6М) и с. 31 (рублёвые 263,0)
         assert (v(a["amount"]), v(a["by_currency"]["rub"]), v(a["coupon_paid_ytd"]), v(a["coupon_ltm"])) == (368.0, 263.0, 18.6, 37.1)
+    if on_third_quarter_anchor():                  # отчётность за 9М2026: с. 8 (24,0 за 9М) и с. 33 (рублёвые 262,9)
+        assert (v(a["amount"]), v(a["by_currency"]["rub"]), v(a["coupon_paid_ytd"]), v(a["coupon_ltm"])) == (377.0, 262.9, 24.0, 35.8)
 
 
 def test_curve_and_the_revaluation_reserve():
@@ -398,13 +482,17 @@ def test_shares_arithmetic():
     if on_first_anchor():                          # отчётность за 6М2026, прим. 23 (с. 31): 12 927 766 417 и 79 783 634
         assert (v(s["issued_total"]), v(s["treasury_ordinary"]), v(s["outstanding_total"])) == (12927.766417, 79.783634, 12847.982783)
         assert v(s["par_value"]) == 50.0
+    if on_third_quarter_anchor():                  # отчётность за 9М2026, прим. 22 (с. 32): 12 927 766 417 и 79 783 636
+        assert (v(s["issued_total"]), v(s["treasury_ordinary"]), v(s["outstanding_total"])) == (12927.766417, 79.783636, 12847.982781)
+        assert v(s["par_value"]) == 50.0
 
 
 def test_corporate_actions_carry_the_consolidation_the_conversion_and_the_registered_issue():
     """Корпоративные события по порядку: выпуски увеличивают число акций и идут цепочкой (до = после прежнего);
     консолидация 5000:1 — одна, коэффициент 0,0002 узлом; конвертация привилегированных акций — последний выпуск, он
-    даёт нынешнее число акций; зарегистрированный и не размещённый выпуск — событие, число акций не меняет
-    (подписка до 6 292 651 866 акций по 87 ₽ — `pending_issue`)."""
+    даёт нынешнее число акций; зарегистрированный и не размещённый выпуск — событие после последнего выпуска, число
+    акций не меняет (подписка до 6 292 651 866 акций по 87 ₽ — `pending_issue`; зарегистрирована 17.07.2026 — после
+    якоря 2К2026 и до якоря 3К2026, на обоих не размещена)."""
     s = load("shares")
     acts = s["corporate_actions"]
     assert [a["date"] for a in acts] == sorted(a["date"] for a in acts)
@@ -423,12 +511,12 @@ def test_corporate_actions_carry_the_consolidation_the_conversion_and_the_regist
     assert v(issues[-1]["shares_after"]) == v(s["issued_total"]), "последний выпуск даёт нынешнее число акций"
     conv = issues[-1]
     assert conv["date"] == "2026-04-29" and v(conv["amount"]) == 0.0 and "привилегированных" in conv["title"]
-    events = [a for a in acts if a["kind"] == "event" and a["date"] > load("anchor")["as_of"]]
+    events = [a for a in acts if a["kind"] == "event" and a["date"] > conv["date"]]
     pend = s["pending_issue"]
     assert len(events) == 1 and v(events[0]["shares_after"]) == v(events[0]["shares_before"]) == v(s["issued_total"])
     assert v(events[0]["price"]) == v(pend["price"]) and events[0]["date"] == pend["registered"]
     assert abs(v(pend["max_shares"]) * v(pend["price"]) / 1000 - v(pend["max_amount"])) < 0.01
-    if on_first_anchor():                          # решение о конвертации: 6 307 348 134 новых обыкновенных акций
+    if anchor_period() in (FIRST_ANCHOR, THIRD_QUARTER_ANCHOR):   # решение о конвертации: 6 307 348 134 новых акций
         assert abs(v(conv["shares_after"]) - v(conv["shares_before"]) - 6307.348134) < 1e-6
         assert (v(pend["max_shares"]), v(pend["price"])) == (6292.651866, 87.0) and pend["registered"] == "2026-07-17"
 
@@ -459,6 +547,9 @@ def test_bridge_values_are_window_statistics():
     if on_first_anchor():
         assert (v(b["cor"]["value"]), v(b["nim"]["value"]), v(b["cir"]["value"])) == (-0.00073, 0.0001, 0.004873)
         assert v(b["cor"]["n"]) == v(b["cir"]["n"]) == 6 and b["cor"]["window"] == ["2025Q1", "2026Q2"]
+    if on_third_quarter_anchor():                  # окно продлено кварталом якоря; C/I — медиана по окну
+        assert (v(b["cor"]["value"]), v(b["nim"]["value"]), v(b["cir"]["value"])) == (-0.000649, -0.000028, 0.002315)
+        assert v(b["cor"]["n"]) == v(b["cir"]["n"]) == 7 and b["cor"]["window"] == ["2025Q1", "2026Q3"] and v(b["nim"]["n"]) == 3
 
 
 def test_bridge_gate_reads_a_small_drift_on_the_anchor():
@@ -560,6 +651,13 @@ def test_guidance_items():
         hist = {h["key"]: h["value"] for h in g["history"]}
         assert (v(hist["net_profit"]), hist["net_profit"]["tol"]) == (625.0, 25.0), "прогноз 25.02.2026: 600–650"
         assert (v(hist["roe"]), hist["roe"]["tol"]) == (0.22, 0.01) and v(hist["key_rate_year_end"]) == 0.12
+    if on_third_quarter_anchor():                  # презентация 9М2026, слайд 14: прогноз 28.07.2026 подтверждён 30.10.2026
+        assert g["as_of"] == "2026-10-30"
+        got = {k: v(it[k]) for k in ("net_profit", "roe", "nim", "cor_max", "cir", "n20_0", "key_rate_year_end")}
+        assert got == {"net_profit": 600.0, "roe": 0.2, "nim": 0.03, "cor_max": 0.011, "cir": 0.4, "n20_0": 0.105,
+                       "key_rate_year_end": 0.135}
+        hist = {h["key"]: h["value"] for h in g["history"]}
+        assert (v(hist["net_profit"]), hist["net_profit"]["tol"]) == (625.0, 25.0), "прогноз 25.02.2026: 600–650"
 
 
 # ------------------------------------------------------------------ календарь
@@ -597,7 +695,8 @@ def test_calendar_events():
 def test_calendar_carries_the_events_the_book_waits_for():
     """Календарь на 12 месяцев вперёд: МСФО за каждый квартал, который закроется в горизонте; форма 0409805 за первый
     прогнозный квартал; заседания Банка России; рекомендация и собрание по дивиденду за год якоря (годовой календарь);
-    размещение зарегистрированного выпуска — сделка вне книги."""
+    размещение зарегистрированного выпуска — сделка вне книги. Отчёт за квартал якоря и раньше остаётся в календаре
+    прецедентом дня отчёта (REANCHOR §1.6): подтверждён, день, не позже даты календаря."""
     c = load("calendar")
     by_id = {e["id"]: e for e in c["events"]}
     kinds = {k: [e for e in c["events"] if e["kind"] == k] for k in KINDS}
@@ -606,8 +705,12 @@ def test_calendar_carries_the_events_the_book_waits_for():
     nxt = f"{y + 1}Q1" if k == 4 else f"{y}Q{k + 1}"
     closing = [e for e in kinds["ifrs"] if e["covers"] == nxt]
     assert len(closing) == 1, "МСФО, закрывающее первый прогнозный квартал"
-    covered = sorted(e["covers"] for e in kinds["ifrs"])
-    assert covered[0] == nxt and len(covered) >= 4 and len(set(covered)) == len(covered)
+    for e in kinds["ifrs"]:
+        if e["covers"] <= anchor_period():
+            assert e["confirmed"] is True and e["precision"] == "day" and e["date"] <= c["as_of"], f"{e['id']}: прецедент"
+    assert len({e["covers"] for e in kinds["ifrs"]}) == len(kinds["ifrs"])
+    covered = sorted(e["covers"] for e in kinds["ifrs"] if e["covers"] > anchor_period())
+    assert covered[0] == nxt and len(covered) >= 4
     assert [e for e in kinds["form805"] if e["covers"] == nxt], "форма 0409805 за первый прогнозный квартал"
     seed = load("dividends")["register_seed"]
     for r in seed:
@@ -627,6 +730,15 @@ def test_calendar_carries_the_events_the_book_waits_for():
         assert by_id["cbr-2026-10-23"]["kind"] == "cbr_forecast" and by_id["cbr-2026-12-18"]["kind"] == "cbr_rate"
         spo = by_id["spo-2026"]
         assert spo["kind"] == "deal" and spo["in_book"] is False and (spo["earliest"], spo["latest"]) == ("2026-10-20", "2026-11-30")
+        assert [e["date"] for e in kinds["regulation"] if e["date"] >= "2027-01-01"] == ["2027-01-01", "2027-04-01", "2028-01-01"]
+    if on_third_quarter_anchor():
+        ifrs = by_id["ifrs-2026Q3"]
+        assert ifrs["date"] == "2026-10-30" and ifrs["confirmed"] is True, "прецедент дня отчёта за 9 месяцев"
+        assert by_id["ifrs-2026Q4"]["estimated"] is True and by_id["ifrs-2026Q4"]["covers"] == "2026Q4"
+        assert by_id["form805-2026Q3"]["confirmed"] is False, "формы 0409805 на якорь ещё нет"
+        assert by_id["cbr-2026-12-18"]["kind"] == "cbr_rate"
+        spo = by_id["spo-2026"]     # 30.10.2026 размещение перенесено без новой даты: окно — до конца квартала книги
+        assert spo["kind"] == "deal" and spo["in_book"] is False and (spo["earliest"], spo["latest"]) == ("2026-11-05", "2026-12-31")
         assert [e["date"] for e in kinds["regulation"] if e["date"] >= "2027-01-01"] == ["2027-01-01", "2027-04-01", "2028-01-01"]
 
 

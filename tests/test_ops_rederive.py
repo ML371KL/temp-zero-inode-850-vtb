@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BOOK = ROOT / "data" / "assumptions"
 SHEET_DIR = BOOK / "evidence" / "path"
 TODAY = dt.date(2031, 2, 3)                      # дата пометки в тестах: в шаблоне её быть не может
-BOOK_VERSION = "0.9"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
+BOOK_VERSION = "1.0"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
 NIM_2027_EXPLAINED = 0.0255                       # книга 0.9: низ объяснённого отклонения строки 1(а) (решение ведущего 29.10.2026)
 TRACKED = ("assumptions_template.yaml", "assumptions.yaml", "assumptions.json", "evidence/path/out/derive_out.json",
            "evidence/path/out/derive_out.txt", "evidence/path/out/derive_start.json")
@@ -133,21 +133,30 @@ def test_the_sheet_holds_the_rules_of_the_anchor_year_on_the_facts_of_the_tree()
     sheet = spec.sheet
     from model.book import load_facts
     eng = types.SimpleNamespace(facts=load_facts(R.Tree().facts))
-    fact = sheet.fact_quarter(eng, sheet.NEAR_FACT_PERIOD)
-    months = [m for m in eng.facts.file("mgmt_quarterly")["monthly"] if m["month"] in fact["months"]]
-    assert len(months) == 2 and fact["scale"] == 1.5
-    assert fact["nii"] == pytest.approx(1.5 * sum(m["nii_m"]["v"] for m in months))
-    assert fact["nim"] == pytest.approx(sum(m["nim_m"]["v"] for m in months) / 2)
-    goals = sheet.opex_goals(eng)
     pnl = eng.facts.file("pnl_quarterly")["quarters"]
-    first = [abs(pnl[f"2026Q{n}"]["opex"]["v"]) for n in (1, 2)]
-    assert goals["q3"] == pytest.approx(fact["opex"]) and goals["mean_q1_q3"] == pytest.approx((sum(first) + fact["opex"]) / 3)
+    goals = sheet.opex_goals(eng)
+    if sheet.NEAR_FACT_PERIOD is None:
+        # якорь 3К2026 (книга 1.0, план перевывода 04.11.2026): месячных фактов первого прогнозного квартала нет — квартала с
+        # месячными фактами нет, лист его не судит; цель расходов 4К — среднее трёх отчётных кварталов года × сезонное отношение
+        with pytest.raises(RuntimeError, match="меньше двух месяцев"):
+            sheet.fact_quarter(eng, sheet.NEAR_D_QUARTER)
+        first = [abs(pnl[f"2026Q{n}"]["opex"]["v"]) for n in (1, 2, 3)]
+        assert goals["q1_q3"] == first and goals["q3"] == 147.6 and goals["mean_q1_q3"] == pytest.approx(sum(first) / 3)
+    else:
+        fact = sheet.fact_quarter(eng, sheet.NEAR_FACT_PERIOD)
+        months = [m for m in eng.facts.file("mgmt_quarterly")["monthly"] if m["month"] in fact["months"]]
+        assert len(months) == 2 and fact["scale"] == 1.5
+        assert fact["nii"] == pytest.approx(1.5 * sum(m["nii_m"]["v"] for m in months))
+        assert fact["nim"] == pytest.approx(sum(m["nim_m"]["v"] for m in months) / 2)
+        first = [abs(pnl[f"2026Q{n}"]["opex"]["v"]) for n in (1, 2)]
+        assert goals["q3"] == pytest.approx(fact["opex"]) and goals["mean_q1_q3"] == pytest.approx((sum(first) + fact["opex"]) / 3)
     assert goals["q4"] == pytest.approx(goals["mean_q1_q3"] * sheet.OPEX_Q4_RATIO)
     assert sheet.OPEX_Q4_AXIS[0] < sheet.OPEX_Q4_RATIO < sheet.OPEX_Q4_AXIS[1] and sheet.OPEX_Q4_WHOLE_SERIES < sheet.OPEX_Q4_AXIS[0]
     # ближний сдвиг по MODEL §3.2 (решение № 5, п. 3.5): в 1-м квартале года σ0 — d и встречная σ0, далее линейный сход к 2028 году
     sig = {"2027Q1": 0.002, "2027Q2": 0.0021, "2027Q3": 0.0022, "2027Q4": 0.0023}
     traj = sheet.near_traj(-0.001, sig)
-    assert traj["2026Q3"] == traj["2026Q4"] == -0.001 and traj["2027Q1"] == pytest.approx(-0.003)
+    assert traj["2026Q4"] == -0.001 and traj["2027Q1"] == pytest.approx(-0.003)
+    assert (traj.get(sheet.NEAR_FACT_PERIOD) == -0.001) if sheet.NEAR_FACT_PERIOD else "2026Q3" not in traj
     assert [traj[f"2027Q{n}"] for n in (2, 3, 4)] == pytest.approx([0.75 * (-0.001 - 0.0021), 0.5 * (-0.001 - 0.0022), 0.25 * (-0.001 - 0.0023)])
     assert traj["2027"] == pytest.approx(sum(traj[f"2027Q{n}"] for n in (1, 2, 3, 4)) / 4) and (traj["LT"], traj["LT_from"]) == (0.0, 2028)
     old = sheet.near_traj(-0.001, sig, fade=sheet.NEAR_OLD_FADE)              # прежняя форма (вариант): 0,8d … 0,2d, встречной σ0 нет
@@ -167,26 +176,31 @@ def test_the_sheet_holds_the_rules_of_the_anchor_year_on_the_facts_of_the_tree()
     tl = make_context(load_book(R.Tree().book_yaml, facts=facts), facts).timeline
     rwa0, eta = 24916.3, 0.6065
     f, g = sheet.deduction_fg(tl, eta=eta, rwa0=rwa0, scenario=0.003)
-    q26, q28, q29 = tl.index("2026Q4"), tl.index("2028Q4"), tl.index("2029Q1")
-    assert f[0] == g[0] == 0.0 and f[tl.index("2026Q3")] == pytest.approx(eta * 0.001 * rwa0) and g[tl.index("2026Q3")] == pytest.approx((1 - eta) * 0.001)
-    assert f[q26] == pytest.approx(eta * 0.002 * rwa0) and f[q28] == pytest.approx(eta * 0.010 * rwa0)
+    # рост вычетов — с первого квартала DED_GROWTH_QUARTERS по второй (книга 1.0, решение Р11: 2026Q4…2028Q4 — 9 кварталов)
+    g0, q28, q29 = tl.index(sheet.DED_GROWTH_QUARTERS[0]), tl.index("2028Q4"), tl.index("2029Q1")
+    n = q28 - g0 + 1
+    assert f[g0 - 1] == g[g0 - 1] == 0.0 and f[g0] == pytest.approx(eta * 0.001 * rwa0) and g[g0] == pytest.approx((1 - eta) * 0.001)
+    assert f[g0 + 1] == pytest.approx(eta * 0.002 * rwa0) and f[q28] == pytest.approx(eta * 0.001 * n * rwa0)
     assert f[q29] == pytest.approx(f[q28] - 0.00085 * rwa0) and f[tl.Q] == pytest.approx(f[q28] - 0.0068 * rwa0)
-    assert g[q28] == pytest.approx((1 - eta) * 0.010) and g[q29] == pytest.approx((1 - eta) * 0.010 + 0.003) and g[tl.Q] == g[q29]
+    assert g[q28] == pytest.approx((1 - eta) * 0.001 * n) and g[q29] == pytest.approx((1 - eta) * 0.001 * n + 0.003) and g[tl.Q] == g[q29]
     flat = [rwa0] * (tl.Q + 1)
     old_form = sheet.deduction_traj(tl, flat, *sheet.deduction_fg(tl, eta=eta, rwa0=rwa0, scenario=0.003, ruble=()))
-    assert (old_form["2026Q2"], old_form["2026Q3"]) == (0.0, 0.001) and old_form["2028Q4"] == pytest.approx(0.010, abs=1e-6)
-    assert old_form["2029Q1"] == pytest.approx(0.010 + 0.003 - 0.00085, abs=1e-6) and old_form["LT_from"] == 2036
-    assert old_form["LT"] == old_form["2036"] == pytest.approx(0.010 + 0.003 - 0.0068, abs=1e-6)
+    before, first = tl.period(g0 - 1), tl.period(g0)
+    assert (old_form[before], old_form[first]) == (0.0, 0.001) and old_form["2028Q4"] == pytest.approx(0.001 * n, abs=1e-6)
+    assert old_form["2029Q1"] == pytest.approx(0.001 * n + 0.003 - 0.00085, abs=1e-6) and old_form["LT_from"] == 2036
+    assert old_form["LT"] == old_form["2036"] == pytest.approx(0.001 * n + 0.003 - 0.0068, abs=1e-6)
     assert sheet.deduction_traj(tl, flat, f, g) == old_form, "на RWA якоря сумма в рублях и п.п. RWA — одна траектория"
     double = [rwa0] + [2 * rwa0] * tl.Q
     assert sheet.deduction_traj(tl, double, f, g)["2028Q4"] == pytest.approx(f[q28] / (2 * rwa0) + g[q28], abs=1e-6)
     assert "2036Q1" not in old_form and "2035Q4" in old_form and sheet.issue_volume(12927.766417, 0.288962) == 325.0
+    assert sheet.issue_volume(12927.766417, 0.266734) == 300.0             # книга 1.0, решение Р2
     # доля слагаемого роста вычетов в рублях: по умолчанию η; варианты состава — 1 (целиком в рублях) и 0 (целиком с RWA)
     f1, g1 = sheet.deduction_fg(tl, eta=eta, rwa0=rwa0, growth_share=1.0)
-    f0, g0 = sheet.deduction_fg(tl, eta=eta, rwa0=rwa0, growth_share=0.0)
-    assert f1[q28] == pytest.approx(0.010 * rwa0) and g1[q28] == pytest.approx(0.0) and f0[q28] == pytest.approx(0.0) and g0[q28] == pytest.approx(0.010)
+    f0, g0_ = sheet.deduction_fg(tl, eta=eta, rwa0=rwa0, growth_share=0.0)
+    assert f1[q28] == pytest.approx(0.001 * n * rwa0) and g1[q28] == pytest.approx(0.0) and f0[q28] == pytest.approx(0.0) and g0_[q28] == pytest.approx(0.001 * n)
     # приток квартала выпуска: доля денег × объём + распределения + возврат купона (решение № 4, п. 3.1)
     assert sheet.issue_inflow(325.0, 0.5, -6.25, 24.6) == 180.85 and sheet.issue_inflow(0.0, 0.5, -6.25, 24.6) == 18.35
+    assert sheet.issue_inflow(300.0, 0.5, -6.25, 24.6) == 168.35             # книга 1.0, решение Р2
     book = yaml.safe_load(R.read_text(R.Tree().template))["nii"]["books"]
     inputs = json.loads((SHEET_DIR / "inputs" / "vtb_r2_inputs.json").read_text(encoding="utf-8"))
     for name, row in inputs["nii_books"]["books"].items():
@@ -277,7 +291,7 @@ def test_a_trajectory_with_other_keys_is_rewritten_whole_and_a_wrong_address_is_
     (lambda r: r["frozen_check"].update(opex_goal_year_1=0.0162), "расходы к средним активам слоя, первый год цели"),
     (lambda r: r["frozen_check"].update(t2_share_error=0.01), "доля дополнительного капитала"),
     (lambda r: r["frozen_check"].update(near_nii_ratio=1.05), "к ЧПД месячных фактов"),
-    (lambda r: r["anchor"].update(n20_model=0.105), "Н20.0 якоря равен капиталу группы"),
+    (lambda r: r["anchor"].update(n20_model=0.1055), "Н20.0 якоря равен напечатанному нормативу группы"),
     (lambda r: r["bridge"].update(nim=-0.0014), "мост маржи"),
     (lambda r: r["near_spreads"].update(same=False), "ближние ключи спредов книг"),
     (lambda r: r["splits"].update(floor_ok=False), "полы спреда кредитных книг"),
@@ -292,6 +306,8 @@ def test_the_command_stops_and_writes_nothing(spoil, words, tree, capsys):
     квартала фактов, якорь, мост маржи, ближние ключи спредов, полы спреда), суждение листа разошлось с книгой, центр
     вне своей оси, премия вне отрезка «факт — нужда», в записи нет узла — остановка с названной причиной; ни шаблон, ни
     книга, ни запись вывода не тронуты (запуск — с записью, на копии дерева)."""
+    if words == "к ЧПД месячных фактов" and R.load_spec(tree).sheet.NEAR_FACT_PERIOD is None:
+        pytest.skip("якорь без месячных фактов первого прогнозного квартала (книга 1.0): шага near нет — нет и сверки ЧПД квартала с фактами")
     record = committed_record()
     spoil(record)
     before = snapshot(tree.book_dir)
@@ -415,8 +431,12 @@ def test_the_ratio_of_other_assets_to_loans_is_a_number_the_command_writes(tree)
     record = committed_record()
     want = record["keys"]["volumes.other_assets_to_loans"]
     anchor = record["anchor"]
-    assert want == pytest.approx(anchor["other_growing"] / anchor["loans"], abs=5e-7) and anchor["other_growing"] == pytest.approx(
-        anchor["other_assets"] - anchor["other_fixed"])
+    # книга 1.0 (решение ведущего Р8): среднее четырёх кварталов окна с равным весом; снимок якоря — рядом, справочно
+    series = anchor["balance_ratios"]["other_assets"]
+    assert want == anchor["other_to_loans"] == pytest.approx(sum(series.values()) / len(series), abs=5e-7) and len(series) == 4
+    assert anchor["other_to_loans_anchor"] == pytest.approx(anchor["other_growing"] / anchor["loans"], abs=5e-7)
+    assert series[str(yaml.safe_load(R.read_text(tree.template))["meta"]["anchor_period"])] == pytest.approx(anchor["other_to_loans_anchor"], abs=5e-7)
+    assert anchor["other_growing"] == pytest.approx(anchor["other_assets"] - anchor["other_fixed"])
     text = R.read_text(tree.template)
     assert yaml.safe_load(text)["volumes"]["other_assets_to_loans"] == want and text.count(f"other_assets_to_loans: {R.number_text(want)}") == 1
     R.write_text(tree.template, text.replace(f"other_assets_to_loans: {R.number_text(want)}", "other_assets_to_loans: 0.2"))
@@ -489,7 +509,7 @@ def test_the_keys_of_the_third_pass_stand_in_the_book_and_the_fourth_scenario_is
         if count:
             with_scenarios += 1
             # у «послабления» свои ключи лет возврата вычета (решение № 5, п. 3.3): число путей — по ключам траектории сценария
-            want = {s: len(sheet.DED_NORMS) * sum(1 for k in cap["reg_scenarios"][s]["deduction_pp"]["n20_0"] if k not in ("2026Q2", "LT_from"))
+            want = {s: len(sheet.DED_NORMS) * sum(1 for k in cap["reg_scenarios"][s]["deduction_pp"]["n20_0"] if k not in (book["meta"]["anchor_period"], "LT_from"))
                     for s in ids}
             assert set(count) == set(ids) and count == want, ax["name"]
         if any(str(p).startswith("joint.reg_prob_given_regime") for p in ax["paths"]):
@@ -555,19 +575,22 @@ def test_the_decisions_of_round_three_stand_in_book_04():
     record = committed_record()
     assert book["meta"]["version"] == BOOK_VERSION
     variants = {v["id"]: v for v in book["valuation"]["reference_variants"]}
-    # выпуск: приток центра = 0,5 × 325 − 6,25 + 24,6; варианты с притоком — перечень листа, приток — их формулой
+    # выпуск: приток центра = 0,5 × 300 − 6,25 + 24,6 (книга 1.0, решение Р2: объём 300); варианты с притоком — перечень листа
     iss = record["issue"]
-    assert book["equity"]["other_movements"]["2026Q4"] == iss["centre"] == 180.85 and iss["volume"] == 325.0
+    assert book["equity"]["other_movements"]["2026Q4"] == iss["centre"] == 168.35 and iss["volume"] == 300.0
     for vid, cfg in sheet.FLOW_VARIANTS.items():
         assert variants[vid]["overrides"]["equity.other_movements"]["2026Q4"] == iss["variants"][vid]["inflow"], vid
         assert iss["variants"][vid]["stay"] == cfg.get("stay", sheet.ISSUE_STAY)
     carrying = {vid for vid, v in variants.items() if isinstance(v["overrides"].get("equity.other_movements"), dict)}
     assert carrying == set(sheet.FLOW_VARIANTS)
-    assert iss["asset_at_price"]["per_share"] == pytest.approx(162.5 * 1000 / iss["divisor"], abs=1e-4)
+    assert iss["asset_at_price"]["per_share"] == pytest.approx(150.0 * 1000 / iss["divisor"], abs=1e-4)
     q, ded = "2026Q4", record["deductions"]
-    sched = book["capital"]["reg_scenarios"]["schedule"]                 # слагаемого выпуска нет: рубли — только доля η роста вычетов
-    assert sched["deduction_rub"]["n20_0"][q] == pytest.approx(ded["eta"] * 0.002 * ded["rwa_anchor"], abs=0.006), "слагаемого выпуска нет"
-    assert sched["deduction_pp"]["n20_0"][q] == pytest.approx((1 - ded["eta"]) * 0.002, abs=6e-7)
+    # рубли пути вычета: доля η роста вычетов (с 2026Q4 — первый квартал роста, Р11) и вычет выпуска — внесённая половина денег, 150,
+    # с квартала выпуска (книга 1.0, решения Р2 и Р10); п.п. — растущая часть
+    sched = book["capital"]["reg_scenarios"]["schedule"]
+    assert ded["issue"]["centre"] == [150.0, q]
+    assert sched["deduction_rub"]["n20_0"][q] == pytest.approx(ded["eta"] * 0.001 * ded["rwa_anchor"] + 150.0, abs=0.006)
+    assert sched["deduction_pp"]["n20_0"][q] == pytest.approx((1 - ded["eta"]) * 0.001, abs=6e-7)
     # «послабление»: доля возврата × смесь по годам
     from model.paths import Trajectory
     cap = book["capital"]["reg_scenarios"]
@@ -589,7 +612,7 @@ def test_the_decisions_of_round_three_stand_in_book_04():
     first = f"{sheet.MISC_PATH}.{sheet.MISC_YEAR}"                     # ось — связка (решение № 6, п. 2.2): концы ключа 2027 года
     axis = next(a for a in book["valuation"]["uncertainty"]["axes"] if a["paths"][0] == first)
     assert (axis["low"][first], axis["high"][first]) == (mi["axis"]["low"], mi["axis"]["high"]) and axis["low"][first] < key < axis["high"][first]
-    assert all(variants[vid]["overrides"][sheet.MISC_PATH][sheet.MISC_YEAR] == key for vid in sheet.MISC_VARIANTS)
+    assert all(variants[vid]["overrides"][f"{sheet.MISC_PATH}.{sheet.MISC_YEAR}"] == key for vid in sheet.MISC_VARIANTS)
     assert set(record["ends"]["misc_forks"]["forks"]) == set(sheet.MISC_FORKS)
     # варианты решений № 4
     assert "wholesale_spread_high" not in variants and "wholesale_spread_low" in variants
@@ -629,19 +652,22 @@ def test_the_keys_of_the_fifth_pass_stand_in_book_04():
     # рубли: доля η роста вычетов (решение № 5, п. 3.1) и высвобождение (решение № 4, п. 3.2); год 2036 — ключом года
     eta, rwa0 = ded["eta"], ded["rwa_anchor"]
     change = Trajectory(book["volumes"]["other_assets_fixed_change"])
+    amount, start = ded["issue"]["centre"]                               # вычет выпуска (книга 1.0, Р2 и Р10): только сторона капитала
+    issue = [amount if q >= tl.index(start) else 0.0 for q in range(tl.Q + 1)]
     for s in ids:
         e = sheet.ded_series(tl, eta=eta, rwa0=rwa0, scenario=sheet.scenario_of(mbook, tl, s))
         t_rub, t_pp = Trajectory(cap[s]["deduction_rub"]["n1_1"]), Trajectory(cap[s]["deduction_pp"]["n1_1"])
         for q in range(tl.Q + 1):
             y, k = tl.year(q), int(tl.period(q)[-1])
-            assert t_rub.value(y, k) == pytest.approx(e["rub"][q], abs=0.006), (s, tl.period(q))
+            assert t_rub.value(y, k) - issue[q] == pytest.approx(e["rub"][q], abs=0.006), (s, tl.period(q))
             assert t_pp.value(y, k) == pytest.approx(e["pp"][q], abs=6e-7), (s, tl.period(q))
             assert change.value(y, k) == pytest.approx(e["change"][q], abs=0.006), tl.period(q)
             assert e["change"][q] == pytest.approx(e["asset"][q] + e["release"][q]) and e["asset"][q] == pytest.approx(e["fixed"][q])
-            assert t_rub.value(y, k) == pytest.approx(change.value(y, k), abs=0.011), "одна сумма на обе стороны: слагаемые (1) и (4)"
+            assert t_rub.value(y, k) - issue[q] == pytest.approx(change.value(y, k), abs=0.011), "одна сумма на обе стороны: слагаемые (1) и (4)"
     assert e["release"][tl.index("2029Q1")] == pytest.approx(-0.00085 * rwa0) and e["release"][tl.Q] == pytest.approx(-8 * 0.00085 * rwa0)
-    assert e["asset"][tl.index("2028Q4")] == pytest.approx(eta * 0.010 * rwa0)
-    assert "2036Q1" not in rub and str(tl.last_year) in rub and change.value(tl.anchor_year, 2) == 0.0
+    n_growth = tl.index(sheet.DED_GROWTH_QUARTERS[1]) - tl.index(sheet.DED_GROWTH_QUARTERS[0]) + 1
+    assert e["asset"][tl.index("2028Q4")] == pytest.approx(eta * 0.001 * n_growth * rwa0)
+    assert "2036Q1" not in rub and str(tl.last_year) in rub and change.value(tl.anchor_year, int(tl.period(0)[-1])) == 0.0
     assert all(v["term1"] <= 0.011 and v["term4"] <= 0.011 for v in ded["both_sides"].values())
     assert ded["both_sides"]["centre"]["design1"] == 0.0 and ded["fixed_sum_ok"] and ded["anchor_zero_ok"]
     # оси: λ_F 0…1 в полосе; связки роста вычетов и доли η ведут обе части пути вычета всех сценариев и путь постоянной части (обе стороны)
@@ -653,7 +679,7 @@ def test_the_keys_of_the_fifth_pass_stand_in_book_04():
         led = {(p.split(".")[2], p.split(".")[3]) for p in ax["paths"] if p.startswith("capital.reg_scenarios.")}
         assert led == {(s, part) for s in ids for part in ("deduction_pp", "deduction_rub")}, ax["name"]
         fixed = {p.rsplit(".", 1)[1] for p in ax["paths"] if p.startswith(sheet.FIXED_CHANGE + ".")}
-        assert fixed == {str(k) for k in book["volumes"]["other_assets_fixed_change"] if k not in ("2026Q2", "LT_from")}, ax["name"]
+        assert fixed == {str(k) for k in book["volumes"]["other_assets_fixed_change"] if k not in (book["meta"]["anchor_period"], "LT_from")}, ax["name"]
     # варианты: что несут — перечень листа; книга каждого варианта проходит схему
     variants = {v["id"]: v for v in book["valuation"]["reference_variants"]}
     assert variants["terminal_fixed_share_1"]["overrides"] == {"valuation.terminal.fixed_growth_share": 1.0}
@@ -692,33 +718,44 @@ def test_the_decisions_of_round_five_stand_in_book_05():
     # п. 3.1: путь постоянной части — те же рубли, что рублёвая часть пути вычета; вариант «регуляторный счёт» — только высвобождение
     rub = book["capital"]["reg_scenarios"]["schedule"]["deduction_rub"]["n20_0"]
     change = book["volumes"]["other_assets_fixed_change"]
-    assert change == rub and change["2028Q4"] == pytest.approx(0.6065 * 0.010 * 24916.3, abs=0.006)
+    ded = record["deductions"]
+    eta, rwa0 = ded["eta"], ded["rwa_anchor"]
+    amount, start = ded["issue"]["centre"]                               # книга 1.0: в рублях пути вычета — и вычет выпуска (Р2, Р10)
+    n_growth = tl.index(sheet.DED_GROWTH_QUARTERS[1]) - tl.index(sheet.DED_GROWTH_QUARTERS[0]) + 1
+    assert set(change) == set(rub) and all(rub[k] == pytest.approx(change[k] + (amount if k == "LT" or (k[:1] == "2" and k >= start) else 0.0), abs=0.011)
+                                           for k in rub if k != "LT_from")
+    assert change["2028Q4"] == pytest.approx(eta * 0.001 * n_growth * rwa0, abs=0.006)
     assert "ded_growth_asset_eta" not in variants and {"ded_growth_regulatory", "ded_growth_asset_all"} <= set(variants)
     reg = Trajectory(variants["ded_growth_regulatory"]["overrides"][sheet.FIXED_CHANGE])
-    e = sheet.ded_series(tl, eta=0.6065, rwa0=24916.3, asset_share=0.0)
+    e = sheet.ded_series(tl, eta=eta, rwa0=rwa0, asset_share=0.0)
     assert all(reg.value(tl.year(q), int(tl.period(q)[-1])) == pytest.approx(e["release"][q], abs=0.006) for q in range(tl.Q))
     # п. 3.3: «послабление» после возврата — вычет смесью; прежняя форма — вычет «по графику»
     old = variants[sheet.RELIEF_VARIANT]["overrides"]
     assert old["capital.reg_scenarios.relief.deduction_pp.n20_0"]["LT"] == book["capital"]["reg_scenarios"]["schedule"]["deduction_pp"]["n20_0"]["LT"]
-    assert book["capital"]["reg_scenarios"]["relief"]["deduction_pp"]["n20_0"]["LT"] == pytest.approx(0.003935 + 0.00285, abs=6e-7)
-    # п. 3.4: центр −0,0115; концы оси — квантили произведения, как ось разыгрывает движок
+    assert book["capital"]["reg_scenarios"]["relief"]["deduction_pp"]["n20_0"]["LT"] == pytest.approx((1 - eta) * 0.001 * n_growth + 0.00285, abs=6e-7)
+    # п. 3.4: реализованная передача −0,0115; концы оси — квантили произведения, как ось разыгрывает движок. Книга 1.0 (решение Р13):
+    # ключ книги — на весах якоря, при котором передача решателя на средних весах окна Р8 равна −0,0115; ось сдвинута на ту же разность
     rz = record["realized"]
-    assert book["nii"]["transmission"]["target"] == rz["centre"] == -0.0115
+    assert rz["centre"] == -0.0115 and book["nii"]["transmission"]["target"] == rz["target"] == pytest.approx(rz["centre"] + rz["shift"], abs=5e-7)
+    assert rz["on_window"]["realized"] == pytest.approx(-0.0115, abs=1e-6) and rz["window_weights"]["quarters"] == ["2025Q4", "2026Q1", "2026Q2", "2026Q3"]
     axis = next(a for a in book["valuation"]["uncertainty"]["axes"] if a["paths"] == [sheet.TRANSMISSION_PATH])
-    assert (axis["low"], axis["high"]) == (rz["axis"]["low"], rz["axis"]["high"]) and axis["low"] < -0.0115 < axis["high"]
+    assert (axis["low"], axis["high"]) == (rz["axis"]["low"], rz["axis"]["high"]) and axis["low"] < rz["target"] < axis["high"]
     for q in sheet.TRANSMISSION_QUANTILES:
-        engine = U.axis_overrides(mbook, axis, U.tri_s(q))[sheet.TRANSMISSION_PATH]
-        assert engine == pytest.approx(sheet.product_quantile(q), abs=5e-6), q
+        engine = U.axis_overrides(mbook, axis, U.tri_s(q))[sheet.TRANSMISSION_PATH] - rz["shift"]
+        assert engine == pytest.approx(sheet.product_quantile(q), abs=6e-6), q
     assert sheet.product_quantile(0.1) == pytest.approx(-0.0265, abs=1e-4) and sheet.product_quantile(0.9) == pytest.approx(0.0007, abs=1e-4)
     rev = next(a for a in book["valuation"]["reverse_dcf"]["axes"] if a["paths"] == [sheet.TRANSMISSION_PATH])
     assert rev["range"] == list(sheet.TRANSMISSION_AXIS) == [-0.068, 0.022]
     assert {variants[v]["overrides"][sheet.TRANSMISSION_PATH] for v in ("transmission_sheet_m023", "transmission_zero_book_share_1",
                                                                          "transmission_low_m068", "transmission_high_p022")} == {-0.023, 0.0, -0.068, 0.022}
     # п. 3.5: ближний сдвиг — d и встречная σ0 в 2027К1, сход к 2028 году; ступень маржи не больше ступени книг; ключ прочих 2027 года — пара
-    near, nr = book["regimes"]["near_nim_shift"], record["near"]
-    sig = {q: round(v, 5) for q, v in nr["sigma0_part"].items()}
-    assert near == sheet.near_traj(round(nr["d"], 5), sig) and near["2027Q1"] == pytest.approx(round(nr["d"], 5) - sig["2027Q1"])
-    assert nr["step"]["ok"] and record["frozen_check"]["near_step_excess"] <= sheet.NEAR_STEP_TOL
+    if "near" in record:
+        near, nr = book["regimes"]["near_nim_shift"], record["near"]
+        sig = {q: round(v, 5) for q, v in nr["sigma0_part"].items()}
+        assert near == sheet.near_traj(round(nr["d"], 5), sig) and near["2027Q1"] == pytest.approx(round(nr["d"], 5) - sig["2027Q1"])
+        assert nr["step"]["ok"] and record["frozen_check"]["near_step_excess"] <= sheet.NEAR_STEP_TOL
+    else:                                     # книга 1.0: шага near нет — ключ сдвига — запись переноса (Р4); приёмку ступени держит
+        assert sheet.NEAR_FACT_PERIOD is None   # tests/test_book_core.py счётом листа на книге дерева
     assert book["other"]["misc_net_real"][sheet.MISC_YEAR] == record["misc"]["key"] and record["misc"]["label"].startswith("пара к ближнему пути маржи")
     nv = record["ends"]["near_variants"]["variants"]
     for vid in sheet.NEAR_VARIANTS:
@@ -784,7 +821,11 @@ def test_the_decisions_of_round_six_stand_in_book_06():
         assert all(drawn[y] == pytest.approx(want[y], abs=0.06) for y in years), (s27, slt, drawn, want)
     # варианты уровня прочих доходов: тот же ключ, прямая от того же начала к своему LT
     for vid in sheet.MISC_VARIANTS:
-        tr = variants[vid]["overrides"][sheet.MISC_PATH]
+        # книга 1.0 (решение ведущего 04.11.2026): подмены — по ключам 2027–2029 и LT; ключа 2026 года у варианта нет (4К2026 — центра)
+        over = variants[vid]["overrides"]
+        assert sheet.MISC_PATH not in over and f"{sheet.MISC_PATH}.2026" not in over, vid
+        tr = {k[len(sheet.MISC_PATH) + 1:]: v for k, v in over.items() if k.startswith(sheet.MISC_PATH + ".")}
+        assert set(tr) == {sheet.MISC_YEAR, *years, "LT"}, vid
         want = sheet.misc_line(key - mi["pairs_delta"], tr["LT"], lt_from, nd=None)
         assert tr[sheet.MISC_YEAR] == key and all(tr[y] == pytest.approx(want[y], abs=sheet.MISC_LINE_TOL) for y in years), vid
     assert "misc_near_d_pair_off" not in variants and "misc_d_pair_off" not in record["ends"]
@@ -836,12 +877,16 @@ def test_the_rule_of_decision_seven_stands_in_book_07():
     assert mi["pair_bare"] == pytest.approx(mi["roots"]["mid"] - mi["pairs_delta"], abs=1e-9)
     by = {r["part"]: r for r in mi["pairs"]}
     assert by["sigma0"]["pair"] == mi["sigma0_pair"] > 0 and by["sigma0"]["after"] == mi["pair_without_sigma0"]
-    assert by["retail_current"]["pair"] == 0.0 and by["retail_current"]["shift"] == {sheet.MISC_YEAR: 0.0}   # остатка нет — без счёта
+    rule_rc = json.loads((SHEET_DIR / "inputs" / "vtb_r2_inputs.json").read_text(encoding="utf-8"))["nii_books"]["near_rule"]["books"]["retail_current"]
+    if rule_rc["residual"] == 0.0:                                          # якорь 2К: остатка нет — без счёта
+        assert by["retail_current"]["pair"] == 0.0 and by["retail_current"]["shift"] == {sheet.MISC_YEAR: 0.0}
+    else:                                                                   # якорь 3К (книга 1.0): остаток ставок 3К — своя пара
+        assert abs(by["retail_current"]["pair"]) > 1.0
     for b in ("d", "corp_loans", "liquidity", "retail_term", "corp_funds", "securities", "wholesale"):
         assert abs(by[b]["pair"]) > 1.0, b                                  # каждая существенная часть несёт свою пару
     # доли остатка книг с ключом года — половина остатка якоря входа (сверка с числом калибровки)
     rule = json.loads((SHEET_DIR / "inputs" / "vtb_r2_inputs.json").read_text(encoding="utf-8"))["nii_books"]["near_rule"]
-    for b in ("corp_loans", "mortgage", "consumer_loans", "liquidity", "retail_term", "corp_funds"):
+    for b in ("corp_loans", "mortgage", "consumer_loans", "liquidity", "retail_current", "retail_term", "corp_funds"):
         assert by[b]["shift"][sheet.MISC_YEAR] == pytest.approx(rule["fade"][sheet.MISC_YEAR] * rule["books"][b]["residual"], abs=1e-12), b
     sec = by["securities"]["shift"]                  # бумаги: ключи 2027 года; отголосок обращения лага (лаг окна 0,92) — 2028 год, дальше < 10⁻⁶
     big = {k for k, v in sec.items() if abs(v) >= 1e-6}
@@ -903,10 +948,12 @@ def test_the_keys_of_the_eighth_pass_stand_in_book_07():
     from model.valuation import terminal_other_movements
     book = yaml.safe_load(R.read_text(R.Tree().template))
     machine = yaml.safe_load(R.read_text(R.Tree().book_yaml))
+    # книга 1.0 — базы числами (перенос якоря записывает слово anchor числом прежнего якоря, М§15.2 п. 3): AT1 — факт нового
+    # якоря 377,0 (решение ведущего Р4), T2 — сумма прежнего якоря 339,1 (надбавка продолжается на ту же сумму сверх базы)
     assert book["capital"]["at1_share"] == {"enabled": True, "from": book["meta"]["first_period"], "spread": 0.04,
-                                            "base": "anchor"}
+                                            "base": 377.0}
     assert book["capital"]["at1_coupon"]["enabled"] is True
-    assert book["capital"]["n20"]["t2_premium"] == {"enabled": True, "spread": 0.025, "base": "anchor"}
+    assert book["capital"]["n20"]["t2_premium"] == {"enabled": True, "spread": 0.025, "base": 339.1}
     assert book["valuation"]["terminal"]["other_movements"] == "flat_rub"
     for path in ("capital.at1_share", "capital.at1_coupon", "capital.n20.t2_premium", "valuation.terminal.other_movements"):
         node_t, node_m = book, machine
@@ -1004,7 +1051,11 @@ def test_the_companion_of_the_template_is_written_by_the_same_command(tree, tmp_
 def test_a_book_that_fails_the_schema_is_not_written(tree, capsys):
     """Выведенные числа, с которыми книга не проходит схему (ключ года — не среднее кварталов), в дерево не попадают."""
     record = committed_record()
-    record["keys"]["regimes.near_nim_shift"]["2027Q1"] = -0.0025
+    if "regimes.near_nim_shift" in record["keys"]:
+        record["keys"]["regimes.near_nim_shift"]["2027Q1"] = -0.0025
+    else:                                     # книга 1.0 (шага near нет): квартальный ключ в году last_period схема запрещает
+        t2 = record["keys"]["capital.n20.t2"]
+        t2["2036Q1"] = t2["2036"]
     before = snapshot(tree.book_dir)
     with pytest.raises(R.Stopped, match="не проходит схему"):
         R.run(tree=tree, quick=False, label="schema", sheet=substituted(record), today=TODAY)

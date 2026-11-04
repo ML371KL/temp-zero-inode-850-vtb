@@ -97,12 +97,32 @@ def test_the_key_of_the_margin_is_the_stationary_margin_of_the_window_world(moda
     assert sum(values) / len(values) > key
 
 
-def test_the_near_path_of_the_anchor_year_is_the_path_of_the_record(modal):
+def sheet():
+    """Лист вывода на ядре (модуль без пакета)."""
+    return S.load_module(S.EVIDENCE / "path" / "derive_on_engine.py", "book_core_derive_sheet")
+
+
+def test_the_near_path_of_the_anchor_year_is_the_path_of_the_record(modal, book):
     """Ближний путь маржи (решение ведущего № 5, п. 3.5): упр. ЧПМ модальной клетки в кварталах ближнего сдвига — путь
     записи вывода на ядре (клетка записи — модальная); в квартале с месячными фактами — маржа фактов (допуск — точность
-    записи)."""
+    записи). Книга 1.0 (якорь 3К2026): месячных фактов первого прогнозного квартала нет — шаг near листа не гоняется,
+    записи `near` нет, ключ ближнего сдвига — запись переноса (решение ведущего Р4); пары шага misc берут сдвиг d из неё
+    (ключ первого квартала пути) — сверка: пара к сдвигу d записи вывода несёт сдвиг ключа книги."""
     ctx, cell = modal
-    near, tl = record()["near"], ctx.timeline
+    rec, tl = record(), ctx.timeline
+    if "near" not in rec:
+        sh = sheet()
+        first = tl.period(1)
+        months = json.loads((S.FACTS_DIR / "mgmt_quarterly.json").read_text(encoding="utf-8")).get("monthly") or []
+        y, k = int(first[:4]), int(first[-1])
+        known = [m for m in months if m["month"] in {f"{y}-{n:02d}" for n in range(3 * k - 2, 3 * k + 1)}]
+        assert sh.NEAR_FACT_PERIOD is None and len(known) < 2, (sh.NEAR_FACT_PERIOD, known)
+        d = book["regimes"]["near_nim_shift"][sh.NEAR_D_QUARTER]
+        assert sh.NEAR_D_QUARTER == first
+        part = next(r for r in rec["misc"]["pairs"] if r["part"] == "d")
+        assert all(part["shift"][q] == pytest.approx(d * sh.NEAR_FADE[q], abs=1e-9) for q in sh.SIGMA0_FADE), part["shift"]
+        return
+    near = rec["near"]
     assert near["cell"] == "/".join((cell.world, cell.regime, cell.scenario))
     got = {tl.period(q): ctx.bridge.to_mgmt_nim(float(cell.quarters["nim"][q])) for q in range(1, tl.Q + 1)
            if tl.period(q) in near["path"]}
@@ -113,9 +133,19 @@ def test_the_near_path_of_the_anchor_year_is_the_path_of_the_record(modal):
 
 def test_the_near_nim_shift_takes_the_sigma0_step_away(modal):
     """Ступень σ0 на границе 2026К4 → 2027К1 снята (решение ведущего № 5, п. 3.5): ступень маржи модальной клетки —
-    та, что печатает запись вывода, и не больше ступени одних книг на ставках мира (приёмка записи)."""
+    та, что печатает запись вывода, и не больше ступени одних книг на ставках мира (приёмка записи). Книга 1.0 (шага
+    near нет, ключ — запись переноса): та же приёмка счётом листа на книге дерева — ступень модальной клетки не больше
+    ступени одних книг на ставках мира (с запасом листа)."""
     ctx, cell = modal
-    step, tl = record()["near"]["step"], ctx.timeline
+    tl = ctx.timeline
+    if "near" not in record():
+        sh = sheet()
+        step = sh.near_step(sh.Engine(None, None))
+        a, b = (ctx.bridge.to_mgmt_nim(float(cell.quarters["nim"][tl.index(p)])) for p in step["quarters"])
+        assert b - a == pytest.approx(step["cell"], abs=1e-9)
+        assert abs(step["cell"]) <= abs(step["books"]) + sh.NEAR_STEP_TOL, step
+        return
+    step = record()["near"]["step"]
     a, b = (ctx.bridge.to_mgmt_nim(float(cell.quarters["nim"][tl.index(p)])) for p in step["quarters"])
     assert b - a == pytest.approx(step["cell"], abs=1e-6) and step["ok"] is True
 

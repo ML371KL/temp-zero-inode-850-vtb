@@ -25,7 +25,7 @@ except ImportError:                      # прогон без pytest.ini (pytho
 pytestmark = pytest.mark.tact
 
 MARKS = ("  #{{WORLDS}}", "#{{WORLDS_BANK}}", "#{{OVERLAY_SHA256}}")
-VERSION = "0.9"
+VERSION = "1.0"
 RESULTS = S.BOOK_DIR / "results.json"
 DERIVE_OUT = S.EVIDENCE / "path" / "out"                     # запись листа вывода на ядре (derive_on_engine.py)
 NII_SHEET = S.EVIDENCE / "path" / "inputs" / "vtb_r2_inputs.json"   # запись листа calib-nii: ближние ключи спредов книг
@@ -277,7 +277,7 @@ def test_governance_discount_is_the_sum_of_channels(book):
 
 def test_uncertainty_axes_hold_the_book_value_inside_their_range(book):
     unc = book["valuation"]["uncertainty"]
-    assert len(unc["axes"]) == 46 and unc["off_band_axes"] == []
+    assert len(unc["axes"]) == 47 and unc["off_band_axes"] == []        # книга 1.0: + ось прочих доходов 4К2026 (Р1)
     assert sum(1 for a in unc["axes"] if a["kind"] == "dict") == 3 and sum(1 for a in unc["axes"] if a["kind"] == "bundle") == 8
     names = [a["name"] for a in unc["axes"]]
     assert len(set(names)) == len(names)
@@ -364,7 +364,7 @@ def test_meta_company_and_prices(book):
         assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", meta[k])
     assert meta["valuation_date"] == meta["date"] >= meta["facts_date"]
     assert (meta["facts_date"], meta["anchor_period"], meta["first_period"], meta["last_period"]) == \
-        ("2026-06-30", "2026Q2", "2026Q3", "2036Q4")
+        ("2026-09-30", "2026Q3", "2026Q4", "2036Q4")                     # книга 1.0: якорь 3К2026
     assert book["valuation"]["uncertainty"]["seed"] == int(meta["date"].replace("-", ""))    # зерно — дата книги
     assert "чистая прибыль, приходящаяся на акционеров банка" in meta["basis"]
 
@@ -411,21 +411,27 @@ def test_lead_decisions_on_margin_volumes_and_capital_are_in_the_book(book):
     обеих сторонах, реализованная передача, ближний сдвиг маржи с ходом к 2028 году, слои капитала долей RWA своей
     клетки, надбавка T2 и распределения акционеру за концом сетки."""
     nii = book["nii"]
-    assert nii["phi_split"] == 0.38 and nii["transmission"]["target"] == -0.0115
+    # книга 1.0: доля сжатия и её ось — запись переноса на якорь 3К (решение ведущего Р4: 0,38 / 0,76 на структуре 2К);
+    # реализованная передача −0,0115 (№ 5, п. 3.4) — на средних весах окна Р8, ключ книги — на весах якоря (Р13: запись листа)
+    realized = _derive_record()["realized"]
+    assert nii["phi_split"] == 0.376982 and realized["centre"] == -0.0115
+    assert nii["transmission"]["target"] == realized["target"] == -0.030828
     axes = {a["paths"][0]: a for a in book["valuation"]["uncertainty"]["axes"]}
-    assert (axes["nii.phi_split"]["low"], axes["nii.phi_split"]["high"]) == (0.0, 0.76)
+    assert (axes["nii.phi_split"]["low"], axes["nii.phi_split"]["high"]) == (0.0, 0.756982)
     v = book["volumes"]
     assert v["share_drift_until"] == 2031 and v["lt_from"] == 2033 and v["link_base"] == "iea"
     facts = json.loads((S.FACTS_DIR / "balance.json").read_text(encoding="utf-8"))
     share = facts["fixed_share_of_deductible"]["v"]                       # узел фактов — на обеих сторонах (№ 4, п. 3.3)
     assert book["capital"]["n20"]["deductions_fixed_share"] == book["capital"]["n11"]["deductions_fixed_share"] == share
     near = book["regimes"]["near_nim_shift"]                              # № 5, п. 3.5: ступень σ0 снята, сход к 2028 году
-    assert near["LT"] == 0.0 and near["LT_from"] == 2028
+    assert near["LT"] == 0.0 and (near.get("LT_from") == 2028 or near_is_the_carry_record())
     n20 = book["capital"]["n20"]
     assert n20["t2_share"] == {"enabled": True, "from": "2029Q1"}           # № 6, п. 2.1
-    assert n20["t2_premium"] == {"enabled": True, "spread": 0.025, "base": "anchor"}   # № 8, п. 1.2
+    # № 8, п. 1.2; книга 1.0 — базы числами: T2 — запись переноса 339,1 (сумма прежнего якоря), AT1 — факт якоря 377,0 (решение Р4)
+    assert n20["t2_premium"] == {"enabled": True, "spread": 0.025, "base": 339.1}
     at1 = book["capital"]["at1_share"]
-    assert at1 == {"enabled": True, "from": book["meta"]["first_period"], "spread": 0.04, "base": "anchor"}   # № 8, п. 1.2; № 9, п. 1
+    facts_at1 = json.loads((S.FACTS_DIR / "balance.json").read_text(encoding="utf-8"))["equity"]["at1"]["v"]
+    assert at1 == {"enabled": True, "from": book["meta"]["first_period"], "spread": 0.04, "base": facts_at1} and facts_at1 == 377.0
     assert book["valuation"]["terminal"]["other_movements"] == "flat_rub"
     variants = {v["id"] for v in book["valuation"]["reference_variants"]}
     assert {"at1_anchor_rub", "at1_from_2029", "t2_premium_off", "om_terminal_none", "t2_flat_rub", "t2_amortizing",
@@ -678,11 +684,22 @@ def test_the_off_band_rule_catches_an_asymmetric_and_a_wide_axis(book):
     assert "нет строки" in variant([{"name": "новая", "kind": "value", "paths": ["x.y"]}])["новая"][0]
 
 
+def near_is_the_carry_record() -> bool:
+    """Шаг near листа не гонялся (на якоре без месячных фактов первого прогнозного квартала, книга 1.0): ключ ближнего сдвига —
+    запись переноса якоря (решение ведущего Р4), записи `near` у листа вывода нет."""
+    return "near" not in _derive_record()
+
+
+NEAR_CARRY_TAIL = 1e-4                    # хвост записи переноса после 2027 года: путь прежней книги через ставки нового якоря
+
+
 def test_the_near_nim_shift_covers_the_near_path_only(book):
     """Ближний сдвиг ЧПМ (решение ведущего ВТБ № 5, п. 3.5): квартальные ключи — от первого прогнозного квартала до
     конца 2027 года (ступень σ0 на границе 2026К4 → 2027К1 снята, сход линейно к 2028 году), ключ года при четырёх
     квартальных — их среднее, с 2028 года — 0. Оси полосы у сдвига нет (он выведен на ядре; варианты no_near_shift и
-    near_sigma0_step_kept)."""
+    near_sigma0_step_kept). Книга 1.0 (якорь 3К2026): шага near нет — ключ стоит записью переноса (решение ведущего Р4):
+    те же квартальные ключи и средние года, LT — 0, ключи 2028–2032 годов — хвост пути прежней книги через ставки нового
+    якоря, меньше 0,01 п.п. (без LT_from)."""
     near = book["regimes"]["near_nim_shift"]
     first = book["meta"]["first_period"]
     q_keys = sorted(k for k in near if "Q" in k)
@@ -693,10 +710,18 @@ def test_the_near_nim_shift_covers_the_near_path_only(book):
         qs = [near[k] for k in q_keys if k.startswith(y)]
         if len(qs) == 4:
             assert near[y] == pytest.approx(sum(qs) / len(qs), abs=1e-9), y
-    assert near["LT"] == 0.0 and near["LT_from"] == 2028 and S.year_value({k: v for k, v in near.items() if "Q" not in k}, 2029) == 0.0
+    if near_is_the_carry_record():
+        tail = {k: v for k, v in near.items() if k.isdigit() and int(k) >= 2028}
+        assert near["LT"] == 0.0 and "LT_from" not in near and all(abs(v) < NEAR_CARRY_TAIL for v in tail.values()), tail
+    else:
+        assert near["LT"] == 0.0 and near["LT_from"] == 2028 and S.year_value({k: v for k, v in near.items() if "Q" not in k}, 2029) == 0.0
     assert not any(a["paths"][0].startswith("regimes.near_nim_shift") for a in book["valuation"]["uncertainty"]["axes"])
     variants = {v["id"]: v["overrides"] for v in book["valuation"]["reference_variants"]}
-    assert set(variants["no_near_shift"]["regimes.near_nim_shift"]) == set(near)   # все ключи словаря на месте
+    zero = variants["no_near_shift"]["regimes.near_nim_shift"]
+    if near_is_the_carry_record():          # книга 1.0: вариант — нулевой путь (его ключи — форма книги 0.9; хвост центра он обнуляет)
+        assert {k for k in near if "Q" in k} <= set(zero) and all(v == 0.0 for k, v in zero.items() if k != "LT_from"), zero
+    else:
+        assert set(zero) == set(near)                                  # все ключи словаря на месте
     assert all(book["regimes"][r]["nim_shift"]["2026"] == 0.0 for r in book["regimes"]["ids"])
 
 
@@ -730,7 +755,8 @@ def test_the_capital_instruments_trajectory_is_quarterly_and_ends_flat(book):
     q_keys = [k for k in t2 if "Q" in k]
     assert q_keys == [anchor] + [f"{y}Q{k}" for y in range(y_from, last) for k in (1, 2, 3, 4)]
     fact = json.loads((S.FACTS_DIR / "capital.json").read_text(encoding="utf-8"))["t2_recognized"]
-    assert t2[anchor] == t2[str(y_from - 1)] == 339.1 and "339,1" in fact["calc"] and fact["v"] > t2[anchor]
+    # книга 1.0: уровень плато — значение книги в квартале якоря (шаг t2 листа; 339,1 — запись переноса с якоря 2К)
+    assert t2[anchor] == t2[str(y_from - 1)] == 339.1 and fact["v"] > t2[anchor]
     assert share_from == f"{y_from}Q1"
     assert t2[str(last)] == t2["LT"] and "LT_from" not in t2
     vals = [t2[k] for k in q_keys] + [t2["LT"]]
@@ -741,9 +767,10 @@ def test_the_capital_instruments_trajectory_is_quarterly_and_ends_flat(book):
 def test_premiums_are_trajectories_by_sector_and_end_by_the_drift_year(book):
     """Премии роста (MODEL §4.3): у кредитов — ровно три группы сектора, у средств — два сегмента; после
     `share_drift_until` премия равна нулю и при сдвинутой оси: оси-связки кредитов и средств клиентов не трогают ни LT,
-    ни ключи после `share_drift_until`, ни ключ первого прогнозного квартала премии средств (он — факт: остатки августа
-    2026 года). Рост кредитов года якоря у ВТБ задан прогнозом банка на 2026 год (механизм гайденса роста включён), премии
-    кредитов — с 2027 года (решение ведущего № 3, раздел 3)."""
+    ни ключи после `share_drift_until`, ни ключ первого прогнозного квартала премии средств, когда он — факт (на якоре 2К —
+    остатки августа 2026 года). Книга 1.0 (якорь 3К2026, решение ведущего Р4): месячных фактов 4К нет — ключ 4К2026 стоит
+    по правилу книги (равен ключу 2027 года), фактов премии нет, ось его ведёт. Рост кредитов года якоря у ВТБ задан прогнозом
+    банка на 2026 год (механизм гайденса роста включён), премии кредитов — с 2027 года (решение ведущего № 3, раздел 3)."""
     v = book["volumes"]
     assert list(v["loan_share_drift"]) == ["corporate", "mortgage", "retail_other"]
     assert list(v["funds_share_drift"]) == ["retail", "corporate"]
@@ -753,12 +780,16 @@ def test_premiums_are_trajectories_by_sector_and_end_by_the_drift_year(book):
     assert all(min(int(k[:4]) for k in traj if k[:1] == "2") == y0 + 1 for traj in v["loan_share_drift"].values())
     axes = {a["paths"][0]: a for a in book["valuation"]["uncertainty"]["axes"]}
     loans = axes["volumes.loan_share_drift.corporate.2029"]
-    funds = axes["volumes.funds_share_drift.retail.2026Q4"]
+    first = book["meta"]["first_period"]
+    funds = axes[f"volumes.funds_share_drift.retail.{first}"]
     facts = book["valuation"]["reverse_dcf"]["premium_facts"]
     for ax in (loans, funds):
         assert ax["kind"] == "bundle" and all(p.rsplit(".", 1)[1][:1] == "2" for p in ax["paths"]), ax["name"]
         assert all(int(p.rsplit(".", 1)[1][:4]) <= v["share_drift_until"] for p in ax["paths"]) and not set(facts) & set(ax["paths"])
-    assert facts == [f"volumes.funds_share_drift.{s}.{book['meta']['first_period']}" for s in ("retail", "corporate")]
+    if facts:                                                          # ключ первого квартала — факт месяцев (якорь 2К)
+        assert facts == [f"volumes.funds_share_drift.{s}.{first}" for s in ("retail", "corporate")]
+    else:                                                              # якорь 3К: ключ первого квартала — правило книги
+        assert all(v["funds_share_drift"][s][first] == v["funds_share_drift"][s][str(y0 + 1)] for s in ("retail", "corporate"))
     assert v["guidance_year"] == y0 and set(v["guidance_growth"]) == {"corporate", "retail"}
 
 

@@ -93,8 +93,9 @@ def _carry(tool: Any, X: dict, report: dict | None = None) -> tuple[dict, list[s
     return derived, warnings
 
 
-def _grid() -> list[str]:
-    return [R.period_str(*R.shift_quarter(*R.parse_period(NEW), i)) for i in range(R.pindex(LAST) - R.pindex(NEW) + 1)]
+def _grid(new: str = NEW) -> list[str]:
+    """Кварталы сетки книги на новом якоре `new` (от квартала якоря по последний)."""
+    return [R.period_str(*R.shift_quarter(*R.parse_period(new), i)) for i in range(R.pindex(LAST) - R.pindex(new) + 1)]
 
 
 def _state(X: dict, subs: dict, anchor: str, q: str) -> tuple[float, float]:
@@ -150,7 +151,7 @@ def check_kept(before: dict, after: dict, k: float = 1.0, rwa_tol: float = RWA_D
     for name, subs in [("центр", None)] + list(now.items()):
         a, b = ({}, {}) if subs is None else (was[name], subs)
         assert abs(_anchor_value(after, b, new)) < FIXED_TOL, (name, _anchor_value(after, b, new))
-        for q in _grid():
+        for q in _grid(new):
             (l0, r0), (l1, r1) = _state(before, a, old, q), _state(after, b, new, q)
             assert abs(l1 - l0) < FIXED_TOL, (name, q, l0, l1)
             assert abs(r1 - k * r0) < rwa_tol, (name, q, r0, r1)
@@ -352,7 +353,7 @@ def _dry_step(book: Any, facts: Any, cells: bool = True) -> SimpleNamespace:
 
 @ci_only
 def test_the_real_book_walks_third_to_fourth_quarter():
-    """Цепочка «якорь 3К2026 → якорь 4К2026» настоящей книги (REANCHOR §1.1, §3.16): книга без взноса
+    """Цепочка «якорь 3К2026 → якорь 4К2026» настоящей книги (REANCHOR §1.1, §3.16; на книге с якорем 3К2026 — один шаг): книга без взноса
     (`capital.recapitalization.enabled: false`) — оба шага в допуске механики по клеткам и точке, концы связок и
     варианты на пути постоянной части на обоих шагах перенесены своим приращением; книга как есть (решение о взносе в
     4-м квартале) — шаг 3К проходит, шаг 4К — отказ с причиной §3.16."""
@@ -363,6 +364,11 @@ def test_the_real_book_walks_third_to_fourth_quarter():
     first = _dry_step(plain, facts)
     assert first.mech["ok"], first.mech["worst"]
     check_real_candidate(plain, first.cand)
+    if first.period == "2026Q4":
+        # книга уже на якоре 3К2026 (книга 1.0): шаг 3К → 4К — первый; книга как есть отказывает на нём же (§3.16)
+        with pytest.raises(R.ReportError, match="квартал решения о взносе"):
+            _dry_step(book, facts, cells=False)
+        return
     second = _dry_step(first.cand.book, first.cand.facts)
     assert second.period == "2026Q4" and second.mech["ok"], second.mech["worst"]
     check_real_candidate(first.cand.book, second.cand)

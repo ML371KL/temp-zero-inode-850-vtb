@@ -1418,7 +1418,8 @@ def test_loan_margin_of_the_worlds(control):
     yl, ql = cm.c_per_parse(B["meta"]["last_period"])
     ref_w = B["nii"]["transmission"]["reference_world"]
     credit = [b for b, sp in books.items() if sp.get("sector")]
-    loans0 = sum(A["E0"][b] for b in credit)
+    W = tr["weights"]                                               # веса решателя: якорь или среднее окна (М§4.5)
+    loans0 = sum(W[b] for b in credit)
     sec = cm.c_bnum(B, "volumes.securities_share_of_liquid")
     kap = cm.c_bnum(B, "credit.kappa")
 
@@ -1435,7 +1436,7 @@ def test_loan_margin_of_the_worlds(control):
     for w in ctx["worlds"]:
         m = tr["loan_margin"][w]
         assert m >= 0.0, (w, m)
-        yld = sum(A["E0"][b] * (c_lt(w, b) + tr["lt_spread"][b][w]) for b in credit) / loans0
+        yld = sum(W[b] * (c_lt(w, b) + tr["lt_spread"][b][w]) for b in credit) / loans0
         bal = (sec * (c_lt(w, cm.SECURITIES) + cm.c_traj_at(books[cm.SECURITIES]["spread"], yl, ql))
                + (1.0 - sec) * (c_lt(w, cm.LIQUIDITY) + cm.c_traj_at(books[cm.LIQUIDITY]["spread"], yl, ql)))
         gap = max(0.0, c_rr(w) - c_rr(cm.W_LOW)) if kappa_ref is None else c_rr(w) - c_rr(kappa_ref)
@@ -1445,7 +1446,7 @@ def test_loan_margin_of_the_worlds(control):
     on_funds = cm.c_transmission_ctl(_with_split(B, 0.0), A)["loan_margin"]
     assert on_loans[ref_w] == on_funds[ref_w] == tr["loan_margin"][ref_w]
     for w in ctx["worlds"]:
-        volume = sum(A["E0"][b] * (c_lt(w, b) - c_lt(ref_w, b)) for b in credit if books[b].get("phi")) / loans0
+        volume = sum(W[b] * (c_lt(w, b) - c_lt(ref_w, b)) for b in credit if books[b].get("phi")) / loans0
         assert on_funds[w] - on_loans[w] == pytest.approx(tr["phi"] * volume, abs=1e-15), w
     if tr["phi"] > 0.0:                    # сжатие на кредитных книгах съедает маржу там, где ставки выше мира H
         for w in ctx["worlds"]:

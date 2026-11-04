@@ -107,13 +107,35 @@ def test_stationary_and_solver_stand_on_the_named_weights():
     assert tr.phi_liab == pytest.approx((1 - p) * tr.phi * a / l_, rel=1e-13)
     for b in phi_a:
         assert tr.phi_weights[b] == pytest.approx(hand[b] / a, rel=1e-13), b
-    # кредитная маржа стационара — на тех же весах: доходность портфеля — средневзвешенная долями окна
-    loans = [b for b, s in books.items() if s.get("sector")]
-    for w in book.get("worlds.ids"):
-        rate = {b: st.asset_rate(b, w, tr.sigma0, tr.phi_assets, ref) for b in loans}
-        y_win = sum(hand[b] * rate[b] for b in loans) / sum(hand[b] for b in loans)
-        y_anc = sum(st.w[b] * rate[b] for b in loans) / sum(st.w[b] for b in loans)
-        assert y_win == pytest.approx(y_anc, abs=1e-15)          # st.w — веса окна
+    # масштаб ROE-эквивалента — якорь при любых весах (печать): IEA_0 / BV_0 якоря
+    from model.book import anchor_facts
+    af = anchor_facts(facts, books)
+    iea0 = sum(af.balances[b] for b in books if books[b]["side"] == "asset")
+    assert st.iea0 == iea0 and st.bv0 == af.bv
+    assert solve_transmission(_anchor(book), facts, bridge).roe_factor == tr.roe_factor
+
+
+def test_level_key_is_the_book_1_0_judgment_on_window_weights():
+    """Ключ уровня книги 1.1 — запись суждения книги 1.0 на средних весах окна (правило keep, REANCHOR §3.5): скаляры
+    пути, которые книга 1.0 решает на весах якоря (ключ 2,9229 %, цель −0,030828 — запись Р13), дают на весах окна
+    стационарную маржу мира N 3,0491 % (упр.) и передачу −0,0115 (Р13 мерил её полным φ)."""
+    book, facts = real_book_or_skip()
+    bridge = bridge_from_facts(facts)
+    old = solve_transmission(_anchor(book).with_overrides({"nii.nim_lt_target_mgmt": 0.029229,
+                                                           "nii.transmission.target": -0.030828}), facts, bridge)
+    st = _Stationary(_window(book), facts)
+    level = str(book.get("nii.transmission.level_world"))
+    ref = old.reference_world
+    key = bridge.to_mgmt_nim(st.nss(level, 0.0, old.sigma0, old.phi, ref, old.sigma0_liab))
+    assert key == pytest.approx(0.0304907058, abs=1e-9) and round(key, 6) == float(book.get("nii.nim_lt_target_mgmt"))
+    dkey = st.ref_lt[MARKET_WORLD]["key"] - st.ref_lt[BASE_WORLD]["key"]
+    flat = (st.nss(MARKET_WORLD, 0.0, old.sigma0, old.phi, ref, old.sigma0_liab)
+            - st.nss(BASE_WORLD, 0.0, old.sigma0, old.phi, ref, old.sigma0_liab)) / dkey
+    assert flat == pytest.approx(-0.0115, abs=1e-6)
+    new = solve_transmission(book, facts, bridge)
+    assert new.phi == pytest.approx(old.phi, abs=1e-6) and new.phi_assets == pytest.approx(old.phi_assets, abs=1e-6)
+    # φ_L = (1 − p)·φ·A/L — на весах окна (A/L 0,8924 против 0,8987 якоря): единственное, что двигает путь
+    assert new.phi_liab / old.phi_liab == pytest.approx(0.99303, abs=5e-5)
 
 
 def test_anchor_mode_is_the_previous_count_bit_for_bit():

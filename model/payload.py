@@ -394,10 +394,11 @@ REQUIRED_FIELDS: dict[str, tuple[str, ...]] = {
                       "spread_lt_world spread_floor rate_lt"),
     "nii.transmission": _F("target definition realized nim_lt_target_mgmt target_eng sigma0 sigma0_liab "
                            "sigma0_split phi phi_assets phi_liab phi_split loan_margin tol solved roe_equiv pairs "
-                           "pairs_range by_world realized_cells nim_lt_printed? nim_stationary? level?"),
+                           "pairs_range by_world realized_cells nim_lt_printed? nim_stationary? level? weights?"),
     "nii.transmission.nim_lt_printed": _F("value target tolerance from_year to_year cell"),
     "nii.transmission.nim_stationary": _F("world value target tolerance"),
     "nii.transmission.level": _F("world value reference_world reference_value"),
+    "nii.transmission.weights": _F("mode periods"),
     "nii.transmission.pairs[]": _F("from to key_from key_to value roe_equiv inside"),
     "nii.nim_by_world": _F("years"),
     "nii.current_share": _F("c_ref psi bounds by_world"),
@@ -2540,6 +2541,14 @@ def _buffer_words(book: Book) -> str:
             f"{pct(float(step))[:-2]} п.п., строка — на 1 п.п.")
 
 
+def composition_words(ctx) -> str:
+    """На каком составе баланса стоит стационарная маржа решателя (М§4.5): веса якоря или среднее окна."""
+    tr = ctx.transmission
+    if tr.weights_mode == "window":
+        return f"на среднем составе баланса {tr.weights_periods[0]}–{tr.weights_periods[-1]}"
+    return "на составе баланса якоря"
+
+
 def _nim_shift_words(x: _Ctx) -> str:
     """Что сдвинуто в строке «₽ за 0,1 п.п. ЧПМ» (П§2 `sensitivity_basis`, М§8.3). Без ключей книги — прежние
     слова. У книги с суждением о марже, которое печатается не ключом (`checks.nim_stationary` — стационарная
@@ -2553,7 +2562,7 @@ def _nim_shift_words(x: _Ctx) -> str:
     stationary, printed = b.opt(NIM_STATIONARY) is not None, b.opt(NIM_LT) is not None
     named = level_nim(x.run.ctx)                # ключ цели — стационарная маржа названного мира: сдвинута она сама
     if named is not None and not stationary:
-        return (f"ключ цели {level} (упр.) — стационарная маржа мира {named['world']} на составе баланса якоря — "
+        return (f"ключ цели {level} (упр.) — стационарная маржа мира {named['world']} {composition_words(x.run.ctx)} — "
                 f"сдвинут на {step}")
     if not stationary and not printed:
         return f"{level} (упр.) сдвинут на {step}"
@@ -2563,7 +2572,7 @@ def _nim_shift_words(x: _Ctx) -> str:
         return words
     if stationary:
         d = stationary_nim(shifted.ctx)["value"] - stationary_nim(x.run.ctx)["value"]
-        return (words + f" — стационарная маржа мира {stationary_nim(x.run.ctx)['world']} на составе баланса якоря "
+        return (words + f" — стационарная маржа мира {stationary_nim(x.run.ctx)['world']} {composition_words(x.run.ctx)} "
                         f"меняется на {_signed_pp(d)}")
     d = printed_nim_lt(shifted)["value"] - printed_nim_lt(x.run)["value"]
     return words + f" — печатаемая маржа модальной клетки меняется на {_signed_pp(d)}"
@@ -3891,6 +3900,8 @@ def _nii(x: _Ctx, invariants: Mapping[str, Finding]) -> dict:
         printed_node["level"] = {"world": named["world"], "value": R_SHARE(named["value"]),
                                  "reference_world": named["reference_world"],
                                  "reference_value": R_SHARE(named["reference_value"])}
+    if tr.weights_mode == "window":             # веса решателя — среднее окна (М§4.5): концы кварталов окна
+        printed_node["weights"] = {"mode": tr.weights_mode, "periods": list(tr.weights_periods)}
     return {"books": books,
             "transmission": {"target": float(b.get("nii.transmission.target")),
                              "definition": "разность стационарных ЧПМ миров M и N на разность их долгосрочных ключевых",

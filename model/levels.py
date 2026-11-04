@@ -420,7 +420,7 @@ def funding_path(run: GridRun) -> dict[str, Any] | None:
 
 
 def stationary_nim(ctx: Any) -> dict[str, Any] | None:
-    """Число гейта `nim_stationary` (М§14.2): стационарная маржа решателя передачи на составе баланса якоря в
+    """Число гейта `nim_stationary` (М§14.2): стационарная маржа решателя передачи на весах решателя (якорь или окно) в
     мире `world` ключа книги (`derived.nii.nss`), переведённая мостом в упр. базис. `ctx` — контекст прогона
     (книга, мост, решение передачи). → {`world`, `value`, `target`, `tolerance`, `key`}; нет ключа — None."""
     cfg = ctx.book.opt(NIM_STATIONARY)
@@ -436,7 +436,7 @@ def stationary_nim(ctx: Any) -> dict[str, Any] | None:
 
 def level_nim(ctx: Any) -> dict[str, Any] | None:
     """Суждение книги об уровне маржи при ключе `nii.transmission.level_world` (М§4.5): ключ цели ЧПМ — стационарная
-    маржа названного мира на составе баланса якоря. → {`world`, `value` — стационарная маржа этого мира при
+    маржа названного мира на весах решателя. → {`world`, `value` — стационарная маржа этого мира при
     решённых σ0 и φ, упр. базис (равна ключу — тождество решателя), `key` — ключ цели, `reference_world`,
     `reference_value` — выведенный решателем уровень мира-опоры, упр. базис}; нет ключа — None."""
     world = level_world(ctx.book)

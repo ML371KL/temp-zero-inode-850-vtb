@@ -323,7 +323,9 @@ def render_run_output(results: Mapping[str, Any], book: Book | None = None) -> s
               f"пассивы {d.get('phi_liab', 0.0):.6f} (доля на активах {d.get('phi_split', 1.0):g}), "
               f"T_real {d['T_real']:.6f}, цель движка "
               f"{d['target_eng']:.6f}, ROE-экв. {d['roe_equiv']:.4f}, по клеткам {d['realized_cells']:.6f}",
-              *([f"  ключ цели ЧПМ — стационарная маржа мира {d['level_world']} на составе баланса якоря; выведенный "
+              *([f"  ключ цели ЧПМ — стационарная маржа мира {d['level_world']} "
+                 + (f"на среднем составе баланса {d['weights']['periods'][0]}–{d['weights']['periods'][-1]}"
+                    if d.get("weights") else "на составе баланса якоря") + "; выведенный "
                  f"уровень мира-опоры {d['reference_world']}: {_p(d['reference_level_mgmt'], 3)} упр. "
                  f"({d['reference_level']:.6f} в движке)"] if d.get("level_world") else []),
               *([f"  веса книг решателя — среднее окна {d['weights']['periods'][0]}–{d['weights']['periods'][-1]} "

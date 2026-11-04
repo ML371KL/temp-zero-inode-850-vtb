@@ -17,7 +17,7 @@ LT-спред кредитной книги к опоре мира s_eff,b,W —
 соседних по key^LT миров — диагностика и гейт (М§4.5).
 
 Чей уровень задаёт ключ цели ЧПМ `nii.nim_lt_target_mgmt`, называет ключ книги
-`nii.transmission.level_world`: стационарная маржа названного мира на составе баланса якоря равна
+`nii.transmission.level_world`: стационарная маржа названного мира на составе баланса книги (веса решателя) равна
 ключу, а уровень мира-опоры решатель находит сам — той же функцией, что выводит ключ под стационар
 мира (`level_for_stationary`). Без ключа ключ цели — уровень мира-опоры (поведение образца).
 
@@ -320,7 +320,7 @@ class _Stationary:
 
 
 def level_world(book: "Book") -> str | None:
-    """Мир, стационарную маржу которого на составе баланса якоря задаёт ключ цели ЧПМ, — ключ книги
+    """Мир, стационарную маржу которого на составе баланса книги (веса решателя) задаёт ключ цели ЧПМ, — ключ книги
     `nii.transmission.level_world`; нет ключа — None: ключ цели — уровень мира-опоры решателя (образец)."""
     world = book.opt(LEVEL_WORLD)
     return None if world is None else str(world)
@@ -342,7 +342,7 @@ def level_for_stationary(stationary: Callable[[float], float], start: float, ste
 def solve_transmission(book: "Book", facts: "Facts", bridge: Bridge) -> Transmission:
     """σ0_A, σ0_L и φ замкнуто по A-N2, `nii.sigma0_split` и A-N3 (реализованная передача M − N);
     BookError, если передача не определена. Ключ цели ЧПМ — стационарная маржа мира `nii.transmission.level_world`
-    на составе баланса якоря (без ключа — мира-опоры): уровень мира-опоры под неё решатель находит сам."""
+    на весах решателя (без ключа — мира-опоры): уровень мира-опоры под неё решатель находит сам."""
     check_family_worlds(book)
     st = _Stationary(book, facts)
     ref_world = str(book.get("nii.transmission.reference_world"))

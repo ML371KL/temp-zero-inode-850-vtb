@@ -1372,6 +1372,7 @@ function passportRow(d) {
 // с ключом цели — стационарная маржа мира суждения (`nim_stationary`, `stationary_*`) либо маржа модальной клетки (`printed_*`).
 const NIM_KEY = "nii.nim_lt_target_mgmt";
 const trans = (d) => obj(obj(d.nii).transmission), nimLevel = (d) => obj(trans(d).level);
+const nimBase = (d) => `на ${trans(d).weights ? "среднем составе баланса окна" : "составе баланса якоря"}`;
 const nimNode = (d) => (nimLevel(d).world ? nimLevel(d) : obj(trans(d).nim_stationary));
 const nimWords = (d) => `стационарная маржа мира «${worldName(d, nimNode(d).world)}»`, nimTol = (x) => `цель ${pct2(x.target)} ± ${num2(x.tolerance * 100)}${NBSP}п.п.`;
 // Ось ключа цели; её диапазон подписан диапазоном ключа, пока ключ — не само суждение.
@@ -1383,7 +1384,7 @@ function nimJudged(d, r) {
 }
 function nimPrinted(d, r) {
 	const [w, a, b] = nimJudged(d, r);
-	return !isNum(a) ? null : hint(nimLevel(d).world ? `суждение книги — ${nimWords(d)} на составе баланса якоря`
+	return !isNum(a) ? null : hint(nimLevel(d).world ? `суждение книги — ${nimWords(d)} ${nimBase(d)}`
 		: `ключ цели; ${w} ${pct2(a)}${isNum(b) ? `, при нужном рынку значении — ${pct2(b)}` : ""}`);
 }
 // Уровни смеси при нужном рынку ключе цели (`levels_solved`).
@@ -1406,7 +1407,7 @@ function levelsCard(d, brief) {
 	const lines = [{ name: mix, key: "key-line key-model", color: MODEL, width: 2.2, ...DOT, points: A.map((a) => [a.year, a.ni_sh]) },
 		{ name: "модальная клетка", key: "key-line key-third2", color: THIRD, dashed: true, ...DOT, points: at(m.years, m.ni_sh) }].filter((x) => x.points.some((p) => isNum(p[1])));
 	return card({ title: `На чём стоит заголовок: ${lt("уровни", "долгосрочные")}`, link: ["capital", "Путь смеси по годам"],
-		sub: (isNum(s.value) ? `Суждение книги о марже — стационарная маржа при ставках мира «${worldName(d, s.world)}» на составе баланса якоря: ${pct2(s.value)}`
+		sub: (isNum(s.value) ? `Суждение книги о марже — стационарная маржа при ставках мира «${worldName(d, s.world)}» ${nimBase(d)}: ${pct2(s.value)}`
 			+ (s.reference_world ? `; уровень мира-опоры «${worldName(d, s.reference_world)}» выведен из неё — ${pct2(s.reference_value)}. `
 				: ` (${nimTol(s)}); ключ цели — уровень мира-опоры — ${pct2(t.nim_lt_target_mgmt)}. `) : "")
 			+ `Уровни клеток и слоёв — результат, а не суждение: состав баланса у каждой клетки свой, кредит вместо ликвидных активов поднимает маржу. Оценка стоит на строке «${mix}»: клетки под вероятностями точки.` },
@@ -2324,8 +2325,8 @@ function transmissionCard(d) {
 		kpi(fmt.num(t.target, 3), "передача M − N в книге (T*)"),
 		kpi(`${fmt.num(t.realized, 3)} ${t.solved ? "✓" : "✗"}`, `реализованная, допуск ${sci(t.tol)}`),
 		isNum(np.value) ? kpi(`${num2(t.nim_lt_target_mgmt * 100)} / ${pct2(np.value)}`, `${head}: ключ цели / печатает модальная клетка (${cellName(d, np.cell)}) в среднем за ${np.from_year}–${np.to_year} годы; ${nimTol(np)}${eng}`)
-			: ns.reference_world ? kpi(`${num2(ns.value * 100)} / ${pct2(ns.reference_value)}`, `${head}: суждение книги — ${nimWords(d)} на составе баланса якоря / выведенный из неё уровень мира-опоры «${worldName(d, ns.reference_world)}»${eng}`)
-			: isNum(ns.value) ? kpi(`${num2(t.nim_lt_target_mgmt * 100)} / ${pct2(ns.value)}`, `${head}: ключ цели — уровень мира-опоры / суждение книги — ${nimWords(d)} на составе баланса якоря; ${nimTol(ns)}${eng}`)
+			: ns.reference_world ? kpi(`${num2(ns.value * 100)} / ${pct2(ns.reference_value)}`, `${head}: суждение книги — ${nimWords(d)} ${nimBase(d)} / выведенный из неё уровень мира-опоры «${worldName(d, ns.reference_world)}»${eng}`)
+			: isNum(ns.value) ? kpi(`${num2(t.nim_lt_target_mgmt * 100)} / ${pct2(ns.value)}`, `${head}: ключ цели — уровень мира-опоры / суждение книги — ${nimWords(d)} ${nimBase(d)}; ${nimTol(ns)}${eng}`)
 			: kpi(pct2(t.nim_lt_target_mgmt), `${head} (движок ${pct2(t.target_eng)})`),
 		isNum(t.sigma0_liab) ? kpi(`${fmt.signed(t.sigma0 * 100, 2)} / ${fmt.pp(t.sigma0_liab)}`, `сдвиг LT-спредов σ0: активы / пассивы; на активах — ${pct0(t.sigma0_split)} сдвига`)
 			: kpi(fmt.pp(t.sigma0), "общий сдвиг LT-спредов σ0"),

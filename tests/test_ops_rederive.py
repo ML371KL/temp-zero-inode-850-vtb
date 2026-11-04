@@ -209,8 +209,8 @@ def test_the_sheet_holds_the_rules_of_the_anchor_year_on_the_facts_of_the_tree()
     for name, row in inputs["nii_books"]["books"].items():
         assert all(book[name][k] == v for k, v in row.items()), name
     record = committed_record()
-    assert record["near_spreads"]["same"] and record["funds"]["levels"]["retail"] == pytest.approx(
-        (inputs["funds_premium"]["facts"]["retail"] + record["funds"]["need_level"]) / 2, abs=5e-5)
+    assert record["near_spreads"]["same"] and record["funds"]["levels"]["retail"] == pytest.approx(   # уровень — 4 знака:
+        (inputs["funds_premium"]["facts"]["retail"] + record["funds"]["need_level"]) / 2, abs=5e-5 + 1e-9)  # полединицы знака
 
 
 # ------------------------------------------------------------ точечная запись

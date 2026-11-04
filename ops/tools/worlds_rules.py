@@ -42,6 +42,7 @@ TEMPLATE = "data/assumptions/assumptions_template.yaml"
 BUILDER = "data/assumptions/build_assumptions.py"
 INPUTS = "data/assumptions/evidence/path/inputs/vtb_r2_inputs.json"
 GATES = "data/assumptions/gate_explanations.yaml"
+DECISIONS = "docs/DECISIONS.md"
 RESULTS = "data/assumptions/results.json"
 FACTS_BOOKS = "data/facts/nii_books.json"
 SECURITIES, WHOLESALE = "securities", "wholesale"
@@ -133,7 +134,9 @@ def released_record(root: Path, version: str) -> str | None:
 def book_version(ctx) -> list[dict]:
     """Приём миров — новая версия книги: младший разряд + 1, если версия с номером шаблона уже выпущена на другой записи
     миров (тег `book-<версия>`). Иначе — номер шаблона (приём той же записи, повтор команды, книга до выпуска). Номер в
-    строке 1 шапки шаблона («… ШАБЛОН машинной книги, версия X (…») — за ним; остальная проза шапки — человеку."""
+    строке 1 шапки шаблона («… ШАБЛОН машинной книги, версия X (…») и в строке открытого вопроса о мирах журнала решений
+    («действует запись, на которой стоит книга X, но не дольше …», тест календаря отказов) — за ним; остальная проза
+    шапки и журнала — человеку."""
     book = template(ctx)
     cur = str(book["meta"]["version"])
     rel = released_record(Path(ctx.root), cur)
@@ -145,7 +148,11 @@ def book_version(ctx) -> list[dict]:
     m = one(first, r"ШАБЛОН машинной книги, версия (\S+) \(")
     if m.group(1) != cur:
         raise RuleError(f"строка 1 шаблона несёт версию {m.group(1)}, meta.version — {cur}")
-    return [{"file": TEMPLATE, "values": {("meta", "version"): new}, "replace": [sub_groups(m, [new])] if new != cur else []}]
+    d = one(text_of(ctx, DECISIONS), r"действует запись, на которой стоит книга (\S+), но не дольше")
+    if d.group(1) != cur:
+        raise RuleError(f"журнал решений: открытый вопрос о мирах называет книгу {d.group(1)}, meta.version — {cur}")
+    return [{"file": TEMPLATE, "values": {("meta", "version"): new}, "replace": [sub_groups(m, [new])] if new != cur else []},
+            {"file": DECISIONS, "replace": [sub_groups(d, [new])] if new != cur else []}]
 
 
 # ----------------------------------------------------------------------------------------------- веса миров

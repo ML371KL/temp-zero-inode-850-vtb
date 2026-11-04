@@ -138,7 +138,11 @@ def cmd_lag_band(a) -> int:
 
 # ----------------------------------------------------------------------------------------------- вывод на ядре
 def cmd_derive(a) -> int:
-    label = "adopt-" + re.sub(r"[^\w.\-]", "_", os.environ.get("WORLDS_VERSION") or "local")
+    base = "adopt-" + re.sub(r"[^\w.\-]", "_", os.environ.get("WORLDS_VERSION") or "local")
+    label, n = base, 1
+    while (ROOT / "var" / "rederive" / f"{label}.json").exists():     # круг цикла — своя запись запуска (флаги кругов целы)
+        n += 1
+        label = f"{base}-{n}"
     workers = os.environ.get("BANK_WORKERS") or "2"
     p = subprocess.run([PY, "-B", "ops/tools/rederive.py", "--no-quick", "--workers", workers, "--label", label], cwd=ROOT,
                        env=env(), capture_output=True, text=True, encoding="utf-8", errors="replace")

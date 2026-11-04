@@ -1,10 +1,9 @@
-"""Сборщик фактов без папки передачи: якорь — из аргумента, состав — тремя таблицами, функции — общие.
+"""Сборщик фактов ВТБ без папки передачи: якорь — из аргумента, состав — таблицами начала файла, функции — общие.
 
-Квартал якоря приходит аргументом `--anchor` (по умолчанию — `data/facts/anchor.json`); дата, лист якоря,
-нарастающий итог, окна мостов и стартовый реестр выводятся из него и из данных. В теле функций сборщика нет
-периодов и дат — они живут в именованных параметрах начала файла (SCHEMA.md §3). Формулы блока пакета и формы
-ядра проверяются на числах примера; файл отчёта квартала — на закоммиченных фактах (только CI, пока сборщика под ВТБ
-нет). Блока пакета у ВТБ нет: проверки блока на закоммиченных фактах сняты.
+Квартал якоря приходит аргументом `--anchor` (по умолчанию — `data/facts/anchor.json`); дата, каталог листов квартала,
+нарастающий итог, суффиксы метрик ручного листа выводятся из него. В теле функций сборщика нет периодов и дат — они
+живут в именованных параметрах начала файла (SCHEMA.md §3). Файл отчёта квартала — на закоммиченных фактах; сборка
+из листов (папка передачи) — в tests/test_facts_archive.py.
 """
 
 from __future__ import annotations
@@ -22,10 +21,6 @@ from pathlib import Path
 import pytest
 
 tact = pytest.mark.tact
-# Сборщик (`ops/tools/build_facts.py`) — копия сборщика панели-образца (Т): его таблицы книг, строк ОПУ и блока пакета —
-# образца, и на фактах ВТБ он не собирает. Тесты, которые гоняют его на закоммиченных фактах, идут только в CI, пока
-# сборщика под ВТБ нет; функции сборщика без фактов эмитента (якорь, формулы, отказы) — в такте.
-VTB_BUILDER = "сборщик фактов ВТБ — до перезаякоривания 30.10"
 
 ROOT = Path(__file__).resolve().parents[1]
 FACTS = ROOT / "data" / "facts"
@@ -56,17 +51,19 @@ def facts() -> dict[str, dict]:
 
 @tact
 def test_anchor_derivations():
-    a = B.Anchor("2026Q2")
-    assert (a.date, a.open_date, a.prev_year_end) == ("2026-06-30", "2026-03-31", "2025-12-31")
-    assert (a.ytd, a.ytd_ru, a.year_quarters) == ("6M2026", "6М2026", ["2026Q1", "2026Q2"])
-    assert a.anchor_sheet == "stage1/ifrs/ifrs_anchor_2026Q2.csv"
+    a = B.Anchor("2026Q3")
+    assert (a.date, a.open_date, a.prev_year_end, a.next_day) == ("2026-09-30", "2026-06-30", "2025-12-31", "2026-10-01")
+    assert (a.ytd, a.ytd_ru, a.year_quarters) == ("9M2026", "9М2026", ["2026Q1", "2026Q2", "2026Q3"])
+    assert (a.stage, a.tag_q, a.tag_ytd, a.tag_next_month) == ("stage1/facts-2026Q3", "q3", "9m", "oct")
     q4 = B.Anchor("2026Q4")
-    assert (q4.date, q4.ytd, q4.ytd_ru, q4.prev_year_end, len(q4.year_quarters)) == ("2026-12-31", "FY2026", "2026 год", "2025-12-31", 4)
+    assert (q4.date, q4.ytd, q4.ytd_ru, q4.prev_year_end, q4.tag_next_month, len(q4.year_quarters)) == \
+        ("2026-12-31", "FY2026", "12М2026", "2025-12-31", "jan", 4)
     q1 = B.Anchor("2027Q1")
     assert (q1.open_date, q1.ytd, q1.prev_year_end, q1.year_quarters) == ("2026-12-31", "3M2027", "2026-12-31", ["2027Q1"])
-    assert B.q_prev("2027Q1") == "2026Q4" and B.q_days("2026Q2") == 91 and B.q_days("2026Q1") == 90
+    assert B.q_prev("2027Q1") == "2026Q4" and B.q_next("2026Q4") == "2027Q1"
+    assert B.q_days("2026Q2") == 91 and B.q_days("2026Q1") == 90 and B.q_days("2026Q3") == 92
     assert B.q_range("2025Q3", "2026Q2") == ["2025Q3", "2025Q4", "2026Q1", "2026Q2"]
-    assert B.ifrs_q("2026Q2") == "2Q2026" and B.q_of_date("2026-06-30") == "2026Q2" and B.q_ru("2026Q2") == "2К2026"
+    assert B.ifrs_q("2026Q2") == "2Q2026" and B.q_ru("2026Q2") == "2К2026" and B.ytd_ru("2026Q4") == "12М2026"
     with pytest.raises(B.BuildError):
         B.Anchor("2026-Q2")
 
@@ -94,105 +91,60 @@ def test_builder_has_no_quarter_literals_outside_named_parameters():
     assert not bad, "периоды и даты в теле функций: " + "; ".join(bad)
 
 
-# ------------------------------------------------------------------ три таблицы состава
+# ------------------------------------------------------------------ таблицы состава
 
-BOOKS = ("cards", "cash_loans", "auto", "mortgage", "sme_loans", "corp_loans", "securities", "liquidity",
-         "retail_current", "retail_term", "corp_funds", "wholesale")
-NAMES = ("Кредитные карты", "Кредиты наличными", "Автокредиты", "Ипотека", "Кредиты МСБ", "Корпоративные кредиты и лизинг",
-         "Долговые бумаги", "Ликвидность", "Текущие счета физлиц", "Срочные вклады физлиц", "Средства бизнеса",
-         "Оптовое фондирование")
+BOOKS = ("corp_loans", "mortgage", "consumer_loans", "securities", "liquidity", "retail_current", "retail_term", "corp_funds",
+         "wholesale")
 
 
 @tact
 def test_table_of_books_is_the_contract_set():
-    assert tuple(B.BOOKS) == BOOKS and tuple(s["name"] for s in B.BOOKS.values()) == NAMES
-    assert [b for b in BOOKS if B.BOOKS[b]["side"] == "asset"] == list(BOOKS[:8])
-    assert B.books_of(loans=True) == list(BOOKS[:6]) and B.books_of("liability") == list(BOOKS[8:])
-    seg = {b: B.BOOKS[b]["segment"] for b in B.books_of(loans=True)}
-    assert seg == {**dict.fromkeys(BOOKS[:5], "retail"), "corp_loans": "corporate"}, "кредиты МСБ — сегмент retail (решение проекта)"
-    for b, s in B.BOOKS.items():
-        assert s["balance"] and s["interest"], b
-        for path, lines in (s.get("nodes") or {}).items():
-            assert set(lines) <= set(s["balance"]), f"{b}: узел {path} называет строку вне книги"
-    lines = [ln.lstrip("-") for s in B.BOOKS.values() for ln in s["balance"]]
-    assert len(lines) == len(set(lines)), "строка остатка стоит в двух книгах"
-    interest = [ln for s in B.BOOKS.values() for ln in s["interest"]] + [ln for ls in B.INTEREST_OUTSIDE.values() for ln in ls]
-    assert len(interest) == len(set(interest)), "строка процентов стоит в двух книгах"
+    assert tuple(B.BOOKS) == BOOKS
+    assert B.books_of("asset") == list(BOOKS[:5]) and B.books_of("liability") == list(BOOKS[5:])
+    assert B.books_of(loans=True) == list(BOOKS[:3])
+    assert {b: B.BOOKS[b]["segment"] for b in B.books_of(loans=True)} == {"corp_loans": "corporate", "mortgage": "retail",
+                                                                          "consumer_loans": "retail"}
+    starts = [s for spec in B.BOOKS.values() for s in spec["rows"] + spec.get("moved", ())]
+    for b, spec in B.BOOKS.items():
+        assert spec["rows"] and spec["cite"] in ("notes", "sup", "b2", "share"), b
+    assert len(B.BOOKS["liquidity"]["rows"]) == 4 and len(B.BOOKS["liquidity"]["moved"]) == 3, \
+        "ликвидность — доходные размещения (решение B2): деньги, резервы и деньги НПФ — в прочих активах"
+    assert len(starts) == len(set(starts)), "строка листа книг стоит в таблице дважды"
 
 
 @tact
-def test_table_of_pnl_lines_and_the_block():
-    assert tuple(B.PNL_LINES) == ("nii", "fees_net", "insurance_net", "llp_debt_fa", "opex")
-    assert len(B.PNL_LINES["opex"]) == 4, "расходы — четыре строки по функциям"
-    assert set(B.PNL_REPORTED) == {"pbt", "tax", "ni", "ni_shareholders", "ni_nci"}
-    assert B.BLOCK["tax_shield"] == 0.25 and B.PNL_OPERATING_NI == "op_np"
+def test_table_of_pnl_and_other_assets():
+    assert set(B.PNL_LINES) == {"nii", "fees_net", "llp_debt_fa", "opex"}
+    assert set(B.PNL_REPORTED) == {"pbt", "tax", "np_after_tax", "np_resale_subs", "ni"}
+    assert [k for k, _ in B.OTHER_ASSETS_FIXED] == ["dta", "goodwill", "associates"], "постоянная часть — решение ведущего № 3"
+    assert B.BRIDGE_MEDIAN == ("cir",) and B.RATES_CARRY_FROM == "2026Q3"
 
 
 @tact
-def test_table_of_other_assets_and_liabilities():
-    fixed = [k for k, s in B.OTHER_ASSETS.items() if s.get("fixed")]
-    assert fixed == ["yandex_stake", "associates"], "постоянные прочие активы — пакет и ассоциированные компании"
-    book_lines = {ln for s in B.BOOKS.values() for ln in s["balance"] if not ln.startswith("-")}
-    other = [ln for spec in (B.OTHER_ASSETS, B.OTHER_LIABILITIES) for s in spec.values() for ln in s["lines"] if not ln.startswith("-")]
-    assert not set(other) & book_lines, "строка прочих активов или обязательств уже стоит в книге"
-    moved = {ln[1:] for s in B.BOOKS.values() for ln in s["balance"] if ln.startswith("-")}
-    assert moved <= set(other), "строка, вычтенная из книги, обязана стоять в прочих активах (акции — вне книги бумаг)"
-    for spec in (B.OTHER_ASSETS, B.OTHER_LIABILITIES):
-        assert all(s["title"] for s in spec.values())
-
-
-@pytest.mark.ci_only(reason=VTB_BUILDER)
-@pytest.mark.xfail(strict=True, reason=VTB_BUILDER)
 def test_committed_facts_follow_the_tables():
-    """Факты собраны теми же таблицами: порядок книг, строки ОПУ, части прочих активов и обязательств."""
+    """Факты собраны теми же таблицами: порядок книг, строки ОПУ, части постоянных прочих активов."""
     f = facts()
     assert tuple(f["balance"]["books"]) == tuple(B.BOOKS) == tuple(f["nii_books"]["books"])
-    assert tuple(f["balance"]["other_assets_parts"]) == tuple(B.OTHER_ASSETS)
-    assert tuple(f["balance"]["other_liabilities_parts"]) == tuple(B.OTHER_LIABILITIES)
+    assert tuple(f["balance"]["other_assets_fixed_parts"]) == tuple(k for k, _ in B.OTHER_ASSETS_FIXED)
     row = f["pnl_quarterly"]["quarters"][f["anchor"]["period"]]
     assert all(k in row for k in B.PNL_LINES) and tuple(row["reported"]) == tuple(B.PNL_REPORTED)
-    dates = [a["date"] for a in f["shares"]["corporate_actions"]]
-    assert dates == sorted(B.ACTIONS), "корпоративные события — по таблице подписей сборщика"
-    assert f["dividends"]["policy"]["cap"]["v"] == B.POLICY["cap"] and f["dividends"]["policy"]["name"] == B.POLICY["name"]
+    hist = f["balance"]["history"]
+    assert all(tuple(r["books"]) == tuple(B.BOOKS) for r in hist.values()), "остатки книг на концы кварталов истории"
+    anchor = hist[f["anchor"]["period"]]["books"]
+    assert {b: anchor[b]["v"] for b in BOOKS} == {b: f["balance"]["books"][b]["v"] for b in BOOKS}
 
 
-# ------------------------------------------------------------------ формулы
-
-@tact
-def test_block_of_the_stake():
-    """Блок пакета из двух поправок эмитента: проценты — поправка / (1 − 0,25), без деления на долю акционеров;
-    неконтролирующая доля — только эффект пакета."""
-    x = B.block_of(-6.056275, -1.698894, -21.8, 4.3, 0.5001, 0.25)
-    assert abs(x["debt_interest"] + 2.265192) < 1e-6 and abs(x["ni_shareholders"] + 7.755169) < 1e-6
-    assert abs(x["nci"] + 6.053853) < 1e-6 and abs(x["pbt"] + 19.765192) < 1e-6
-    assert abs(x["ni"] - x["ni_shareholders"] - x["nci"]) < 1e-12 and abs(x["tax"] - (x["ni"] - x["pbt"])) < 1e-12
-    zero = B.block_of(0.0, 0.0, 0.0, 0.0, 0.5001, 0.25)
-    assert all(v == 0 for v in zero.values())
-
-
-@tact
-def test_unaudited_profit_and_core_form():
-    ni = {"2025Q3": 45.0, "2025Q4": 54.0, "2026Q1": 46.5, "2026Q2": 52.0}
-    assert B.unaudited_profit(ni, "2026Q2", [3, 4]) == 98.5, "после отсечки 4-го квартала — прибыль двух кварталов"
-    assert B.unaudited_profit(ni, "2026Q1", [3, 4]) == 46.5 and B.unaudited_profit(ni, "2025Q4", [3, 4]) == 54.0
-    keys = {"ded20": 197.99, "gap20": 0.0, "fvoci_recognition": 0.64, "ded11": 168.895, "gap11": 0.00114}
-    n20, n11 = B.core_form(bv=756.8, reserve=-4.6, payable=4.8, pre_dividend=False, t2=123.182, at1=0.0, rwa=5287.303,
-                           unaudited=98.589488, keys=keys)
-    assert abs(n20 - 0.1293) < 5e-6 and abs(n11 - 0.0940) < 5e-6
-    with_dividend, _ = B.core_form(bv=756.8, reserve=-4.6, payable=4.8, pre_dividend=True, t2=123.182, at1=0.0, rwa=5287.303,
-                                   unaudited=98.589488, keys=keys)
-    assert abs(with_dividend - n20 - 4.8 / 5287.303) < 1e-9, "норматив до вычета дивиденда возвращает остаток к выплате"
-
+# ------------------------------------------------------------------ мелкие правила
 
 @tact
 def test_small_helpers():
-    assert B.dividend_period({"fiscal_period": "2024Q1-Q3"}) == "2024Q3" and B.dividend_period({"fiscal_period": "2026Q2"}) == "2026Q2"
-    assert B.page_words("6") == "с. 6" and B.page_words("22, 84") == "с. 22, 84" and B.page_words("PL!AZ107") == "PL!AZ107"
-    assert B.page_words("прим. 19") == "прим. 19" and B.page_words("1–2") == "с. 1–2"
-    assert B.ru(6272.1) == "6 272,1" and B.ru(-0.5, 2) == "−0,50" and B.pct(0.1293) == "12,93 %"
-    assert B.d_ru("2026-10-12") == "12.10.2026" and B.d_words("2026-10-12") == "12 октября 2026 года"
-    assert B.dedup("a; b; a") == "a; b" and B.na("причина") == {"v": None, "calc": "причина"}
-    assert abs(B.detrended_sd([1.0, 2.0, 3.0, 4.0])) < 1e-12 and B.detrended_sd([0.0, 1.0, 0.0, 1.0]) > 0.5
+    assert B.page_words("6") == "с. 6" and B.page_words("13 и 15") == "с. 13 и 15" and B.page_words("22, 84") == "с. 22, 84"
+    assert B.page_words("2.P&L!B12") == "2.P&L!B12" and B.page_words("слайд 11") == "слайд 11"
+    assert B.ru(6272.1) == "6272,1" and B.ru(-0.5, 2) == "−0,50" and B.ruk(1408.2) == "1 408,2" and B.rud(25314.9) == "25 314.9"
+    assert B.d_ru("2026-10-12") == "12.10.2026" and B.shares_words(12927766417) == "12 927 766 417"
+    assert B.na("причина") == {"v": None, "calc": "причина"}
+    assert B.est(1.0, "оценка", rng=(0.5, 2.0)) == {"v": 1.0, "calc": "оценка", "estimated": True, "range": [0.5, 2.0]}
+    assert B.strip_tail("начало; якорь 2026Q3: хвост", "; якорь ") == "начало"
     with pytest.raises(B.BuildError):
         B.node(None, "документ")
     with pytest.raises(B.BuildError):
@@ -200,64 +152,73 @@ def test_small_helpers():
 
 
 @tact
-def test_document_titles():
-    assert "шесть месяцев 2026 года" in B.doc_title("primary/2026Q2_ifrs_fs.pdf", None)
-    assert "за 2025 год" in B.doc_title("primary/FY2025_ifrs_fs.pdf", "x")
-    assert B.doc_title("primary/other.pdf", "заголовок; запись — MANIFEST-x.md") == "заголовок"
-    assert B.doc_title(None, None) is None
-    docs = json.loads((FACTS / "anchor.json").read_text(encoding="utf-8"))["documents"]
-    assert not [d["key"] for d in docs if "MANIFEST" in d["title"]], "в заголовках реестра — рабочие пометки манифестов"
+def test_bridge_value_series():
+    """Ряд значения моста: тот ряд истории, чьё среднее по окну равно значению; иначе — «× 4», если он есть."""
+    rows = [{"period": "2026Q1", "gap": {"v": 0.001}, "gap_x4": {"v": 0.003}},
+            {"period": "2026Q2", "gap": {"v": 0.003}, "gap_x4": {"v": 0.005}}]
+    block = {"window": ["2026Q1", "2026Q2"], "value": {"v": 0.002}, "history": rows}
+    assert B.bridge_series(block) == "gap"
+    assert B.bridge_series({**block, "value": {"v": 0.004}}) == "gap_x4"
+    assert B.bridge_series({**block, "value": {"v": 0.0025}}) == "gap_x4", "медиана и прочее — прежнее правило"
+    assert B.bridge_series({**block, "history": [{"period": "2026Q1", "gap": {"v": 0.001}}]}) == "gap"
 
 
 # ------------------------------------------------------------------ файл отчёта квартала
 
-@pytest.mark.ci_only(reason=VTB_BUILDER)
-@pytest.mark.xfail(strict=True, reason=VTB_BUILDER)
+@tact
 def test_quarter_report_from_the_committed_facts():
-    """Файл отчёта квартала для перезаякоривания: форма семейства с отличиями эмитента — период дивиденда вместо
-    года, слоты нормативов банковской группы и флаг оценки, акции одной категории."""
+    """Файл отчёта квартала для перезаякоривания: форма семейства с отличиями эмитента — годовой календарь
+    (год прибыли объявленного дивиденда), слоты нормативов банковской группы и флаг оценки, акции одной категории,
+    без поля capital.t2 (слот t2_recognized у ВТБ — не ключ книги)."""
     f = facts()
     r = B.report_from_facts(f, source="тест")
     assert r["schema"] == "quarter-report/1" and r["period"] == f["anchor"]["period"] and r["as_of"] == f["anchor"]["as_of"]
     assert tuple(r["balance"]["books"]) == BOOKS == tuple(r["interest"])
+    assert r.get("published", "9") > r["as_of"]
     b = r["balance"]
-    assert "dividends_payable_year" not in b and isinstance(b["dividends_payable_declared"], list)
-    assets = sum(b["books"][x] for x in BOOKS[:8]) - b["allowance"] + b["other_assets"]
-    claims = sum(b["books"][x] for x in BOOKS[8:]) + b["other_liabilities"] + b["dividends_payable"] + b["bv_common"] + b["at1"] + b["nci"]
-    assert abs(assets - claims) < 0.2 and abs(assets - f["balance"]["total_assets"]["v"]) < 1e-6
-    assert b["fvoci"] == f["balance"]["securities"]["fvoci_debt"]["v"] + f["balance"]["securities"]["fvoci_repo"]["v"]
+    assert "dividends_payable_declared" not in b and b["dividends_payable_year"] == f["balance"]["dividends_payable_year"]
+    assets = sum(b["books"][x] for x in BOOKS[:5]) - b["allowance"] + b["other_assets"]
+    claims = sum(b["books"][x] for x in BOOKS[5:]) + b["other_liabilities"] + b["dividends_payable"] + b["bv_common"] + b["at1"] + b["nci"]
+    assert abs(assets - claims) < 0.2 and abs(assets - f["balance"]["total_assets"]["v"]) < 0.2
+    assert b["fvoci"] == pytest.approx(f["balance"]["securities"]["fvoci_debt"]["v"] + f["balance"]["securities"]["fvoci_repo"]["v"])
+    assert b["other_assets_fixed"] == f["balance"]["other_assets_fixed"]["v"] and b["loans_fvtpl"] == 0.0
     p = r["pnl"]
     assert abs(sum(p[k] for k in ("nii", "llp_debt_fa", "fees_net", "insurance_net", "noncore_net", "opex", "misc_net")) - p["pbt"]) < 2e-6
-    assert "estimated" not in p or p["estimated"] is True
+    assert p.get("estimated") is True, "прибыль квартала — напечатанное значение файла эмитента"
     c = r["capital"]
-    assert c["n20_pre_dividend"] is False and isinstance(c["estimated"], bool) and ("estimate" in c) == c["estimated"]
+    assert isinstance(c["n20_pre_dividend"], bool) and isinstance(c["estimated"], bool) and ("estimate" in c) == c["estimated"]
     assert c["n20_0"] == f["capital"]["n20_0"]["value"]["v"] and c["n1_1_bank"] == f["capital"]["n1_1_bank"]["value"]["v"]
-    assert c["basel_cet1"] == f["capital"]["basel"]["cet1"]["v"] and c["t2"] == f["capital"]["t2_recognized"]["v"]
+    assert c["basel_cet1"] == f["capital"]["basel"]["cet1"]["v"] and "t2" not in c
     assert set(r["shares"]) == {"issued_total", "outstanding_total", "economic_treasury", "issued_ordinary", "outstanding_ordinary"}
     assert set(r["market"]["ofz_curve"]) == {"1", "3", "5", "10"} and r["market"]["key_avg"] == f["nii_books"]["key_avg_anchor_q"]["v"]
     m = f["mgmt_quarterly"]["quarters"][r["period"]]
-    assert r["mgmt"]["nim"] == (m["nim_exact"]["v"] if m["nim_exact"]["v"] is not None else m["nim"]["v"])
-    assert abs(sum(r["interest"][x] for x in BOOKS[:8]) - sum(r["interest"][x] for x in BOOKS[8:]) - r["dia"]
+    assert r["mgmt"] == {x: m[x]["v"] for x in ("nim", "cor", "cir")}
+    assert abs(sum(r["interest"][x] for x in BOOKS[:5]) - sum(r["interest"][x] for x in BOOKS[5:]) - r["dia"]
                + f["nii_books"]["other_interest_net_q"]["v"] - p["nii"]) <= 0.15
+    opened = B.q_end(B.q_prev(r["period"])).isoformat()
+    want = [h["period"] for h in f["dividends"]["history"] if opened < h["decided_date"] <= r["as_of"]]
+    assert [d["period"] for d in r["dividend_decisions"]] == want
 
 
-@pytest.mark.ci_only(reason=VTB_BUILDER)
-@pytest.mark.xfail(strict=True, reason=VTB_BUILDER)
+@tact
 def test_quarter_report_refuses_what_does_not_add_up():
     r = B.report_from_facts(facts(), source="тест")
     for change, why in ((lambda x: x["balance"].__setitem__("other_assets", x["balance"]["other_assets"] + 10), "баланс"),
                         (lambda x: x["pnl"].__setitem__("misc_net", x["pnl"]["misc_net"] + 1), "ОПУ"),
-                        (lambda x: x["balance"]["books"].pop("cards"), "balance.books.cards"),
+                        (lambda x: x["balance"]["books"].pop("mortgage"), "balance.books.mortgage"),
                         (lambda x: x.pop("shares"), "shares"),
-                        (lambda x: x["balance"].__setitem__("dividends_payable_declared", [{"period": "2026Q1", "amount": 99.0}]), "объявленные")):
+                        (lambda x: x["balance"].__setitem__("dividends_payable_declared", [{"period": "2026Q1", "amount": 99.0}]),
+                         "объявленные"),
+                        (lambda x: (x["balance"].__setitem__("dividends_payable", 5.0), x["balance"].pop("dividends_payable_year"),
+                                    x["balance"].__setitem__("other_liabilities", x["balance"]["other_liabilities"] - 5.0)),
+                         "года прибыли")):
         bad = copy.deepcopy(r)
         change(bad)
         with pytest.raises(B.BuildError, match=why):
             B.check_report(bad)
 
 
-@pytest.mark.ci_only(reason=VTB_BUILDER)
-@pytest.mark.xfail(strict=True, reason=VTB_BUILDER)
+@tact
 def test_cli_report_from_ready_facts(tmp_path):
     """`--report ФАЙЛ --facts КАТАЛОГ` пишет отчёт квартала без папки передачи; чужой якорь — отказ."""
     out = tmp_path / "report.json"
@@ -284,5 +245,16 @@ def test_cli_without_handoff_dir_refuses(tmp_path):
 def test_cli_help_names_the_arguments():
     res = subprocess.run([sys.executable, "-B", str(BUILDER), "--help"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     assert res.returncode == 0
-    for arg in ("--anchor", "--out", "--check", "--report", "--facts"):
+    for arg in ("--anchor", "--out", "--check", "--report", "--facts", "--base", "--expected"):
         assert arg in res.stdout, arg
+
+
+@tact
+def test_base_of_a_wrong_quarter_refuses(tmp_path):
+    """База — факты прежнего квартала: каталог фактов другого квартала — отказ до чтения листов."""
+    for k, body in facts().items():
+        (tmp_path / f"{k}.json").write_text(json.dumps(body, ensure_ascii=False), encoding="utf-8")
+    anchor = json.loads((FACTS / "anchor.json").read_text(encoding="utf-8"))["period"]
+    with pytest.raises(B.BuildError, match="нужны факты"):
+        B.load_base(B.Anchor(anchor), tmp_path)
+    assert B.load_base(B.Anchor(B.q_next(anchor)), tmp_path)["anchor"]["period"] == anchor

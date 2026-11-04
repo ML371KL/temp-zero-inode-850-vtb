@@ -30,19 +30,23 @@ def test_schema_describes_every_file():
 
 
 def test_schema_lists_the_named_parameters_of_the_builder():
-    """Всё, что в сборщике названо датой или периодом, — именованный параметр, и схема его перечисляет."""
-    text = (FACTS / "SCHEMA.md").read_text(encoding="utf-8")
+    """Всё, что в сборщике названо датой, периодом или решением, — именованный параметр, и документ сборщика
+    (docs/FACTS.md, раздел 9; на него ссылается SCHEMA.md) его перечисляет вместе с таблицами состава."""
+    schema = (FACTS / "SCHEMA.md").read_text(encoding="utf-8")
+    text = facts_md().split("## 9. Сборщик фактов", 1)[-1]
     src = (ROOT / "ops" / "tools" / "build_facts.py").read_text(encoding="utf-8")
-    for name in ("PNL_FIRST", "HISTORY_FIRST", "CAPITAL_HISTORY_FIRST", "DEBT_SECURITIES_FROM", "BRIDGE_FIRST",
-                 "NIM_BRIDGE_COMPARABLE_FROM", "COR_BRIDGE_DENOMINATOR", "RAS_FROM", "POLICY", "ACTIONS", "SPLIT_FIRST_TRADE", "INSTRUMENTS",
-                 "GUIDANCE_ITEMS", "MGMT_PAIRS", "BOOKS", "PNL_LINES", "PNL_REPORTED", "BLOCK", "OTHER_ASSETS",
-                 "OTHER_LIABILITIES"):
+    assert "`docs/FACTS.md`, раздел 9" in schema, "SCHEMA.md не ссылается на раздел сборщика в FACTS.md"
+    for name in ("BOOKS", "NOTE_LINES", "ALLOWANCE", "PNL_LINES", "PNL_REPORTED", "OTHER_ASSETS_FIXED", "INTANGIBLES", "EQUITY",
+                 "STAGE", "RULES_FROM", "RULES_FROM_PERIOD", "RATES_CARRY_FROM", "FLOATING_FROM", "FLOATING_SPREAD",
+                 "BRIDGE_MEDIAN", "DECISION_PRINTED_RATIOS", "DECISION_CIR_MEDIAN", "DECISION_B2", "DECISION_FIXED", "CURVE_FILE"):
         assert re.search(rf"^{name}\b", src, re.M), f"в сборщике нет параметра {name}"
-        assert f"`{name}`" in text, f"SCHEMA.md не называет параметр {name}"
-    for name in ("PNL_FIRST", "HISTORY_FIRST", "DEBT_SECURITIES_FROM", "BRIDGE_FIRST", "NIM_BRIDGE_COMPARABLE_FROM", "RAS_FROM"):
+        assert f"`{name}`" in text, f"FACTS.md, раздел 9, не называет параметр {name}"
+    for name in ("RULES_FROM_PERIOD", "RATES_CARRY_FROM"):
         value = re.search(rf'^{name} = "(\d{{4}}Q[1-4])"', src, re.M).group(1)
-        assert re.search(rf"`{name}`[^|]*\| {value} \|", text) or re.search(rf"`{name}`, `\w+` \| {value} \|", text), \
-            f"SCHEMA.md: значение {name} расходится со сборщиком ({value})"
+        assert re.search(rf"`{name}`[^|]*\|[^|]*\b{value}\b[^|]*\|", text), f"FACTS.md: значение {name} расходится со сборщиком ({value})"
+    for name in ("STAGE", "CURVE_FILE"):
+        value = re.search(rf'^{name} = "([^"]+)"', src, re.M).group(1)
+        assert f"| {value} |" in text, f"FACTS.md: значение {name} расходится со сборщиком ({value})"
 
 
 def test_schema_node_names_exist_in_the_facts():

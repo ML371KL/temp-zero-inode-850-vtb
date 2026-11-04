@@ -2132,8 +2132,10 @@ def expected_facts(prev: dict[str, dict], report: dict, *, name: str, sha: str) 
                   "вне книг разнесён по книгам активов, REANCHOR §3.6)")
     interest = {b: abs(num(f"interest.{b}")) for b in BOOKS}
     nii, dia = num("pnl.nii"), abs(num("dia"))
-    t2p = abs(num("pnl.t2_premium")) if has("pnl.t2_premium") else 0.0
-    residual, scale = carry_scale(interest, nii + t2p, dia)  # надбавка за субординацию — вне книг, её несёт ключ книги
+    # надбавка за субординацию (`pnl.t2_premium` ожидаемого отчёта — ряд клетки со своим знаком) — вне книг, её несёт ключ книги:
+    # остаток «ЧПД − проценты книг» — без неё, тем же счётом, что у reanchor.py (nii + t2_premium − …); на ожидании модели он ноль
+    t2p = num("pnl.t2_premium") if has("pnl.t2_premium") else 0.0
+    residual, scale = carry_scale(interest, nii + t2p, dia)
     inc, exp = sum(interest[b] for b in assets_b), sum(interest[b] for b in liabs_b)
     checks.append(("отчёт квартала: проценты книг дают ЧПД отчёта (остаток вне книг — меньше 10 % ЧПД)",
                    abs(residual) < 0.10 * abs(nii), f"Σ книг − страхование вкладов {ru(nii - residual)}, ЧПД {ru(nii)}, "

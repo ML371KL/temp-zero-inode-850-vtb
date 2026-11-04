@@ -254,13 +254,38 @@ def test_the_collector_and_the_tool_read_one_anchor_without_the_grid(decision):
     assert af.period == report["period"] and af.bv == report["balance"]["bv_common"]
 
 
+def _closes_the_contribution_quarter(book) -> bool:
+    """Первый прогнозный квартал книги — квартал решения о взносе акционеров (REANCHOR §3.16)."""
+    rec = book.opt("capital.recapitalization")
+    return bool(rec and rec.get("enabled")) and int(str(book.get("meta.first_period"))[-1]) == int(rec["decision_quarter"])
+
+
+@ci_only
+def test_the_tool_refuses_to_close_the_contribution_quarter_of_the_book_as_is():
+    """Книга как есть с якорем 3К2026: закрываемый 4К2026 — квартал решения о взносе акционеров, и взнос в нём стоит в части
+    клеток — инструмент отказывает с причиной REANCHOR §3.16 (перенос через квартал взноса — решение до отчёта за 2026 год,
+    `docs/MANUAL.md` §12)."""
+    book, facts = real_book_or_skip()
+    if not _closes_the_contribution_quarter(book):
+        pytest.skip("первый прогнозный квартал книги — не квартал решения о взносе")
+    with pytest.raises(R.ReportError, match="квартал решения о взносе"):
+        scene_of(book, facts)
+
+
 @ci_only
 def test_the_collector_and_the_tool_give_the_core_one_anchor_three_quarters_in_a_row():
     """Настоящая книга, три ожидаемых отчёта подряд: факты `build_facts.py --expected` и рабочие факты кандидата
     `reanchor.py` — одно состояние якоря (сверка `--compare-facts` пуста) и одна точка на книге-кандидате. Второй
     шаг — смена года якоря (концы прошлого года, окно моста ЧПМ), третий — квартал собрания (годовой календарь:
-    решение — строкой истории дивидендов с суммой на все категории акций)."""
+    решение — строкой истории дивидендов с суммой на все категории акций).
+
+    Тест держит связку «сборщик + инструмент», а не форму переноса через квартал взноса: если первый прогнозный квартал
+    книги — квартал решения о взносе акционеров (книга с якорем 3К2026 закрывает 4К2026), цепочка идёт на копии книги без
+    взноса (форма цепочек `test_reanchor.py`, `test_reanchor_fixed_ends.py`); отказ на книге как есть держит
+    `test_the_tool_refuses_to_close_the_contribution_quarter_of_the_book_as_is` (решение ведущего 05.11.2026)."""
     book, facts = real_book_or_skip()
+    if _closes_the_contribution_quarter(book):
+        book = book.with_overrides({"capital.recapitalization.enabled": False})
     prev = {k: copy.deepcopy(facts.files[k]) for k in B.BUILT}
     seen_decision, seen_year = False, False
     for _ in range(3):

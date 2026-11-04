@@ -2305,13 +2305,13 @@
      "unit": "pp"
     },
     {
-     "name": "Лаг книги бумаг между мирами (0,16–0,28)",
+     "name": "Лаг книги бумаг между мирами (0,16–0,24)",
      "kind": "value",
      "paths": [
       "nii.books.securities.rho"
      ],
      "low": 0.16,
-     "high": 0.28,
+     "high": 0.24,
      "dist": "triangular",
      "unit": "number"
     },
@@ -5152,8 +5152,8 @@
     "overrides": {
      "nii.books.securities.rho": 0.92,
      "nii.books.securities.spread": {
-      "2026": -0.04616,
-      "2027": -0.04666,
+      "2026": -0.04747,
+      "2027": -0.04732,
       "2028H1": -0.03472,
       "2028H2": -0.03218,
       "2029H1": -0.02964,

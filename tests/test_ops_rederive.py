@@ -24,7 +24,9 @@ ROOT = Path(__file__).resolve().parents[1]
 BOOK = ROOT / "data" / "assumptions"
 SHEET_DIR = BOOK / "evidence" / "path"
 TODAY = dt.date(2031, 2, 3)                      # дата пометки в тестах: в шаблоне её быть не может
-BOOK_VERSION = "1.0"                             # книга, на которой проверены решения ведущего (новая версия — пересмотр)
+BOOK_VERSION = str(yaml.safe_load((BOOK / "assumptions_template.yaml").read_text(encoding="utf-8"))["meta"]["version"])
+#                                                  версия книги — из книги (книга 1.1, флаг сеанса миров: литерал «1.0» краснел на каждой
+#                                                  новой версии без единой правки решений; числа решений тесты сверяют с записью вывода)
 NIM_2027_EXPLAINED = 0.0255                       # книга 0.9: низ объяснённого отклонения строки 1(а) (решение ведущего 29.10.2026)
 TRACKED = ("assumptions_template.yaml", "assumptions.yaml", "assumptions.json", "evidence/path/out/derive_out.json",
            "evidence/path/out/derive_out.txt", "evidence/path/out/derive_start.json")

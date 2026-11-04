@@ -65,7 +65,32 @@ steps:
       worlds.source.sha256: "{record.sha256}"
     replace: {"{from.origin}": "{origin}"}   # подписи источника суждений на витрине: «[Ф: … — magnit-850oa book-1.x]»
 
-  # ---------------------------------------------------------------- сборка и сверка
+  - id: version
+    kind: rule
+    title: "номер версии книги: младший разряд + 1 к версии, выпущенной на другой записи миров"
+    module: ops/tools/worlds_rules.py
+    function: book_version
+  - id: world-weights
+    kind: rule
+    title: "веса миров A-P1 — вероятности записи (ось «Веса миров» вне диапазонов записи — стоп)"
+    module: ops/tools/worlds_rules.py
+    function: world_weights
+
+  # ---------------------------------------------------------------- числа по правилам книги (до вывода на ядре)
+  - id: spreads
+    kind: rule
+    title: "ключи спредов книг ЧПД и лаг бумаг — правило листа calib-nii в форме якоря 3К на ключевой мира H"
+    module: ops/tools/worlds_rules.py
+    function: spreads
+  - id: lag-band
+    kind: run
+    title: "ось лага книги бумаг против полосы правила (ось — суждение: сдвиг полосы — флаг)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "lag-band"]
+  - id: sheet-record
+    kind: run
+    title: "запись листа calib-nii во входе листа вывода: ключи книг, путь бэктеста мира H"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "sheet-record"]
+    check: ["{python}", "-B", "ops/tools/worlds_steps.py", "sheet-record", "--check"]
   - id: build
     kind: run
     title: "машинная книга из шаблона, записи и надстройки"
@@ -75,6 +100,95 @@ steps:
     title: "запись, книга и ближние ключи спредов согласованы (правило листа calib-nii на ключевой мира H)"
     cmd: ["{python}", "-B", "ops/tools/refresh_worlds.py", "--check"]
 
+  # ---------------------------------------------------------------- вывод на ядре
+  - id: derive-loop
+    kind: loop
+    title: "вывод на ядре до неподвижной точки (повтор на той же книге — «изменений нет»)"
+    max: 3
+    steps:
+      - id: derive
+        kind: run
+        title: "вывод на ядре: ops/tools/rederive.py (лист derive_on_engine.py как есть), запись в шаблон"
+        cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "derive"]
+        timeout: 3600
+  - id: build-check
+    kind: run
+    title: "машинная книга воспроизводится сборкой"
+    cmd: ["{python}", "-B", "data/assumptions/build_assumptions.py", "--check"]
+
+  # ---------------------------------------------------------------- таблицы, эталоны, тексты
+  - id: tables
+    kind: run
+    title: "таблицы книги (2 000 прогонов; та же книга — без пересчёта)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "tables"]
+    timeout: 10800
+  - id: gate-masses
+    kind: rule
+    title: "ожидаемые массы объяснений сработавших гейтов — массы таблиц (две значащие цифры)"
+    module: ops/tools/worlds_rules.py
+    function: gate_masses
+  - id: control
+    kind: run
+    title: "контрольная модель (вне допуска больше, чем до приёма, — стоп)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "control"]
+    timeout: 3600
+  - id: numbers
+    kind: run
+    title: "числа документов (метки render_numbers)"
+    cmd: ["{python}", "-B", "ops/tools/render_numbers.py"]
+    check: ["{python}", "-B", "ops/tools/render_numbers.py", "--check"]
+  - id: calendar
+    kind: run
+    title: "календарь отказов сборки: дата отказа по мирам в MANUAL §10.9 (нет — флаг)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "calendar"]
+  - id: walk
+    kind: run
+    on_change: true
+    title: "прогулка версий от прошлой выпущенной книги (файл шагов — из блока walk манифеста)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "walk"]
+    timeout: 3600
+  - id: changes
+    kind: run
+    on_change: true
+    title: "журнал версии книги V<версия>-CHANGES.md: ключи «было → стало» и прогулка"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "changes"]
+  - id: journal
+    kind: journal
+    on_change: true
+    title: "строка версий README книги и запись CHANGELOG"
+    entries:
+      - file: data/assumptions/README.md
+        after: "| Версия | Записана | Что |\n|---|---|---|"
+        text: "| {book.version} | {today_ru} | {labels.walk_step}: миры семейства {version} приняты командой `ops/tools/adopt_worlds.py` (запись, надстройка банков, ближние ключи спредов и лаг бумаг по правилу листа calib-nii, числа на ядре — `ops/tools/rederive.py`); якорь, факты, цена и дата книги, суждения и оси — прежние; быстрые числа команды (500 прогонов): медиана {n.median_before} → {n.median_after} ₽ (печать {n.print_before} → {n.print_after}), точка {n.point_before} → {n.point_after} ₽. Журнал версии — `V{book.version}-CHANGES.md` |"
+      - file: docs/CHANGELOG.md
+        after: "в её репозитории (`ML371KL/temp-zero-inode-850-sber`, файл `docs/CHANGELOG.md`)."
+        text: "\n## {today_ru} — книга {book.version}: {labels.walk_step}\n\n- **Книга** `data/assumptions/` — версия {book.version} (журнал `V{book.version}-CHANGES.md`): миры семейства {version} приняты командой `ops/tools/adopt_worlds.py --version {version}` (отчёт `var/adopt/{version}/report.json`); якорь, факты, цена и дата книги, суждения и оси — прежние. Быстрые числа команды (500 прогонов): медиана {n.median_before} → {n.median_after} ₽, точка {n.point_before} → {n.point_after} ₽. Код ядра (`model/`) не менялся."
+  - id: quick
+    kind: quick
+    title: "быстрые числа книги (500 прогонов, зерно книги)"
+    cmd: ["{python}", "-B", "ops/tools/worlds_steps.py", "quick", "--out", "var/adopt/quick.json"]
+    out: var/adopt/quick.json
+    timeout: 1800
+  - id: gates
+    kind: gates
+    title: "сработавшие гейты таблиц книги"
+    file: data/assumptions/results.json
+    path: checks
+
+# Прогулка версий (ops/tools/worlds_steps.py walk): шаги — по одной причине сдвига; подстановки: {label} — подпись шага
+# миров индекса (labels.walk_step), {short} — короткое имя версии миров, {book}/{prev} — книга и прошлая выпущенная
+# книга, {cbr_decision_ru}. Новое правило, которое двигает отдельную группу ключей, — новый шаг здесь.
+walk:
+  file: data/assumptions/evidence/path/inputs/walk_{prev}_to_{book}.yaml
+  out: data/assumptions/evidence/path/out/walk_{prev}_to_{book}.txt
+  head: "# Прогулка книги ВТБ {prev} → {book} (миры ставок после заседания Банка России {cbr_decision_ru}): шаги ops/tools/walk_book.py, по одной причине сдвига (V{book}-CHANGES.md)."
+  steps:
+    - {name: "{label}: запись миров {short} — пути N/H/M, кривые, уровень кривой в терминале правилом, дата кривых, веса миров", from_end: [worlds.N, worlds.H, worlds.M, worlds.source, meta.curve_as_of, joint.world_prob]}
+    - {name: "{label}: ближние ключи спредов книг и лаг бумаг на ключевой мира H {short} (правило листа calib-nii, якорь 3К)", from_end: [nii.books]}
+    - {name: "{label}: банковская надстройка {short}", from_end: [worlds_bank, worlds.overlay]}
+    - {name: "{label}: числа, выведенные на ядре (rederive.py), концы осей и справочные варианты", from_end: [nii, volumes, fees, opex, other, capital, equity, regimes, credit, dividends, pnl, tax, oci, bridge, valuation, checks, joint]}
+    - {name: "Версия книги {book}", from_end: [meta]}
+
 # Листы и инструменты, которые читают запись миров, надстройку или их копии (сторож тестов сверяет список с деревом).
 # feeds — ключи шаблона из их выхода; пусто — печать или проверка.
 readers:
@@ -83,4 +197,6 @@ readers:
   data/assumptions/evidence/worlds_bank/build_overlay.py: {feeds: [worlds_bank.json], step: overlay-check}
   ops/tools/refresh_worlds.py: {feeds: [], step: refresh-check}
   ops/tools/adopt_worlds.py: {feeds: [], step: ""}
+  ops/tools/worlds_rules.py: {feeds: ["nii.books.*.spread", "nii.books.securities.rho", "joint.world_prob", "<вариант securities_window_lag>"], step: spreads}
+  ops/tools/worlds_steps.py: {feeds: ["evidence/path/inputs/vtb_r2_inputs.json: nii_books.books, backtest_path.nim", "выведенные на ядре (rederive.py)"], step: sheet-record}
   model/payload.py: {feeds: [], step: ""}                  # печать происхождения записи на витрине (читает книгу)

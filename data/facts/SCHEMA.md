@@ -72,7 +72,7 @@
 | `equity.{total, at1, nci, bv_common}` и компоненты | капитал; `at1` — ноль с причиной (бессрочные займы — обязательство) |
 | `prev_year_end.{as_of, loans_corporate, loans_retail}` | кредитные книги на конец прошлого года по сегменту стоимости риска |
 | `iea` | процентные активы движка: кредитные книги + долговые бумаги + ликвидность |
-| `history.<период>` | концы кварталов: `date`, `bv_common`, `loans`, `loans_ac_gross` (= `loans`), `loans_fvtpl` (справочно), `funds`, `iea`, `total_assets` |
+| `history.<период>` | концы кварталов: `date`, `bv_common`, `loans`, `loans_ac_gross` (= `loans`), `loans_fvtpl` (справочно), `funds`, `iea`, `total_assets`; `books.<книга>` — остатки книг ЧПД в составе книг якоря (ликвидность — доходные размещения): веса решателя передачи ставки средним окна (`nii.transmission.weights: window`, М§4.5); Σ книг активов = `iea`, кредитных = `loans`, средств клиентов = `funds`; у квартала якоря — равны `books` |
 
 ### 2.3. `nii_books.json` (IFRS; квартал якоря)
 

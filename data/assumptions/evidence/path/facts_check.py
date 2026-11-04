@@ -47,8 +47,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 INPUTS = HERE / "inputs" / "vtb_r2_inputs.json"
-FACT_PERIOD = "2026Q4"                    # первый квартал после якоря (3К2026): строки квартала с месячными фактами — когда в фактах есть хотя бы
-#                                           два его месяца (на якоре 3К месячных фактов 4К ещё нет — строки не судятся); на якоре 2К — "2026Q3"
+def _next_after_anchor() -> str:
+    """Первый квартал после якоря фактов дерева (книга 1.1: лист выводит его сам, перенос якоря правки листа не требует)."""
+    anchor = str(json.loads((HERE.parents[3] / "data" / "facts" / "anchor.json").read_text(encoding="utf-8"))["period"])
+    i = 4 * int(anchor[:4]) + int(anchor[-1])
+    return f"{i // 4}Q{i % 4 + 1}"
+
+
+FACT_PERIOD = _next_after_anchor()        # первый квартал после якоря: строки квартала с месячными фактами — когда в фактах есть хотя бы
+#                                           два его месяца (на якоре 3К2026 месячных фактов 4К ещё нет — строки не судятся)
 TOL = {"nii": 0.03, "fees": 0.03, "opex": 0.01, "llp": 0.25, "other": 0.25, "pbt": 0.15, "ni_q": 0.15, "ni_year": 0.10}
 #       ЧПД и комиссии — знаменатель клетки к факту (3 %); расходы — уровень поставлен по фактам (1 %); резервы — пути режимов
 #       второго полугодия 0,9–1,1 % при 0,8 и 1,0 % в июле и августе (25 %); прочие доходы — ключ года стоит темпом восьми
@@ -178,6 +185,9 @@ def rows_of(book_path: Path | None, facts_dir: Path | None) -> dict:
 
     facts = load_facts(facts_dir)
     book = load_book(book_path, facts=facts)
+    anchor = str(facts.plain("anchor", "period"))
+    if FACT_PERIOD != f"{(4 * int(anchor[:4]) + int(anchor[-1])) // 4}Q{(4 * int(anchor[:4]) + int(anchor[-1])) % 4 + 1}":
+        raise RuntimeError(f"факты листа стоят на якоре {anchor}, а квартал месячных фактов листа {FACT_PERIOD} выведен из фактов дерева")
     all_inputs = json.loads(INPUTS.read_text(encoding="utf-8"))
     inputs = all_inputs["skeptic"]
     run = run_grid(book, facts, live_from_book(book, facts))

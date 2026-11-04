@@ -110,9 +110,60 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 INPUTS = HERE / "inputs" / "vtb_r2_inputs.json"
+TREE = HERE.parents[3]                    # корень рабочей копии: факты и шаблон книги дерева
+
+
+# ------------------------------------------------------------------ календарь якоря: из фактов и книги дерева, не правкой листа
+# Книга 1.1 (задача C): квартал якоря, месяцы следующего квартала, начало роста вычетов и квартал выпуска лист выводит сам — перенос
+# якоря на следующий квартал правки листа не требует (на якоре 3К2026 их переводили руками: план перевывода 04.11.2026). Источники —
+# факты дерева (`data/facts`: anchor.json, месяцы mgmt_quarterly.monthly) и шаблон книги (путь притока капитала); лист вызывают на
+# фактах дерева (команда перевывода передаёт `--facts` дерева), и Engine сверяет, что его факты стоят на том же якоре.
+def q_shift(period: str, k: int) -> str:
+    """Квартал `period` ± k кварталов («2026Q3», 1 → «2026Q4»)."""
+    i = 4 * int(period[:4]) + int(period[-1]) - 1 + k
+    return f"{i // 4}Q{i % 4 + 1}"
+
+
+def quarter_months(period: str) -> set[str]:
+    year, qn = int(period[:4]), int(period[-1])
+    return {f"{year}-{m:02d}" for m in range(3 * qn - 2, 3 * qn + 1)}
+
+
+def _tree_calendar() -> dict:
+    """Квартал якоря и месяцы следующего квартала в фактах дерева; квартал притока выпуска в шаблоне книги дерева."""
+    facts = TREE / "data" / "facts"
+    anchor = str(json.loads((facts / "anchor.json").read_text(encoding="utf-8"))["period"])
+    nxt = q_shift(anchor, 1)
+    monthly = json.loads((facts / "mgmt_quarterly.json").read_text(encoding="utf-8")).get("monthly") or []
+    months = sorted(m["month"] for m in monthly if m["month"] in quarter_months(nxt))
+    return {"anchor": anchor, "next": nxt, "months": months}
+
+
+def issue_quarter(flow: dict, anchor: str) -> str | None:
+    """Квартал выпуска по известной цене — квартал пути притока капитала книги (`equity.other_movements`) после якоря, в котором приток
+    не равен распределениям (значению LT пути): в нём стоит доля денег выпуска. Нет такого — None; больше одного — отказ."""
+    lt = float(flow["LT"])
+    keys = [k for k, v in flow.items() if "Q" in str(k) and str(k) > anchor and float(v) != lt]
+    if len(keys) > 1:
+        raise RuntimeError(f"путь притока капитала книги: кварталов с притоком сверх распределений больше одного ({', '.join(keys)}) — "
+                           "квартал выпуска листу не вывести")
+    return keys[0] if keys else None
+
+
+def _template_issue_quarter(anchor: str) -> str | None:
+    import yaml
+    tpl = yaml.safe_load((TREE / "data" / "assumptions" / "assumptions_template.yaml").read_text(encoding="utf-8"))
+    return issue_quarter(tpl["equity"]["other_movements"], anchor)
+
+
+_CAL = _tree_calendar()
+ANCHOR_QUARTER = _CAL["anchor"]           # квартал якоря книги (= meta.anchor_period; лист сверяет): ключ квартала якоря в путях вычета — ноль
+NEXT_QUARTER = _CAL["next"]               # первый прогнозный квартал
+NEAR_MONTHS = tuple(_CAL["months"])       # месяцы первого прогнозного квартала в фактах (mgmt_quarterly.monthly)
 
 # ------------------------------------------------------------------ суждения листов и решений (лист их не меняет)
-NEAR_FACT_PERIOD = None                   # квартал с месячными фактами после якоря: на якоре 3К2026 его нет (месячных фактов 4К2026 ещё нет) —
+NEAR_FACT_PERIOD = NEXT_QUARTER if len(NEAR_MONTHS) >= 2 else None   # квартал с месячными фактами после якоря (два месяца и больше) —
+#                                           книга 1.1: выводится из фактов дерева; на якоре 3К2026 без месяцев 4К2026 его нет —
 #                                           шаг near не гоняется, ключ regimes.near_nim_shift — запись переноса (решения ведущего Р4 и план
 #                                           перевывода 04.11.2026, п. 1); пары шага misc берут путь и сдвиг d из этой записи. На якоре 2К2026
 #                                           здесь стоял "2026Q3" (июль и август: маржа клетки = маржа фактов)
@@ -121,9 +172,12 @@ NEAR_FACT_PERIOD = None                   # квартал с месячными
 # модальной клетки в этом квартале: маржа клетки минус маржа той же клетки без σ0 в ближних годах) и линейно сходит к году схода книги
 # (с него — ноль): near(q) = доля(q) × (d − σ0_вклад(q)). Ступени маржи на границе года якоря тогда нет сверх той, что дают одни книги на
 # ставках мира (приёмка шага: печатаются обе ступени).
-NEAR_FADE = {"2026Q4": 1.0, "2027Q1": 1.0, "2027Q2": 0.75, "2027Q3": 0.5, "2027Q4": 0.25}   # доля сдвига d по кварталам
+NEAR_FACTS_THROUGH = NEAR_FACT_PERIOD or ANCHOR_QUARTER   # последний квартал с фактами: путь сдвига d — после него
+NEAR_SHAPE = {"2026Q1": 1.0, "2026Q2": 1.0, "2026Q3": 1.0, "2026Q4": 1.0, "2027Q1": 1.0, "2027Q2": 0.75, "2027Q3": 0.5, "2027Q4": 0.25}
+NEAR_OLD_SHAPE = {"2026Q1": 1.0, "2026Q2": 1.0, "2026Q3": 1.0, "2026Q4": 1.0, "2027Q1": 0.8, "2027Q2": 0.6, "2027Q3": 0.4, "2027Q4": 0.2}
+NEAR_FADE = {q: v for q, v in NEAR_SHAPE.items() if q > NEAR_FACTS_THROUGH}           # доля сдвига d по кварталам после фактов
 SIGMA0_FADE = {"2027Q1": 1.0, "2027Q2": 0.75, "2027Q3": 0.5, "2027Q4": 0.25}                 # доля встречной σ0 по кварталам
-NEAR_OLD_FADE = {"2026Q4": 1.0, "2027Q1": 0.8, "2027Q2": 0.6, "2027Q3": 0.4, "2027Q4": 0.2}  # прежняя форма (книга 0.4): справочный вариант
+NEAR_OLD_FADE = {q: v for q, v in NEAR_OLD_SHAPE.items() if q > NEAR_FACTS_THROUGH}  # прежняя форма (книга 0.4): справочный вариант
 NEAR_D_QUARTER = next(iter(NEAR_FADE))    # квартал пути сдвига с долей d 1 (первый после года фактов): без квартала с месячными фактами сдвиг d
 #                                           записи книги читается здесь
 NEAR_LAST_YEAR = 2027                     # с 2028 года общего сдвига нет: путь делают книги (решения B4; № 2, п. 2; № 5, п. 3.5 — год схода 2028)
@@ -142,8 +196,10 @@ OPEX_Q4_RATIO = 1.428                     # решение № 2, п. 3.1: 4-й 
 OPEX_Q4_AXIS = (1.409, 1.447)             # диапазон того же окна
 OPEX_Q4_WHOLE_SERIES = 1.3185             # середина всего ряда 2017–2025 — справочный вариант
 OPEX_GROUPS = (("2027", "2028", "2029", "2030"), ("2031", "2032"))   # годы одного корня; последний год группы — год цели
-OPEX_YEAR = "2026"                        # год якоря: 1–3-й кварталы — факт pnl_quarterly (3К2026 — якорь), корень — только у 4-го квартала
-OPEX_Q4 = f"{OPEX_YEAR}Q4"                # (план перевывода 04.11.2026, п. 3: ключ 2026Q3 закрыт якорем — убран из opex.real_growth)
+OPEX_YEAR = ANCHOR_QUARTER[:4]            # год якоря: 1–3-й кварталы — факт pnl_quarterly (3К — якорь), корень — только у 4-го квартала
+OPEX_Q4 = f"{OPEX_YEAR}Q4" if ANCHOR_QUARTER[-1] == "3" else None   # (план перевывода 04.11.2026, п. 3: ключ 3-го квартала закрыт якорем);
+#                                           на якоре 4-го квартала год закрыт — корня года якоря нет (шаг opex — только группы лет и LT);
+#                                           на якоре 1-го и 2-го кварталов правила цели квартала нет — отказ шага opex
 FEES_KEYS = ("2027", "2028", "2029", "2030")
 FEES_LT_FROM = 2031
 POLICY_PAYOUT = {"2026": 0.25, "LT": 0.50}    # доли политики от ВСЕЙ прибыли: решение № 2, п. 4.2
@@ -180,11 +236,12 @@ T2_FLAT_UNTIL = "2028Q4"                  # решение B8: плоско в �
 # ключи кварталов — там, где значение меняется внутри года (рост вычетов 3К2026–4К2028; второе чтение высвобождения), ключи лет — где
 # год плоский; год last_period — ключом года (среднее его кварталов: квартальные ключи в этом году ядро запрещает), LT — его значение.
 DED_GROWTH_PER_Q = 0.001
-DED_GROWTH_QUARTERS = ("2026Q4", "2028Q4")   # решение ведущего Р11 (книга 1.0): рост вычетов — с первого прогнозного квартала якоря 3К
+DED_GROWTH_QUARTERS = (NEXT_QUARTER, "2028Q4")   # решение ведущего Р11 (книга 1.0): рост вычетов — с первого прогнозного квартала (книга 1.1 —
+#                                           квартал после якоря фактов дерева) по 4К2028 (решение B7)
 DED_GROWTH_AXIS = (0.0, 0.002)            # ось роста вычетов: 0…0,8 п.п. в год (решения B7, B13)
 ISSUE_PRICE = 87.0                        # ₽ за акцию выпуска [Ф: решение о выпуске, primary/SH_2026-07_open_subscription_decision.pdf]
 ISSUE_STAY = 0.5                          # доля денег выпуска, которая создаёт стоимость: приходит в банк и в капитал норматива (устав; ось 0…1)
-ISSUE_FROM = "2026Q4"
+ISSUE_FROM = _template_issue_quarter(ANCHOR_QUARTER)   # квартал выпуска — из пути притока капитала шаблона книги (книга 1.1; Р2: 4К2026)
 # Выпуск по известной цене — одним местом на обе стороны (решение ведущего № 4, п. 3.1; рекомендация проверяющего находки A-1):
 # приток капитала квартала выпуска = доля денег × объём + распределения квартала (долгосрочное значение траектории — тот же
 # квартальный поток) + возврат лишнего купона бессрочных 2026 года; делитель — объём / цена (ключ книги, прежний). Справочные
@@ -198,7 +255,8 @@ FLOW_VARIANTS = {                         # справочные вариант�
     #                                       (`from`: деньги и распределения — в нём; в квартале центра — распределения и купон), вычет выпуска
     #                                       (`deduct`: нет — деньги засчитаны в капитал норматива вопреки словам банка); по умолчанию — центр
     "issue_none": {"deduct": False}, "issue_reg_only_162": {"stay": 1.0, "deduct": False}, "issue_300_stay_50": {}, "issue_400_stay_50": {},
-    "issue_max_stay_50": {}, "issue_300_stay_0": {"stay": 0.0}, "issue_300_stay_100": {"stay": 1.0}, "issue_q1_2027": {"from": "2027Q1"},
+    "issue_max_stay_50": {}, "issue_300_stay_0": {"stay": 0.0}, "issue_300_stay_100": {"stay": 1.0},
+    "issue_q1_2027": {"from": q_shift(ISSUE_FROM, 1) if ISSUE_FROM else None},   # квартал после квартала выпуска центра
     "shareholder_distributions_0": {}, "shareholder_distributions_50": {}, "at1_coupon_2026_full_year": {"coupon": False},
 }
 # Вычет выпуска (решение ведущего Р10, уточняет Р2): вычет из капитала норматива = внесённая в оценку часть денег (доля денег × объём) с
@@ -215,8 +273,7 @@ DED_NORMS = ("n20_0", "n1_1")             # одна траектория на �
 DED_ROOT = "capital.reg_scenarios.{s}.deduction_pp.{n}"
 RUB_ROOT = "capital.reg_scenarios.{s}.deduction_rub.{n}"       # К1: вычет сценария в рублях (MODEL §4.11, прил. A № 23)
 FIXED_CHANGE = "volumes.other_assets_fixed_change"              # К2: путь постоянной части прочих активов (MODEL §4.3, прил. A № 24)
-ANCHOR_QUARTER = "2026Q3"                 # квартал якоря книги (meta.anchor_period; лист сверяет): ключ квартала якоря в путях вычета — ноль
-BALANCE_RATIO_QUARTERS = ("2025Q4", "2026Q1", "2026Q2", "2026Q3")   # решение ведущего Р8: отношения прочих активов и прочих обязательств к
+BALANCE_RATIO_QUARTERS = tuple(q_shift(ANCHOR_QUARTER, k) for k in (-3, -2, -1, 0))   # решение ведущего Р8: отношения прочих активов и прочих обязательств к
 #                                           кредитам — среднее четырёх кварталов с равным весом (4К2025–3К2026) в определениях книги: прочие
 #                                           активы — растущая часть (с деньгами и обязательными резервами, без денег НПФ; без ОНА, гудвила и
 #                                           ассоциированных); прочие обязательства — без дивидендов к выплате и без обязательств выбывшей СК
@@ -290,7 +347,8 @@ FADE_YEARS = tuple(str(y) for y in range(int(LOAN_WINDOW_YEARS[-1]) + 1, PREMIUM
 FADE_SHARE = {y: (PREMIUM_FADE_TO - int(y)) / (PREMIUM_FADE_TO - int(LOAN_WINDOW_YEARS[-1])) for y in FADE_YEARS}   # 0,75 / 0,5 / 0,25
 LOAN_PATHS = {s: f"volumes.loan_share_drift.{s}" for s in ("corporate", "mortgage", "retail_other")}
 PREMIUM_PATHS = {"retail": "volumes.funds_share_drift.retail", "corporate": "volumes.funds_share_drift.corporate"}
-PREMIUM_LEVEL_KEYS = ("2026Q4",) + LOAN_WINDOW_YEARS                     # ключи уровня премии средств клиентов
+PREMIUM_LEVEL_KEYS = tuple(q_shift(ANCHOR_QUARTER, k) for k in range(1, 5 - int(ANCHOR_QUARTER[-1]))) + LOAN_WINDOW_YEARS
+#                                           ключи уровня премии средств клиентов: оставшиеся кварталы года якоря (на якоре 3К — 4К) и годы окна
 PREMIUM_SHAPE = {**{k: 1.0 for k in PREMIUM_LEVEL_KEYS}, **FADE_SHARE}    # форма премии: уровень, затем сход; с года схода — ноль
 NEED_YEAR = PREMIUM_FADE_TO - 1           # «нужда баланса»: отношение кредитов к средствам клиентов на конец последнего года премии
 STOP_YEARS = ("2027", "2028")             # справочные варианты роста: годы, на которые задан темп (годы ступеней требования)
@@ -446,7 +504,14 @@ class Engine:
         self.live_from_book, self.solve = live_from_book, solve_transmission
         self.BookError = book_schema.BookError
         self.facts = load_facts(facts_dir)
+        period = str(self.facts.plain("anchor", "period"))
+        if period != ANCHOR_QUARTER:
+            raise RuntimeError(f"факты листа стоят на якоре {period}, а календарь листа выведен из фактов дерева на якоре {ANCHOR_QUARTER}: "
+                               "лист вызывают на фактах дерева (команда перевывода)")
         self.book = load_book(book_path, facts=self.facts)
+        have = issue_quarter(dict(self.book.get("equity.other_movements")), ANCHOR_QUARTER)
+        if have != ISSUE_FROM:
+            raise RuntimeError(f"квартал выпуска книги {have}, а календарь листа — {ISSUE_FROM} (шаблон дерева): машинная книга не из шаблона дерева")
         self.bridge = bridge_from_facts(self.facts)
         self.inputs = json.loads(INPUTS.read_text(encoding="utf-8"))
         self.overrides: dict = {}                              # выведенные ключи: путь → значение
@@ -2078,8 +2143,9 @@ def step_fees(eng: Engine, out: dict) -> None:
 def opex_traj(base: dict, q4: float, r1: float, r2: float, r3: float) -> dict:
     """Траектория реального роста расходов: 4-й квартал года якоря, группы лет и LT — корни; ключ 3-го квартала года якоря закрыт якорем
     3К2026 и не пишется (план перевывода 04.11.2026, п. 3)."""
-    d = {k: v for k, v in base.items() if k != f"{OPEX_YEAR}Q3"}
-    d[OPEX_Q4] = q4
+    d = {k: v for k, v in base.items() if not (str(k)[:4] == OPEX_YEAR and "Q" in str(k) and str(k) <= ANCHOR_QUARTER)}
+    if OPEX_Q4:
+        d[OPEX_Q4] = q4
     d.update({k: r1 for k in OPEX_GROUPS[0]})
     d.update({k: r2 for k in OPEX_GROUPS[1]})
     d["LT"] = r3
@@ -2090,6 +2156,9 @@ def opex_traj(base: dict, q4: float, r1: float, r2: float, r3: float) -> dict:
 def opex_goals(eng: Engine, ratio_q4: float = OPEX_Q4_RATIO) -> dict:
     """Цель 4-го квартала года якоря: среднее первых трёх кварталов по фактам (pnl_quarterly; 3К2026 — якорь, факт 147,6) × сезонное
     отношение (план перевывода 04.11.2026, п. 3)."""
+    if ANCHOR_QUARTER[-1] in ("1", "2"):
+        raise RuntimeError(f"шаг opex: якорь {ANCHOR_QUARTER} — правила цели кварталов года якоря после 1-го и 2-го квартала у листа нет "
+                           "(решение № 2, п. 3.1 задаёт только 4-й квартал к среднему первых трёх)")
     pnl = eng.facts.file("pnl_quarterly")["quarters"]
     first = [abs(float(pnl[f"{OPEX_YEAR}Q{n}"]["opex"]["v"])) for n in (1, 2, 3)]
     mean = sum(first) / 3
@@ -2098,7 +2167,7 @@ def opex_goals(eng: Engine, ratio_q4: float = OPEX_Q4_RATIO) -> dict:
 
 def _opex_start(eng: Engine) -> tuple:
     have = eng.value("opex.real_growth")
-    return (float(have[OPEX_Q4]), float(have[OPEX_GROUPS[0][0]]), float(have[OPEX_GROUPS[1][0]]), float(have["LT"]))
+    return (float(have[OPEX_Q4]) if OPEX_Q4 else None, float(have[OPEX_GROUPS[0][0]]), float(have[OPEX_GROUPS[1][0]]), float(have["LT"]))
 
 
 def _opex_roots(eng: Engine, goals: dict, level: float, start: tuple, which: str = "all", extra: dict | None = None) -> tuple:
@@ -2124,7 +2193,7 @@ def _opex_roots(eng: Engine, goals: dict, level: float, start: tuple, which: str
         return sum(to_assets(eng, run, prob, "opex", y) for y in years) / len(years)
 
     q4, r1, r2, r3 = start
-    if which in ("all", "q4"):
+    if which in ("all", "q4") and OPEX_Q4:
         q4 = bisect(lambda x: quarter((x, r1, r2, r3)) - goals["q4"], -0.25, 0.35, tol=1e-6)
     if which in ("all", "group1"):
         r1 = bisect(lambda x: ratio((q4, x, r2, r3), (int(OPEX_GROUPS[0][-1]),)) - level, -0.10, 0.12, tol=1e-9)

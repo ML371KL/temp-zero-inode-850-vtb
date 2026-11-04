@@ -120,7 +120,10 @@ def test_the_description_names_the_steps_of_the_sheet_and_a_corridor_for_every_n
     assert new_text == text and marks == []
     # у каждого ключа с датой вывода в шаблоне — запись описания с пометкой, и наоборот
     dated = len(re.findall(r"ВЫВЕДЕНО НА ЯДРЕ \d\d\.\d\d\.\d{4}", text))
-    assert dated == sum(1 for e in spec.WRITES if e.get("mark")) and "ВЫВОДИТСЯ НА ЯДРЕ —" not in text
+    # книга 1.0 (якорь 3К2026): шаг near не гоняется, ключ ближнего сдвига — запись переноса; пометку вывода он сохраняет
+    # (по ней инструмент переноса находит числа ядра), записи описания у него на этом якоре нет
+    carried = 0 if "near" in spec.STEPS else 1
+    assert dated == sum(1 for e in spec.WRITES if e.get("mark")) + carried and "ВЫВОДИТСЯ НА ЯДРЕ —" not in text
     assert all(R.has_mark(text, item) for item in items if item.entry.get("mark"))
 
 

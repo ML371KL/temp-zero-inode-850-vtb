@@ -747,10 +747,15 @@ def test_the_decisions_of_round_five_stand_in_book_05():
         engine = U.axis_overrides(mbook, axis, U.tri_s(q))[sheet.TRANSMISSION_PATH] - rz["shift"]
         assert engine == pytest.approx(sheet.product_quantile(q), abs=6e-6), q
     assert sheet.product_quantile(0.1) == pytest.approx(-0.0265, abs=1e-4) and sheet.product_quantile(0.9) == pytest.approx(0.0007, abs=1e-4)
+    # диапазон строки обратного расчёта и справочные варианты передачи — числа реализованной передачи на весах якоря тем же
+    # сдвигом, что ключ (книга 1.0, решение ведущего 04.11.2026 к Р13); варианты пишет шаг realized
     rev = next(a for a in book["valuation"]["reverse_dcf"]["axes"] if a["paths"] == [sheet.TRANSMISSION_PATH])
-    assert rev["range"] == list(sheet.TRANSMISSION_AXIS) == [-0.068, 0.022]
-    assert {variants[v]["overrides"][sheet.TRANSMISSION_PATH] for v in ("transmission_sheet_m023", "transmission_zero_book_share_1",
-                                                                         "transmission_low_m068", "transmission_high_p022")} == {-0.023, 0.0, -0.068, 0.022}
+    assert list(sheet.TRANSMISSION_AXIS) == [-0.068, 0.022] == rz["support_realized"]
+    assert rev["range"] == rz["support"] == [round(x + rz["shift"], 6) for x in sheet.TRANSMISSION_AXIS]
+    want = {v: round(x + rz["shift"], 6) for v, x in sheet.TRANSMISSION_VARIANTS.items()}
+    assert {v: variants[v]["overrides"][sheet.TRANSMISSION_PATH] for v in want} == want == rz["variants"]
+    assert {sheet.TRANSMISSION_VARIANTS[v] for v in ("transmission_sheet_m023", "transmission_zero_book_share_1",
+                                                    "transmission_low_m068", "transmission_high_p022")} == {-0.023, 0.0, -0.068, 0.022}
     # п. 3.5: ближний сдвиг — d и встречная σ0 в 2027К1, сход к 2028 году; ступень маржи не больше ступени книг; ключ прочих 2027 года — пара
     if "near" in record:
         near, nr = book["regimes"]["near_nim_shift"], record["near"]

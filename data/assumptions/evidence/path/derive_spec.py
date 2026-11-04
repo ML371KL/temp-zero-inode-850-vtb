@@ -261,6 +261,11 @@ WRITES = (
        "corridor": [("", sheet.TRANSMISSION_AXIS[0], 0.0, "нижний конец — между краем носителя и нулём")] if end == "low"
        else [("", -0.02, sheet.TRANSMISSION_AXIS[1], "верхний конец — выше центра и не выше края носителя")]}
       for end in ("low", "high")),
+    *({"step": "realized", "address": VARIANTS + ({"id": vid}, "overrides", sheet.TRANSMISSION_PATH), "source": ("realized", "variants", vid),
+       "unit": 1e-6, "rule": f"справочный вариант {vid}: передача {value:+g} в единицах реализованной передачи — на весах якоря тем же сдвигом, "
+                             "что ключ (решение ведущего 04.11.2026 к Р13)",
+       "corridor": [("", -0.3, 0.3, "в отрезке поиска строки обратного расчёта")]}
+      for vid, value in sheet.TRANSMISSION_VARIANTS.items()),
     # ---- near: общий ближний сдвиг маржи по MODEL §3.2 (решение № 5, п. 3.5); без квартала с месячными фактами после якоря шага нет —
     #      ключ — запись переноса книги (план перевывода 04.11.2026, п. 1)
     *([{"step": "near", "address": ("regimes", "near_nim_shift"), "source": _key("regimes.near_nim_shift"), "unit": 1e-5, "deadband": DEADBAND_UNITS,
@@ -467,7 +472,8 @@ SAME = (
     {"step": "transmission", "address": REVERSE + ({"paths.0": sheet.NIM_KEY}, "range"), "source": ("transmission", "nim_axis"),
      "rule": "диапазон строки обратного расчёта — ось уровня маржи"},
     {"step": "realized", "address": REVERSE + ({"paths.0": "nii.transmission.target"}, "range"), "source": ("realized", "support"),
-     "rule": "диапазон строки обратного расчёта — носитель реализованной передачи (−0,068…+0,022: измеренная на краях при доле книги 0)"},
+     "rule": "диапазон строки обратного расчёта — носитель реализованной передачи (−0,068…+0,022: измеренная на краях при доле книги 0), "
+             "на весах якоря — тем же сдвигом, что ключ (Р13)"},
     *({"step": "splits", "address": AXES + ({"paths.0": "nii.phi_split"}, end), "source": ("splits", "axis_phi", i),
        "rule": f"ось доли сжатия — число листа: конец {end}"} for i, end in enumerate(("low", "high"))),
     *({"step": "splits", "address": AXES + ({"paths.0": "nii.sigma0_split"}, end), "source": ("splits", "axis_sigma0", i),

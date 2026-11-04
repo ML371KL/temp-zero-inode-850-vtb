@@ -389,8 +389,8 @@ def test_capital_slots_of_the_banking_group():
     ядра) = собственные средства; три знаменателя раскрыты, нормативы воспроизводятся делением (с точностью записи
     норматива: форма — 0,01 п.п.; напечатанный эмитентом до выхода формы — 0,1 п.п., сказано в calc); Н20.0 якоря —
     до вычета дивиденда, объявленного до якоря и выплаченного после. Ряд формы кончается якорем, а пока формы на якорь
-    нет (её выход — неподтверждённое событие календаря), — прошлым кварталом, и базовый капитал якоря — уровень
-    последней формы с пометкой оценки (REANCHOR §3.10)."""
+    нет (её выход — неподтверждённое событие календаря), — прошлым кварталом, а капитал группы якоря — из одного
+    документа на дату якоря (примечание отчётности), базовый — по напечатанному Н20.1 с пометкой оценки."""
     c, b = load("capital"), load("balance")
     g = c["group_capital"]
     assert abs(v(g["base"]) + v(g["additional"]) + v(g["supplementary"]) - v(g["total"])) <= 0.002
@@ -416,8 +416,12 @@ def test_capital_slots_of_the_banking_group():
     assert v(c["n1_1_bank"]["value"]) < v(c["n20_2"]) < v(c["n20_0"]["value"])
     last = c["history"][-1]
     if anchor_form_pending():
+        # формы на якорь нет: капитал группы — из одного документа на одну дату (прим. 28 отчёта на дату якоря), базовый
+        # капитал — напечатанный Н20.1 × активы для Н20.1 с пометкой оценки; ряд формы кончается прошлым кварталом
         assert last["period"] == q_prev(anchor_period()), "ряд формы — до последней вышедшей формы"
-        assert v(c["bank_base_capital"]) == v(last["capital_base"]) and c["bank_base_capital"].get("estimated") is True
+        assert c["bank_base_capital"].get("estimated") is True
+        assert abs(v(c["bank_base_capital"]) - round(v(c["n1_1_bank"]["value"]) * v(bs["rwa_n20_1"]), 3)) < 1e-9
+        assert all(g[k]["src"] == g["total"]["src"] for k in ("base", "additional", "supplementary", "tier1")), "один документ"
     else:
         assert last["period"] == anchor_period() and v(last["n20_0"]) == v(c["n20_0"]["value"]) and \
             v(last["n20_1"]) == v(c["n1_1_bank"]["value"])

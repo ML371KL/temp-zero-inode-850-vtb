@@ -813,6 +813,10 @@ def test_regime_update_fact_equal_to_expectation_moves_nothing(inputs):
     клеткам режима), не меняет ни вероятностей, ни отклонений, ни V0 слоёв."""
     book, facts = inputs
     b1 = cm.copy.deepcopy(book)
+    # одно наблюдение на книге без наблюдений: у книги 1.0 (якорь 3К2026) в окне уже стоит наблюдение квартала якоря — его
+    # отклонение затухает и в первом прогнозном квартале, и замена окна одним наблюдением сдвигала бы V0 сама (книга 0.9 —
+    # без наблюдений)
+    b1["joint"]["regime_update"]["observations"] = []
     regimes = list(b1["regimes"]["ids"])
     only = regimes[1] if len(regimes) > 1 else regimes[0]
     b1["joint"]["regime_prob"] = {r: (1.0 if r == only else 0.0) for r in regimes}
@@ -1167,10 +1171,13 @@ def test_observation_of_a_closed_quarter_uses_frozen_expectations(inputs):
             assert dv["m"] == pytest.approx(obs_cor - mu_cor[r], abs=1e-15)
         assert cm._c_dev_at(dv, fy, fq) == pytest.approx(rho * dv["m"], rel=1e-12)
         assert cm._c_dev_at(dv, fy + 1, fq) == pytest.approx(rho ** (cm.QY + 1) * dv["m"], rel=1e-12)
-    # отклонение входит в CoR первого прогнозного квартала клетки
+    # отклонение входит в CoR первого прогнозного квартала клетки; база сравнения — та же книга без наблюдений (у книги 1.0
+    # в окне стоит своё наблюдение квартала якоря, книга 0.9 была без них)
     r0 = regimes[0]
+    clean = cm.copy.deepcopy(book)
+    clean["joint"]["regime_update"]["observations"] = []
     with_obs = cm.c_cell_annual(ctx, cm.W_LOW, r0, "schedule")["rows"][0]["cor_q"][0]
-    without = cm.c_cell_annual(cm.c_control_context(book, facts), cm.W_LOW, r0, "schedule")["rows"][0]["cor_q"][0]
+    without = cm.c_cell_annual(cm.c_control_context(clean, facts), cm.W_LOW, r0, "schedule")["rows"][0]["cor_q"][0]
     assert with_obs - without == pytest.approx(rho * ctx["dev"][r0]["cor"]["m"], rel=1e-9)
     bad = cm.copy.deepcopy(book)
     bad["joint"]["regime_update"]["observations"] = [_obs(anchor, obs_cor, None)]

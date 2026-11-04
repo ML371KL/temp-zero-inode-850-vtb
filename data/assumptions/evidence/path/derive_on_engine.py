@@ -376,6 +376,11 @@ NIM_AXIS = (0.028099541, 0.030255781)     # ось уровня маржи — �
 # Уровень маржи и решатель — на весах якоря (запись переноса, не трогается). Долг: веса решателя средним окна — ключ ядра.
 TRANSMISSION_WEIGHTS = "transmission_weights"     # вход: остатки книг на концы кварталов окна Р8 (inputs/vtb_r2_inputs.json)
 TRANSMISSION_WEIGHTS_TOL = 0.05                   # млрд ₽: квартал якоря ряда весов равен остаткам книг фактов
+# Справочные варианты передачи и диапазон строки обратного расчёта — та же форма, что ключ (решение ведущего 04.11.2026 к Р13): число
+# реализованной передачи варианта, записанное на весах якоря тем же сдвигом «ключ − реализованная»; числа пишет шаг realized
+TRANSMISSION_VARIANTS = {"transmission_sheet_m023": -0.023, "transmission_zero_book_share_1": 0.0, "transmission_low_m068": -0.068,
+                         "transmission_high_p022": 0.022, "transmission_regression": -0.10, "margin_r1_numbers": -0.03,
+                         "margin_level_c_all_worlds": 0.0}
 TRANSMISSION_PATH = "nii.transmission.target"
 TRANSMISSION_MEASURED = (-0.068, -0.023, 0.022)   # измеренная передача: низ / середина / верх (решение № 2, п. 1.2)
 TRANSMISSION_BOOK_SHARE = (0.0, 0.5, 1.0)         # доля книги без процентного дохода в передаче: низ / середина / верх (решение № 2, п. 2)
@@ -976,7 +981,10 @@ def step_realized(eng: Engine, out: dict) -> None:
                        "axis_exact": ax["exact"], "axis": written_ends, "engine_quantiles": {str(q): v for q, v in engine_q.items()},
                        "engine_match": round(match, 9), "engine_match_ok": match <= 5e-6,
                        "moments": {"product_mean": mean_m * mean_u, "product_sd": sd_prod, "axis_mean": mean_ax, "axis_sd": sd_ax},
-                       "support": list(TRANSMISSION_AXIS),
+                       "support": [round(TRANSMISSION_AXIS[0] + shift, 6), round(TRANSMISSION_AXIS[1] + shift, 6)],
+                       "support_realized": list(TRANSMISSION_AXIS),
+                       "variants": {vid: round(v + shift, 6) for vid, v in TRANSMISSION_VARIANTS.items()},
+                       "variants_realized": dict(TRANSMISSION_VARIANTS),
                        "rule": "концы оси движка на ключе реализованной передачи подобраны так, что P10 и P90 оси, как её разыгрывает движок "
                                "(положение s — треугольник на [−1; 1] с модой 0; значение = центр + |s| × (конец − центр); медиана — центр книги), "
                                "равны P10 и P90 произведения двух независимых треугольников (измеренная −0,068 / −0,023 / +0,022 × (1 − доля книги "
@@ -2140,8 +2148,9 @@ def step_transmission(eng: Engine, out: dict) -> None:
     rows, drift = {}, 0.0
     ax = (out.get("realized") or {}).get("axis") or {
         end: float(next(a for a in book.get("valuation.uncertainty.axes") if a["paths"][0] == TRANSMISSION_PATH)[end]) for end in ("low", "high")}
+    support = (out.get("realized") or {}).get("support") or list(TRANSMISSION_AXIS)          # на весах якоря (Р13)
     points = [("low", {"nii.transmission.target": ax["low"]}), ("centre", {}), ("high", {"nii.transmission.target": ax["high"]}),
-              ("support_low", {"nii.transmission.target": TRANSMISSION_AXIS[0]}), ("support_high", {"nii.transmission.target": TRANSMISSION_AXIS[1]}),
+              ("support_low", {"nii.transmission.target": support[0]}), ("support_high", {"nii.transmission.target": support[1]}),
               ("nim_low", {NIM_KEY: NIM_AXIS[0]}), ("nim_high", {NIM_KEY: NIM_AXIS[1]})]
     for name, ov in points:
         b = eng.current(ov)
@@ -2155,7 +2164,7 @@ def step_transmission(eng: Engine, out: dict) -> None:
                       "nss_mgmt": {w: round(float(eng.bridge.to_mgmt_nim(v)), 5) for w, v in tr.nss.items()},
                       "pairs": {k: None if v is None else round(v, 4) for k, v in tr.pairs.items()},
                       "floor_headroom": [round(gap[0], 5), gap[1], gap[2]]}
-    out["transmission"] = {"axis": [ax["low"], ax["high"]], "support": list(TRANSMISSION_AXIS), "nim_axis": list(NIM_AXIS), "level_world": world,
+    out["transmission"] = {"axis": [ax["low"], ax["high"]], "support": list(support), "nim_axis": list(NIM_AXIS), "level_world": world,
                            "level_world_fixed": drift < 1e-9, "rows": rows}
     say(f"nii.transmission.target: {centre} (произведение середин); ось движка {ax['low']}…{ax['high']}, носитель {TRANSMISSION_AXIS[0]}…"
         f"{TRANSMISSION_AXIS[1]}; мир уровня {world} на оси " + ("неподвижен" if drift < 1e-9 else f"УХОДИТ на {100 * drift:.4f} п.п."))

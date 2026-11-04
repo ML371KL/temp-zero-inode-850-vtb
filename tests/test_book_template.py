@@ -743,7 +743,7 @@ def test_value_axes_on_year_keys_do_not_meet_quarter_keys(book):
 
 def test_the_capital_instruments_trajectory_is_quarterly_and_ends_flat(book):
     """Инструменты капитала (решение ведущего ВТБ B8; № 2, п. 4.6; № 6, п. 2.1): срочные субординированные инструменты
-    без прибыли — 339,1 млрд ₽ МСФО якоря (слот фактов t2_recognized шире: дополнительный капитал формы 0409805 с
+    без прибыли — субординированная задолженность МСФО якоря (335,0 млрд ₽ на 30.09.2026; слот фактов t2_recognized шире: дополнительный капитал формы 0409805 с
     прибылью до аудита) — плоско по 4К2028 (ключи квартала якоря и 2028 года), с 1К2029 — доля RWA конца 2028 года
     (квартальные ключи до года перед последним, на модальной клетке; при ключе t2_share ядро читает их только по 4К2028);
     последний год — ключом года, равным LT; путь не убывает; оси полосы нет (варианты t2_flat_rub, t2_amortizing,
@@ -755,8 +755,9 @@ def test_the_capital_instruments_trajectory_is_quarterly_and_ends_flat(book):
     q_keys = [k for k in t2 if "Q" in k]
     assert q_keys == [anchor] + [f"{y}Q{k}" for y in range(y_from, last) for k in (1, 2, 3, 4)]
     fact = json.loads((S.FACTS_DIR / "capital.json").read_text(encoding="utf-8"))["t2_recognized"]
-    # книга 1.0: уровень плато — значение книги в квартале якоря (шаг t2 листа; 339,1 — запись переноса с якоря 2К)
-    assert t2[anchor] == t2[str(y_from - 1)] == 339.1 and fact["v"] > t2[anchor]
+    # книга 1.0: уровень плато — субординированная задолженность МСФО на дату якоря (30.09.2026 — 335,0; правило переноса,
+    # решение ведущего 04.11.2026); база надбавки за субординацию — сумма прежнего якоря 339,1
+    assert t2[anchor] == t2[str(y_from - 1)] == 335.0 and fact["v"] > t2[anchor]
     assert share_from == f"{y_from}Q1"
     assert t2[str(last)] == t2["LT"] and "LT_from" not in t2
     vals = [t2[k] for k in q_keys] + [t2["LT"]]

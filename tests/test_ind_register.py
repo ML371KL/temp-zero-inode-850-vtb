@@ -181,6 +181,23 @@ def test_annual_key_is_the_default(tmp_path):
     assert register.alarm([], today=date(2026, 7, 21)) is None                                    # квартала нет — нет срока
 
 
+def test_annual_alarm_closes_the_years_closed_by_the_facts():
+    """Годовой календарь — то же правило закрытого периода, что у квартального: год, чьё решение — строка истории
+    фактов (4-й квартал года не позже последнего закрытого `closed_through`), закрыт и без записи сборщиков и без
+    стартового реестра (книга 1.0: дивиденд за 2025 год выплачен до якоря 3К2026 — строка истории); год позже
+    последнего закрытого ждёт записи по-прежнему; без `closed_through` — прежнее правило."""
+    tpl = "нет записи за {year} год ({end}): {detail}"
+    kw = {"agm_quarter": 2, "template": tpl, "period_labels": LABELS}
+    assert register.alarm([], today=date(2026, 11, 4), closed_through="2025Q4", **kw) is None
+    assert register.alarm([], today=date(2026, 11, 4), closed_through="2026Q1", **kw) is None
+    assert register.alarm([], today=date(2026, 11, 4), closed_through="2024Q4", **kw) == \
+        "нет записи за 2025 год (2026-06-30): записей нет"
+    assert register.alarm([], today=date(2026, 11, 4), closed_through=None, **kw) == \
+        "нет записи за 2025 год (2026-06-30): записей нет"
+    assert register.alarm([], today=date(2027, 7, 1), closed_through="2025Q4", **kw) == \
+        "нет записи за 2026 год (2027-06-30): записей нет"                                       # следующий год — запись
+
+
 def test_manual_record_validation(tmp_path):
     store = Store(tmp_path)
     ok = register.record_manual(store, year=None, period="2026Q3", label=" за девять месяцев 2026 года ", dps=4.9,
@@ -311,9 +328,9 @@ def test_the_first_tact_on_an_empty_state_does_not_alarm_about_a_dividend_the_fa
 
 
 def test_the_book_of_the_repository_is_quiet_on_its_own_date_with_an_empty_register():
-    """Книга и факты репозитория: на дату книги у каждого открытого квартала прибыли, чей срок решения прошёл,
-    в стартовом реестре фактов есть выплаченная запись — выпуск с пустого каталога состояния тревоги реестра
-    не несёт. Дата — дата книги, не «сегодня»: тест не зависит от дня прогона."""
+    """Книга и факты репозитория: на дату книги каждый период, чей срок решения прошёл, закрыт — строкой истории
+    фактов (решение не позже даты фактов) или выплаченной записью стартового реестра, — выпуск с пустого каталога
+    состояния тревоги реестра не несёт. Дата — дата книги, не «сегодня»: тест не зависит от дня прогона."""
     book_date = config.book_value("meta.date")
     if not book_date or not config.facts_file("dividends"):
         pytest.skip("нет книги или фактов о дивидендах")

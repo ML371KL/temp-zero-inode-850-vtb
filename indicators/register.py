@@ -38,8 +38,10 @@
 **Тревога** (`alarm`). Квартальный календарь книги (`dividends.calendar.frequency: quarterly`):
 открытый квартал прибыли — позже последнего закрытого по фактам (`closed_through`), — у которого
 квартал решения по карте лагов кончился, а годной записи (`paid` или `declared` с двумя
-источниками) нет. Годовой календарь: прошёл конец квартала собрания (`agm_quarter`), годной
-записи за прошлый год нет. Текст — шаблон книги `meta.labels.register.collector_alarm`.
+источниками) нет. Годовой календарь: прошёл конец квартала собрания (`agm_quarter`), прошлый год
+позже последнего закрытого по фактам (`closed_through`: год закрыт, если его 4-й квартал не позже
+последнего закрытого) и годной записи за него нет — одно правило закрытого периода с квартальной
+ветвью. Текст — шаблон книги `meta.labels.register.collector_alarm`.
 
 **Стартовый реестр фактов закрывает период.** Запись `paid` в `facts/dividends.json →
 register_seed` — выплаченный дивиденд, подтверждённый первичкой при сборке фактов; ядро
@@ -465,6 +467,8 @@ def alarm(records: Sequence[Mapping[str, Any]], *, today: date, agm_quarter: int
     end = periods.quarter_end(periods.quarter(today.year, int(quarter)))
     if today <= end:
         return None
+    if closed_through and str(closed_through) >= f"{year}Q4":   # решение за год — строка истории фактов: то же правило,
+        return None                                             # что у квартальной ветви (период до closed_through закрыт)
     if year in seed_closed(seed, quarterly=False) or any(r.get("year") == year and usable(r) for r in records):
         return None
     have = [r for r in records if r.get("year") == year]

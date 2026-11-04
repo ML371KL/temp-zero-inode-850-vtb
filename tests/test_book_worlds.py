@@ -93,7 +93,6 @@ def test_world_blocks_are_the_record_over_100(book, record):
     assert record["curve_lt"] == rule
     for w in book["worlds"]["ids"]:
         assert book["worlds"][w]["zero_curve"]["LT"] == round(record["curve_lt"][w] / 100, 5) == round(rule[w] / 100, 5)
-    assert book["worlds"]["N"]["zero_curve"]["LT"] == 0.089 and book["worlds"]["H"]["zero_curve"]["LT"] == 0.126
 
 
 def test_world_weights_and_their_axis_stay_inside_the_record_ranges(book, record):

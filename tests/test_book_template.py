@@ -25,7 +25,10 @@ except ImportError:                      # прогон без pytest.ini (pytho
 pytestmark = pytest.mark.tact
 
 MARKS = ("  #{{WORLDS}}", "#{{WORLDS_BANK}}", "#{{OVERLAY_SHA256}}")
-VERSION = "1.0"
+# номер версии ставит команда приёма миров (младший разряд + 1, ops/tools/worlds_rules.py:book_version): тест сверяет его
+# вид и согласие машинной книги с шаблоном, а не литерал версии
+VERSION = str(S.template()["meta"]["version"])
+assert re.fullmatch(r"\d+\.\d+", VERSION), VERSION
 RESULTS = S.BOOK_DIR / "results.json"
 DERIVE_OUT = S.EVIDENCE / "path" / "out"                     # запись листа вывода на ядре (derive_on_engine.py)
 NII_SHEET = S.EVIDENCE / "path" / "inputs" / "vtb_r2_inputs.json"   # запись листа calib-nii: ближние ключи спредов книг

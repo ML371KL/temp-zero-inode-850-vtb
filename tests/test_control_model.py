@@ -2770,11 +2770,26 @@ KNOWN_ROW_CLASSES = {
     "small_stake": "DPS клетки с малой долей нынешних акций: допуск DPS на акции своего года не покрывает разность числа "
                    "акций, которую разрешает допуск доли (0,05 / s)",
     "recap_one": "взнос у порога у одной модели (и взнос обеих моделей, принятый только абсолютным полом 0,3 п.п. × RWA): "
-                 "взнос года, допустимый по своему правилу, сдвигает долю нынешних акций на конец года вне допуска доли",
+                 "взнос года, допустимый по своему правилу, сдвигает долю нынешних акций на конец года вне допуска доли "
+                 "(и стоимость акций до взноса в квартале, где путь акций у одной модели обрывается у нуля)",
 }
 KNOWN_ROWS_REASON = ("вне допусков М§17 только строки известных классов без правила в М§17: "
                      + "; ".join(KNOWN_ROW_CLASSES.values()))
 _ROW_YEAR_CELL = re.compile(r"(\d{4}), клетка (\w+)/(\w+)/(\w+)$")
+_ROW_CELL = re.compile(r"клетка (\w+)/(\w+)/(\w+)$")
+
+
+def _one_model_recap_before(rows: list[dict], tag: str, year: int) -> bool:
+    """В клетке `tag` до года `year` включительно есть взнос, который одна модель сделала, а другая нет (или принятый
+    только абсолютным полом) — корень класса recap_one."""
+    for r in rows:
+        mr = _ROW_YEAR_CELL.search(r["what"])
+        if (r["group"] == "rec" and r["ok"] and mr and "/".join(mr.groups()[1:]) == tag and int(mr.group(1)) <= year
+                and r["core"] is not None and r["control"] is not None
+                and ((r["core"] > TOL_ZERO_BN) != (r["control"] > TOL_ZERO_BN)
+                     or (r["diff_rel"] is not None and abs(r["diff_rel"]) > r["tol"]))):
+            return True
+    return False
 
 
 class KnownRowsOnly(AssertionError):
@@ -2787,6 +2802,23 @@ def _known_row_class(row: dict, rows: list[dict], ctl: dict, run) -> str | None:
     TOL_STAKE / TOL_DPS_OWN и строка в пределах допуска числа акций из допуска доли; взнос года не позже строки доли,
     названный одной моделью или принятый не относительным допуском, а абсолютным полом (правило М§17 у взноса есть,
     у доли, которую он сдвигает, — нет)."""
+    if row["group"] == "pre_money":
+        # стоимость акций до взноса в квартале, где путь акций обрывается у одной модели (у нуля): тот же корень, что у
+        # строки доли — взнос у порога у одной модели не позже года обрыва (книга 1.0, сценарий реестра «выплата и отсечка
+        # через год», M/downturn/strict: взнос 2026 года — ядро 0, контроль 11,6; обрыв у ядра в 4К2027, −15,4 против 1,2)
+        mc = _ROW_CELL.search(row["what"])
+        if mc is None:
+            return None
+        key = mc.groups()
+        c = next((x for x in ctl["cells"] if (x["world"], x["regime"], x["scenario"]) == key), None)
+        if c is None:
+            return None
+        cut_core = getattr(getattr(run.cell(*key), "shares", None), "broken", None)
+        cut_mine = next((k for k, x in enumerate(c["share_path"]) if x["shares"] is None), None)
+        k = cut_core if cut_core is not None else cut_mine
+        if k is None:
+            return None
+        return "recap_one" if _one_model_recap_before(rows, "/".join(key), cm.c_qper(ctl["ctx"]["anchor"], k)[0]) else None
     m = _ROW_YEAR_CELL.search(row["what"])
     if m is None or row["diff"] is None and row["core"] is None:
         return None
@@ -2825,14 +2857,8 @@ def _known_row_class(row: dict, rows: list[dict], ctl: dict, run) -> str | None:
         if s < TOL_STAKE / TOL_DPS_OWN and (s <= 0.0 or row["diff_rel"] is None
                                            or abs(row["diff_rel"]) <= TOL_DPS_OWN + TOL_STAKE / s):
             return "small_stake"
-    if row["group"] == "stake":
-        for r in rows:
-            mr = _ROW_YEAR_CELL.search(r["what"])
-            if (r["group"] == "rec" and r["ok"] and mr and "/".join(mr.groups()[1:]) == tag and int(mr.group(1)) <= year
-                    and r["core"] is not None and r["control"] is not None
-                    and ((r["core"] > TOL_ZERO_BN) != (r["control"] > TOL_ZERO_BN)
-                         or (r["diff_rel"] is not None and abs(r["diff_rel"]) > r["tol"]))):
-                return "recap_one"
+    if row["group"] == "stake" and _one_model_recap_before(rows, tag, year):
+        return "recap_one"
     return None
 
 

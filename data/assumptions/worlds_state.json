@@ -28,11 +28,11 @@
   },
   "data/assumptions/WORLDS-RECIPE.md": {
    "src": "doc/WORLDS-RECIPE.md",
-   "sha256": "74a56922efcb7bebc42cb07cf6d6ddd16210aa06593a8047aab45e2259361251"
+   "sha256": "e43e67156474906bccba5763f199723a4c1343668f13d589400dc8edab9f460e"
   },
   "data/assumptions/evidence/worlds_bank/inputs/bank_overlay_draft.yaml": {
    "src": "bank/sector_sheet.yaml",
-   "sha256": "dbdb3ac305e7cbb0a0832c43d18a6359e96fa10275eab33c04296e3b7f232c15"
+   "sha256": "d6540069d5ff1a817d900b0be38a4f77fc11a7de8d2863ba8d1b466fbd3b5370"
   },
   "data/assumptions/worlds_bank.json": {
    "src": "bank/worlds_bank.json",

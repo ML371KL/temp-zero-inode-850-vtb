@@ -158,5 +158,11 @@ def test_the_overlay_draft_copy_is_the_stage1_draft():
     if not root:
         pytest.skip("нет BANK_HANDOFF_DIR")
     mod = S.load_module(OVERLAY_SCRIPT, "book_build_overlay_archive")
-    src = Path(root, *mod.HANDOFF_DRAFT).read_text(encoding="utf-8")
-    assert mod.sanitize(src) == (S.EVIDENCE / "worlds_bank" / "inputs" / "bank_overlay_draft.yaml").read_text(encoding="utf-8")
+    src = yaml.safe_load(mod.sanitize(Path(root, *mod.HANDOFF_DRAFT).read_text(encoding="utf-8")))
+    # копия — лист сектора семейства из общего источника миров (её пишет команда приёма); лист этапа 1 ВТБ несёт те же
+    # пути сектора по мирам, ту же базу ЦБ и ту же запись миров (факты сектора 2024–2025 и тексты листа — справка)
+    copy = yaml.safe_load((S.EVIDENCE / "worlds_bank" / "inputs" / "bank_overlay_draft.yaml").read_text(encoding="utf-8"))
+    for block in ("worlds", "cbr_ondkp_baseline", "cbr_bank_review_forecast"):
+        assert src["sector"][block] == copy["sector"][block], block
+    assert src["meta"]["worlds_record"]["sha256"] == copy["meta"]["worlds_record"]["sha256"]
+    assert src["meta"]["sources"]["ondkp"]["sha256"] == copy["meta"]["sources"]["ondkp"]["sha256"]

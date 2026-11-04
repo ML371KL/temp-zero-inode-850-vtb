@@ -1,0 +1,101 @@
+{
+ "book_version": "1.1",
+ "gates": {
+  "pb_by_world": [
+   "H/crisis/strict",
+   "M/crisis/mid",
+   "M/crisis/relief",
+   "M/crisis/strict",
+   "M/downturn/strict"
+  ],
+  "roe_range": [
+   "M/crisis/relief"
+  ],
+  "terminal_share": [
+   "M/crisis/mid",
+   "M/crisis/relief",
+   "M/crisis/strict"
+  ],
+  "cir_lt": [],
+  "volume_sign": [],
+  "stress_sign": [
+   "H/crisis/mid",
+   "H/crisis/strict",
+   "H/downturn/mid",
+   "H/downturn/strict",
+   "H/norm/mid",
+   "H/norm/strict",
+   "H/soft/mid",
+   "H/soft/strict",
+   "M/crisis/mid",
+   "M/crisis/strict",
+   "M/downturn/mid",
+   "M/downturn/strict",
+   "M/norm/mid",
+   "M/norm/strict",
+   "M/soft/mid",
+   "M/soft/strict",
+   "N/crisis/mid",
+   "N/crisis/strict",
+   "N/downturn/mid",
+   "N/downturn/strict",
+   "N/norm/mid",
+   "N/norm/strict",
+   "N/soft/mid",
+   "N/soft/strict"
+  ]
+ },
+ "roe_range": {
+  "cells": [
+   "M/crisis/relief"
+  ],
+  "year": 2027,
+  "roe": [
+   -0.15377737259886148,
+   -0.15377737259886148
+  ],
+  "ni": [
+   -398.53138683411794,
+   -398.53138683411794
+  ],
+  "others": [
+   "M/crisis/mid",
+   "M/crisis/strict"
+  ],
+  "others_roe": [
+   -0.118634512152194,
+   -0.118634512152194
+  ],
+  "others_ni": [
+   -366.1478148447667,
+   -366.1478148447667
+  ]
+ },
+ "terminal_share": {
+  "cells": [
+   "M/crisis/mid",
+   "M/crisis/relief",
+   "M/crisis/strict"
+  ],
+  "share": [
+   0.16308009239795918,
+   0.1661207804934616
+  ],
+  "others": 33,
+  "others_share": [
+   0.2099151571119739,
+   0.4831778045906466
+  ]
+ },
+ "cir_lt": {
+  "mean": 0.3892171827165237,
+  "target": 0.42,
+  "tolerance": 0.02,
+  "modal": 0.39612280544337275,
+  "below_corridor": 0.010782817283476243
+ },
+ "stress_sign": {
+  "max_excess": 203.7372049568537,
+  "count": 24
+ }
+}

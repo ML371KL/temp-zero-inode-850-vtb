@@ -21,7 +21,8 @@
                  кварталов — обращение лага книги, лаг — наименьшее RMS «форма ядра − бэктест» в мирах N и M за восемь
                  кварталов на сетке 0,04…1,00; справочный вариант `securities_window_lag` — лаг окна и ключи линией на
                  остатке своего входа; 5 знаков;
-  gate_masses    ожидаемые массы объяснений сработавших гейтов — массы таблиц книги (`results.json`), две значащие цифры.
+  mass2          две значащие цифры массы записи объяснения (формат ys2 меток шаблона `gate_explanations.tpl`; массы и
+                 числа объяснений пишет шаг `gate-texts` команды из шаблона и выхода `ops/tools/gate_numbers.py`).
 
 Тем же счётом — запись листа во входе (`nii_books.books`, путь бэктеста `backtest_path.nim`): её пишет шаг `sheet-record`
 (`ops/tools/worlds_steps.py`), функции — `sheet_record()` и `backtest_nim()` ниже.
@@ -386,14 +387,3 @@ def backtest_nim(root: Path, record: dict, book: dict, inputs: dict) -> list[flo
 def mass2(x: float) -> float:
     """Масса записи объяснения — две значащие цифры (0,04794 → 0,048; 0,6405 → 0,64; 1 → 1,0)."""
     return float(f"{float(x):.2g}")
-
-
-def gate_masses(ctx) -> list[dict]:
-    """Ожидаемая масса объяснения гейта = масса сработавшего гейта в таблицах книги, две значащие цифры (запись с
-    коридором массы — суждение о дрейфе, её правило не трогает). Тексты объяснений — суждение."""
-    res = json_file(ctx, RESULTS)
-    fired = {c["name"]: c["mass"] for c in res["checks"] if c.get("fired") and c.get("kind") == "gate"}
-    notes = ctx.yaml(GATES) or {}
-    values = {(name, "expected_mass"): mass2(fired[name]) for name, e in notes.items()
-              if isinstance(e, dict) and "expected_mass" in e and name in fired}
-    return [{"file": GATES, "values": values}]

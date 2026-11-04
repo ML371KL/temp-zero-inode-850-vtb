@@ -326,6 +326,9 @@ def render_run_output(results: Mapping[str, Any], book: Book | None = None) -> s
               *([f"  ключ цели ЧПМ — стационарная маржа мира {d['level_world']} на составе баланса якоря; выведенный "
                  f"уровень мира-опоры {d['reference_world']}: {_p(d['reference_level_mgmt'], 3)} упр. "
                  f"({d['reference_level']:.6f} в движке)"] if d.get("level_world") else []),
+              *([f"  веса книг решателя — среднее окна {d['weights']['periods'][0]}–{d['weights']['periods'][-1]} "
+                 f"(nii.transmission.weights: window): " + ", ".join(f"{b} {v:.4f}" for b, v in d['weights']['books'].items())]
+                if d.get("weights") else []),
               "  кредитная маржа стационара: " + ", ".join(f"{w} {_p(v)}" for w, v in (d.get("loan_margin") or {}).items()),
               "  LT-спред кредитных книг к опоре: " + "; ".join(
                   f"{b} " + ", ".join(f"{w} {_p(v)}" for w, v in row.items())

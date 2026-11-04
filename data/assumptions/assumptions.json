@@ -1318,13 +1318,13 @@
    }
   },
   "transmission": {
-   "target": -0.030828,
+   "target": -0.0115,
    "reference_world": "H",
    "level_world": "N",
    "fd_step": 0.01,
-   "weights": "anchor"
+   "weights": "window"
   },
-  "nim_lt_target_mgmt": 0.029229,
+  "nim_lt_target_mgmt": 0.030491,
   "sigma0_split": 0.496793,
   "phi_split": 0.376982,
   "sigma0_from": 2027,
@@ -2146,8 +2146,8 @@
      "paths": [
       "nii.nim_lt_target_mgmt"
      ],
-     "low": 0.028099541,
-     "high": 0.030255781,
+     "low": 0.029365959,
+     "high": 0.031513203,
      "dist": "triangular",
      "unit": "pct"
     },
@@ -2157,8 +2157,8 @@
      "paths": [
       "nii.transmission.target"
      ],
-     "low": -0.05804,
-     "high": -0.00871,
+     "low": -0.03872,
+     "high": 0.01062,
      "dist": "triangular",
      "unit": "number"
     },
@@ -4955,12 +4955,12 @@
       "nii.nim_lt_target_mgmt"
      ],
      "search": [
-      0.013313894,
-      0.044117325
+      0.014641998,
+      0.045316917
      ],
      "range": [
-      0.028099541,
-      0.030255781
+      0.029365959,
+      0.031513203
      ],
      "unit": "%"
     },
@@ -4975,8 +4975,8 @@
       0.3
      ],
      "range": [
-      -0.087328,
-      0.002672
+      -0.068,
+      0.022
      ],
      "unit": ""
     },
@@ -5029,10 +5029,10 @@
   "reference_variants": [
    {
     "id": "margin_level_c_all_worlds",
-    "title": "Уровень окна 2026 года во всех мирах: 2,9 % (2,77 % на составе баланса 30.09.2026), передача 0",
+    "title": "Уровень окна 2026 года во всех мирах: 2,9 % (2,899 % на средних весах окна 4К2025–3К2026), передача 0",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.02773,
-     "nii.transmission.target": -0.019328
+     "nii.nim_lt_target_mgmt": 0.028991,
+     "nii.transmission.target": 0.0
     }
    },
    {
@@ -5040,7 +5040,7 @@
     "title": "Передача −0,023 листа: доля книги без процентного дохода в передаче — 0",
     "note": "пара «передача + уровень»: измеренная передача целиком, прочие доходы — уровень книги",
     "overrides": {
-     "nii.transmission.target": -0.042328
+     "nii.transmission.target": -0.023
     }
    },
    {
@@ -5048,21 +5048,21 @@
     "title": "Передача 0: вся измеренная передача — фондирование книги без процентного дохода",
     "note": "пара «передача + уровень»: доля книги 1, прочие доходы — уровень книги",
     "overrides": {
-     "nii.transmission.target": -0.019328
+     "nii.transmission.target": 0.0
     }
    },
    {
     "id": "transmission_low_m068",
     "title": "Передача ключевой в маржу −0,068: измеренная на нижнем краю, доля книги без процентного дохода 0 (край носителя)",
     "overrides": {
-     "nii.transmission.target": -0.087328
+     "nii.transmission.target": -0.068
     }
    },
    {
     "id": "transmission_high_p022",
     "title": "Передача ключевой в маржу +0,022: измеренная на верхнем краю, доля книги без процентного дохода 0 (край носителя)",
     "overrides": {
-     "nii.transmission.target": 0.002672
+     "nii.transmission.target": 0.022
     }
    },
    {
@@ -5070,29 +5070,29 @@
     "title": "Передача ключевой в маржу по регрессиям перехода 2023–2025 годов: −0,10",
     "note": "вне оси: регрессии описывают ближнюю механику и несут рост книги без процентного дохода (устав §3; решение № 2, п. 2)",
     "overrides": {
-     "nii.transmission.target": -0.119328
+     "nii.transmission.target": -0.1
     }
    },
    {
     "id": "nim_level_plus_01",
-    "title": "Уровень маржи мира N выше на 0,1 п.п.: 3,02 %",
+    "title": "Уровень маржи мира N выше на 0,1 п.п.: 3,15 %",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.030229
+     "nii.nim_lt_target_mgmt": 0.031491
     }
    },
    {
     "id": "nim_level_minus_01",
-    "title": "Уровень маржи мира N ниже на 0,1 п.п.: 2,82 %",
+    "title": "Уровень маржи мира N ниже на 0,1 п.п.: 2,95 %",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.028229
+     "nii.nim_lt_target_mgmt": 0.029491
     }
    },
    {
     "id": "margin_r1_numbers",
-    "title": "Маржа по числам первого круга: уровень 3,1 % (2,97 % на составе баланса 30.09.2026), передача −0,03",
+    "title": "Маржа по числам первого круга: уровень 3,1 % (3,099 % на средних весах окна 4К2025–3К2026), передача −0,03",
     "overrides": {
-     "nii.nim_lt_target_mgmt": 0.02973,
-     "nii.transmission.target": -0.049328
+     "nii.nim_lt_target_mgmt": 0.030991,
+     "nii.transmission.target": -0.03
     }
    },
    {

@@ -1321,14 +1321,15 @@ def test_phi_split_divides_the_compression(inputs, control):
     p = cm.c_bnum(B, "nii.phi_split")
     assert tr["phi_split"] == p and set(tr["phi_weights"]) == set(phi_assets)
     assert sum(tr["phi_weights"].values()) == pytest.approx(1.0, abs=1e-15)
-    assert tr["phi_a_sum"] == pytest.approx(sum(A["E0"][b] for b in phi_assets) / tr["iea0"], rel=1e-15)
-    assert tr["phi_l_sum"] == pytest.approx(sum(A["E0"][b] for b in phi_liabs) / tr["iea0"], rel=1e-15)
+    W = tr["weights"]                                               # веса решателя: якорь или среднее окна (М§4.5)
+    assert tr["phi_a_sum"] == pytest.approx(sum(W[b] for b in phi_assets), rel=1e-15)
+    assert tr["phi_l_sum"] == pytest.approx(sum(W[b] for b in phi_liabs), rel=1e-15)
 
     def c_ref_gap(w, b):
         f = cm.c_ref_field(books[b]["ref"])
         return cm.c_world_quarter(B, w, f, yl, ql) - cm.c_world_quarter(B, ref_w, f, yl, ql)
 
-    volume = {w: sum(A["E0"][b] / tr["iea0"] * c_ref_gap(w, b) for b in phi_assets) for w in ctx["worlds"]}   # C_W
+    volume = {w: sum(W[b] * c_ref_gap(w, b) for b in phi_assets) for w in ctx["worlds"]}   # C_W
     for split in (0.0, 0.3, 1.0):
         t2 = cm.c_transmission_ctl(_with_split(B, split), A)
         for k in ("phi", "sigma0", "sigma0_liab", "t_real", "t_local", "pairs", "nss"):

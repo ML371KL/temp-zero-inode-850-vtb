@@ -358,8 +358,9 @@ LINK_ENDS = {"02": 0.2, "10": 1.0}        # справочные вариант�
 LINK_KEYS = {"opex": "opex.volume_link", "fees": "fees.volume_link"}
 LOAN_SECTORS = ("corporate", "mortgage", "retail_other")
 NIM_KEY = "nii.nim_lt_target_mgmt"
-NIM_AXIS = (0.028099541, 0.030255781)     # ось уровня маржи — суждение (решение № 2, п. 2: 2,94–3,15 % на якоре 2К); на якоре 3К — ось переноса
-#                                           вместе с ключом 2,9229 % (решение ведущего Р4: уровень маржи — по переносу; ось шаблона та же)
+NIM_AXIS = (0.029365959, 0.031513203)     # ось уровня маржи — суждение (решение № 2, п. 2: 2,94–3,15 % на якоре 2К); на якоре 3К — ось переноса
+#                                           вместе с ключом 2,9229 % (решение ведущего Р4: уровень маржи — по переносу; ось шаблона та же); книга 1.1 — запись
+#                                           той же оси на средних весах окна (ключ 3,0491 %, веса решателя window, правило keep REANCHOR §3.5)
 # Реализованная передача ключевой в маржу (решение ведущего № 5, п. 3.4; заменяет слова решения № 2, п. 2 «ось — диапазон самой передачи»):
 # ключ книги — функция двух суждений: передача = измеренная × (1 − доля книги без процентного дохода). Измеренная — треугольник
 # −0,068 / −0,023 / +0,022 (длинная разность окон (C − L) / (14,5 − 7,75), лист calib-nii/r2; решение № 2, п. 1.2); доля книги — 0 / 0,5 / 1
@@ -374,8 +375,9 @@ NIM_AXIS = (0.028099541, 0.030255781)     # ось уровня маржи — �
 # весах якоря (1,0407). Ключ книги — значение на весах якоря, при котором на средних весах окна передача решателя (flat − φ·d стационара на этих
 # весах, σ0 и φ решателя ядра на ключе) равна реализованной; ось — концы произведения, сдвинутые на ту же разность (ключ − реализованная).
 # Уровень маржи и решатель — на весах якоря (запись переноса, не трогается). Долг: веса решателя средним окна — ключ ядра.
-TRANSMISSION_WEIGHTS = "transmission_weights"     # вход: остатки книг на концы кварталов окна Р8 (inputs/vtb_r2_inputs.json)
-TRANSMISSION_WEIGHTS_TOL = 0.05                   # млрд ₽: квартал якоря ряда весов равен остаткам книг фактов
+# КНИГА 1.1 (05.11.2026): долг закрыт ключом ядра nii.transmission.weights: window — решатель стоит на средних весах окна (остатки книг —
+# balance.history фактов, счёт ядра model.nii.book_weights), и ключ книги — сама реализованная передача: шаг пишет центр без сдвига. Ветвь
+# Р13 (секущая на весах якоря) остаётся для книги с весами якоря (anchor); средние веса окна она берёт из того же счёта ядра.
 # Справочные варианты передачи и диапазон строки обратного расчёта — та же форма, что ключ (решение ведущего 04.11.2026 к Р13): число
 # реализованной передачи варианта, записанное на весах якоря тем же сдвигом «ключ − реализованная»; числа пишет шаг realized
 TRANSMISSION_VARIANTS = {"transmission_sheet_m023": -0.023, "transmission_zero_book_share_1": 0.0, "transmission_low_m068": -0.068,
@@ -875,34 +877,22 @@ def realized_axis(centre: float) -> dict:
 
 
 def window_weights(eng: Engine) -> dict:
-    """Веса книг ЧПД к процентным активам — среднее с равным весом кварталов окна Р8 (вход TRANSMISSION_WEIGHTS); квартал якоря ряда
-    сверяется с остатками книг фактов."""
-    from model.nii import _Stationary
-    st = _Stationary(eng.current(), eng.facts)
-    rows = eng.inputs[TRANSMISSION_WEIGHTS]["quarters"]
-    anchor = str(eng.current().get("meta.anchor_period"))
-    if anchor not in rows:
-        raise RuntimeError(f"веса окна Р8: в ряду нет квартала якоря {anchor}")
-    nb = eng.facts.file("nii_books")["books"]
-    off = {b: round(float(rows[anchor][b]) - float(nb[b]["balance_close"]["v"]), 3) for b in st.roles.names
-           if abs(float(rows[anchor][b]) - float(nb[b]["balance_close"]["v"])) > TRANSMISSION_WEIGHTS_TOL}
-    if off:
-        raise RuntimeError(f"веса окна Р8: квартал якоря ряда не равен остаткам книг фактов: {off}")
-    per_q, by_q = [], {}
-    for q, row in rows.items():
-        iea = sum(float(row[b]) for b in st.roles.assets)
-        w = {b: float(row[b]) / iea for b in st.roles.names}
-        per_q.append(w)
-        by_q[q] = {"iea": round(iea, 1), "liabilities_to_iea": round(sum(w[b] for b in st.roles.liabilities), 6)}
-    weights = {b: sum(w[b] for w in per_q) / len(per_q) for b in st.roles.names}
-    return {"weights": weights, "by_quarter": by_q, "quarters": list(rows),
-            "liabilities_to_iea": sum(weights[b] for b in st.roles.liabilities),
-            "liabilities_to_iea_anchor": sum(st.w[b] for b in st.roles.liabilities)}
+    """Веса книг ЧПД к процентным активам: среднее с равным весом концов кварталов окна (счёт ядра `model.nii.book_weights` с ключом
+    `window`: остатки — balance.history.<квартал>.books фактов, квартал якоря — остатки якоря) и веса якоря (ключ `anchor`)."""
+    from model.book import book_roles
+    from model.nii import ANCHOR_WEIGHTS, WEIGHTS, WINDOW_WEIGHTS, book_weights
+    book = eng.current()
+    win = book_weights(book.with_overrides({WEIGHTS: WINDOW_WEIGHTS}), eng.facts)
+    anc = book_weights(book.with_overrides({WEIGHTS: ANCHOR_WEIGHTS}), eng.facts)
+    liab = book_roles(book.get("nii.books")).liabilities
+    by_q = {q: {"liabilities_to_iea": round(sum(w[b] for b in liab), 6)} for q, w in win.by_quarter.items()}
+    return {"weights": dict(win.weights), "anchor_weights": dict(anc.weights), "by_quarter": by_q, "quarters": list(win.periods),
+            "liabilities_to_iea": sum(win.weights[b] for b in liab), "liabilities_to_iea_anchor": sum(anc.weights[b] for b in liab)}
 
 
 def transmission_on_weights(eng: Engine, target: float, weights: dict | None) -> dict:
-    """Передача решателя ядра при ключе `target` на весах `weights` (None — веса якоря): flat − φ·d стационара (σ0 и φ — решатель ядра
-    на весах якоря; flat — разность стационарной маржи миров M и N на единицу разности ключевой, d — сжатие на единицу φ)."""
+    """Передача решателя ядра при ключе `target` на весах `weights` (None — веса решателя книги): flat − φ·d стационара (σ0 и φ — решатель
+    ядра на весах книги; flat — разность стационарной маржи миров M и N на единицу разности ключевой, d — сжатие на единицу φ)."""
     from model.nii import _Stationary
     from model.worlds import BASE_WORLD, MARKET_WORLD
     book = eng.current({TRANSMISSION_PATH: target})
@@ -923,27 +913,35 @@ def step_realized(eng: Engine, out: dict) -> None:
     """Реализованная передача (решение № 5, п. 3.4): центр — произведение середин двух суждений без округления; концы оси движка — по
     квантилям произведения (правило подбора — в шапке листа); сверка: квантили оси, как её разыгрывает движок, на записанных концах.
     Книга 1.0 (Р13): реализованная передача — на средних весах окна Р8; ключ книги — значение на весах якоря, при котором передача решателя
-    на средних весах равна реализованной (секущая по ключу); ось — концы произведения, сдвинутые на ту же разность."""
+    на средних весах равна реализованной (секущая по ключу); ось — концы произведения, сдвинутые на ту же разность. Книга 1.1: решатель стоит
+    на средних весах окна (`nii.transmission.weights: window`) — ключ и есть реализованная передача, сдвиг ноль, секущей нет."""
     from model import uncertainty as U
+    from model.nii import WINDOW_WEIGHTS, weights_mode
     book = eng.current()
     was = float(book.get(TRANSMISSION_PATH))
     centre = round(TRANSMISSION_MEASURED[1] * (1.0 - TRANSMISSION_BOOK_SHARE[1]), 9)
     ww = window_weights(eng)
-    on = lambda t: transmission_on_weights(eng, t, ww["weights"])        # noqa: E731
-    t0, t1 = centre, centre - 0.02
-    f0, f1 = on(t0)["realized"] - centre, on(t1)["realized"] - centre
+    mode = weights_mode(book)
     steps = []
-    for _ in range(20):
-        t2 = t1 - f1 * (t1 - t0) / (f1 - f0)
-        t0, f0 = t1, f1
-        t1, f1 = t2, on(t2)["realized"] - centre
-        steps.append(abs(f1))
-        if abs(f1) < 1e-10:
-            break
-    if abs(f1) >= 1e-8:
-        raise RuntimeError(f"Р13: передача на средних весах окна не сошлась к {centre} (невязка {f1:.2e})")
-    target = round(t1, 6)
-    on_window, on_anchor = on(target), transmission_on_weights(eng, target, None)
+    if mode == WINDOW_WEIGHTS:                                           # веса решателя — среднее окна: ключ = реализованная передача
+        target = round(centre, 6)
+        on_window = transmission_on_weights(eng, target, None)
+        on_anchor = transmission_on_weights(eng, target, ww["anchor_weights"])
+    else:                                                                # веса якоря (Р13): ключ на весах якоря — секущей
+        on = lambda t: transmission_on_weights(eng, t, ww["weights"])    # noqa: E731
+        t0, t1 = centre, centre - 0.02
+        f0, f1 = on(t0)["realized"] - centre, on(t1)["realized"] - centre
+        for _ in range(20):
+            t2 = t1 - f1 * (t1 - t0) / (f1 - f0)
+            t0, f0 = t1, f1
+            t1, f1 = t2, on(t2)["realized"] - centre
+            steps.append(abs(f1))
+            if abs(f1) < 1e-10:
+                break
+        if abs(f1) >= 1e-8:
+            raise RuntimeError(f"Р13: передача на средних весах окна не сошлась к {centre} (невязка {f1:.2e})")
+        target = round(t1, 6)
+        on_window, on_anchor = on(target), transmission_on_weights(eng, target, None)
     shift = target - centre
     eng.overrides[TRANSMISSION_PATH] = target
     ax = realized_axis(centre)
@@ -970,6 +968,7 @@ def step_realized(eng: Engine, out: dict) -> None:
     mean_ax = sum(vals) / k
     sd_ax = math.sqrt(sum((v - mean_ax) ** 2 for v in vals) / k)
     out["realized"] = {"centre": centre, "target": target, "shift": round(shift, 9), "was": was, "axis_realized": realized_ends,
+                       "weights_mode": mode,
                        "window_weights": {"quarters": ww["quarters"], "liabilities_to_iea": round(ww["liabilities_to_iea"], 6),
                                           "liabilities_to_iea_anchor": round(ww["liabilities_to_iea_anchor"], 6), "by_quarter": ww["by_quarter"],
                                           "weights": {b: round(v, 6) for b, v in ww["weights"].items()}},
@@ -990,9 +989,15 @@ def step_realized(eng: Engine, out: dict) -> None:
                                "равны P10 и P90 произведения двух независимых треугольников (измеренная −0,068 / −0,023 / +0,022 × (1 − доля книги "
                                "0 / 0,5 / 1)) при центре книги — произведении середин без округления: конец = центр + (квантиль произведения − центр) / "
                                "|s(квантиль)|; концы пишет команда перевывода (решение ведущего № 5, п. 3.4)"}
-    say(f"{TRANSMISSION_PATH}: {target} (было {was}) — на весах якоря (пассивы / процентные активы {ww['liabilities_to_iea_anchor']:.4f}); реализованная "
-        f"передача {centre} на средних весах окна {ww['quarters'][0]}–{ww['quarters'][-1]} ({ww['liabilities_to_iea']:.4f}): решатель φ {on_window['phi']:.6f}, "
-        f"на средних весах {on_window['realized']:+.6f}, на весах якоря {on_anchor['realized']:+.6f}; сдвиг ключа и оси {shift:+.6f} (Р13)")
+    if mode == WINDOW_WEIGHTS:
+        say(f"{TRANSMISSION_PATH}: {target} (было {was}) — веса решателя — среднее окна {ww['quarters'][0]}–{ww['quarters'][-1]} (пассивы / процентные "
+            f"активы {ww['liabilities_to_iea']:.4f}; якорь {ww['liabilities_to_iea_anchor']:.4f}): решатель φ {on_window['phi']:.6f}, передача на весах "
+            f"решателя {on_window['realized']:+.6f}, на весах якоря {on_anchor['realized']:+.6f}; ключ — реализованная передача, сдвига нет")
+    else:
+        say(f"{TRANSMISSION_PATH}: {target} (было {was}) — на весах якоря (пассивы / процентные активы {ww['liabilities_to_iea_anchor']:.4f}); "
+            f"реализованная передача {centre} на средних весах окна {ww['quarters'][0]}–{ww['quarters'][-1]} ({ww['liabilities_to_iea']:.4f}): решатель "
+            f"φ {on_window['phi']:.6f}, на средних весах {on_window['realized']:+.6f}, на весах якоря {on_anchor['realized']:+.6f}; сдвиг ключа и оси "
+            f"{shift:+.6f} (Р13)")
     say(f"   реализованная: {centre} = {TRANSMISSION_MEASURED[1]} × (1 − {TRANSMISSION_BOOK_SHARE[1]}) — произведение середин без округления; "
         f"произведение: P10 {pq[TRANSMISSION_QUANTILES[0]]:+.5f}, медиана {pq[0.5]:+.5f}, P90 {pq[TRANSMISSION_QUANTILES[1]]:+.5f} (среднее {mean_m * mean_u:+.5f}, "
         f"σ {sd_prod:.5f}); ось движка {written_ends['low']} / {target} / {written_ends['high']} (в реализованной передаче {realized_ends['low']} / "

@@ -1165,13 +1165,16 @@ def derived_values(ctx: RunContext) -> dict[str, Any]:
     level = {} if level_world(ctx.book) is None else {
         "level_world": tr.level_world, "reference_world": tr.reference_world, "reference_level": tr.reference_level,
         "reference_level_mgmt": ctx.bridge.to_mgmt_nim(tr.reference_level)}
+    # веса решателя средним окна (`nii.transmission.weights: window`) печатаются рядом: концы кварталов и веса книг
+    window = {} if tr.weights_mode != "window" else {
+        "weights": {"mode": tr.weights_mode, "periods": list(tr.weights_periods), "books": dict(tr.weights)}}
     return {
         "nii": {"sigma0": tr.sigma0, "sigma0_liab": tr.sigma0_liab, "sigma0_split": tr.split, "delta0": tr.delta0,
                 "lt_spread": {b: dict(row) for b, row in tr.lt_spread.items()},
                 "phi": tr.phi, "phi_assets": tr.phi_assets, "phi_liab": tr.phi_liab, "phi_split": tr.phi_split,
                 "loan_margin": dict(tr.loan_margin), "target_eng": tr.target_eng, "T_real": tr.t_real,
                 "T": dict(tr.t_local), "T_pairs": dict(tr.pairs), "roe_equiv": tr.roe_equiv,
-                "roe_equiv_pairs": dict(tr.pairs_roe), "D": tr.d, "nss": dict(tr.nss), **level},
+                "roe_equiv_pairs": dict(tr.pairs_roe), "D": tr.d, "nss": dict(tr.nss), **level, **window},
         "anchor": dict(ctx.book.anchors),
         "capital": {"rwa0": prep.rwa0,
                     "floor20": {s: by_year(sp.floor20) for s, sp in prep.scenarios.items()},

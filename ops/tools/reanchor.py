@@ -205,7 +205,7 @@ from model.credit import bridge_from_facts  # noqa: E402
 from model.dividends import DECLARED, THOUSAND, closed_through, history_dps, is_quarterly  # noqa: E402
 from model.grid import (GridRun, LiveInputs, floor_value, live_from_book, make_context,  # noqa: E402
                         regime_expectations, run_cell, run_grid)
-from model.nii import solve_transmission  # noqa: E402
+from model.nii import WINDOW_WEIGHTS, book_weights, solve_transmission, weights_mode  # noqa: E402
 from model.paths import Trajectory, get_path, has_path  # noqa: E402
 from model.timeline import (parse_period, period_str, quarter_days, quarter_end,  # noqa: E402
                             quarter_start, shift_quarter, to_date)
@@ -1000,6 +1000,12 @@ def facts_after(book: Book, facts: Facts, report: Mapping, *, update_bridge: boo
     _null_untouched(bal, touched, ("history", "prev_year_end"), absent)
     rows = bal.get("history")
     carried = _node_keys(rows) & {"loans", "funds"}      # базы объёма: рост объёма г/г читает их с концов кварталов (М§4.7)
+    # остатки книг ЧПД на концы кварталов — вход весов решателя передачи средним окна (`nii.transmission.weights: window`,
+    # М§4.5): строки истории, которые их несут, получают их и на новых концах — окно нового якоря стоит на тех же числах,
+    # что окно сборщика фактов (сверка --compare-facts)
+    with_books = isinstance(rows, Mapping) and any(isinstance(r, Mapping) and isinstance(r.get("books"), Mapping)
+                                                   for r in rows.values()) \
+        or isinstance(rows, list) and any(isinstance(r, Mapping) and isinstance(r.get("books"), Mapping) for r in rows)
     listed = set(rows) if isinstance(rows, dict) else {r.get("period") for r in rows or [] if isinstance(r, dict)}
     if rows is not None and old_period not in listed:
         # конец прежнего якоря уходит в историю: по концам отчётных кварталов ядро взвешивает год якоря (М§4.6)
@@ -1011,14 +1017,22 @@ def facts_after(book: Book, facts: Facts, report: Mapping, *, update_bridge: boo
             "loans_ac_gross": _node(_r(old_loans - old.fv_loans, 6), was),
             "bv_common": _node(float(old.bv), was),
             "iea": _node(_r(sum(old.balances[b] for b in roles.assets), 6), was),
-            **{k: _node(_r(bases[k], 6), was) for k in sorted(carried)}})
+            **{k: _node(_r(bases[k], 6), was) for k in sorted(carried)},
+            **({"books": {b: _node(float(old.balances[b]), was) for b in books}} if with_books else {})})
+    elif with_books:
+        old_row = rows.get(old_period) if isinstance(rows, Mapping) else next(
+            (r for r in rows if isinstance(r, Mapping) and r.get("period") == old_period), None)
+        if isinstance(old_row, dict) and not isinstance(old_row.get("books"), Mapping):
+            old_row["books"] = {b: _node(float(old.balances[b]), f"reanchor: остатки книг прежнего якоря {old_period}")
+                                for b in books}
     bases = {"loans": loans, "funds": funds}
     _add_period_row(bal, "history", period, {
         "date": end.isoformat(), "loans_ac_gross": _node(_r(loans - fv_part, 6), tag),
         "allowance_ac": _node(float(B["allowance"]), tag), "loans_fvtpl": _node(float(B["loans_fvtpl"]), tag),
         "bv_common": _node(float(B["bv_common"]), tag), "iea": _node(_r(iea, 6), tag),
         "total_assets": _node(_r(assets, 6), tag),
-        **{k: _node(_r(bases[k], 6), tag) for k in sorted(carried)}})
+        **{k: _node(_r(bases[k], 6), tag) for k in sorted(carried)},
+        **({"books": {b: _node(float(B["books"][b]), tag) for b in books}} if with_books else {})})
 
     # --- книги ЧПД: ставки якоря несут весь ЧПД
     nb = files["nii_books"]
@@ -1719,7 +1733,12 @@ def keep_transmission(X: dict, new_facts: Facts, old: GridRun) -> dict[str, tupl
     сохраняются тем же решением в записи образца (книга без ключа мира уровня, цель — уровень мира-опоры:
     там σ0 от цели A-N3 не зависят, и решение идёт в два шага), а ключ книги на новом якоре — стационарная маржа
     мира уровня при этих скалярах: то же суждение на составе баланса нового якоря. Оси по ключу и по цели A-N3
-    пересчитываются в единицах ключа книги: вдоль оси A-N3 неподвижен ключ, а не уровень мира-опоры."""
+    пересчитываются в единицах ключа книги: вдоль оси A-N3 неподвижен ключ, а не уровень мира-опоры.
+
+    Веса решателя средним окна (`nii.transmission.weights: window`, М§4.5): «структура якоря» выше — средние доли книг
+    четырёх концов кварталов по квартал якоря. Решение то же: ядро читает окно нового якоря из фактов кандидата (строки
+    истории с остатками книг, `facts_after`), и цели переписываются на весах окна, а не на снимке даты нового якоря —
+    перенос сохраняет суждение (скаляры пути), а его запись не несёт шума одной даты (REANCHOR §3.5)."""
     bridge = bridge_from_facts(new_facts)
     was = old.ctx.transmission
     level = _get(X, LEVEL_WORLD)                         # None — ключ цели стоит в мире-опоре решателя (образец)
@@ -3138,6 +3157,9 @@ def reanchor(book: Book, facts: Facts, report: Mapping, *, valuation_date: Any =
         sigmas={"old": _sigmas(base_run.ctx.transmission), "new": _sigmas(run.ctx.transmission)},
         phi_weights={"old": dict(base_run.ctx.transmission.phi_weights),
                      "new": dict(run.ctx.transmission.phi_weights)},
+        solver_weights={"mode": run.ctx.transmission.weights_mode,
+                        "old": list(base_run.ctx.transmission.weights_periods),
+                        "new": list(run.ctx.transmission.weights_periods)},
         regime_floor=regime_floor(book, run.ctx.posterior))
     if "cir" not in report["mgmt"]:
         warnings.append("в отчёте нет mgmt.cir: история моста C/I останется без закрытого квартала, и годовой "
@@ -4262,10 +4284,16 @@ def report_text(book: Book, result: Mapping) -> str:
                      + (" — ключ оставлен числом прежней книги, скаляры пути решены под него заново"
                         if lv["key"][0] == lv["key"][1] else
                         " — запись прежнего суждения на новом якоре, не пересмотр уровня"))
+    sw = d.get("solver_weights") or {}
+    window = sw.get("mode") == WINDOW_WEIGHTS
+    if window:
+        lines.append(f"- веса книг решателя передачи — среднее окна (`nii.transmission.weights: window`): концы кварталов "
+                     f"{sw['old'][0]}–{sw['old'][-1]} → {sw['new'][0]}–{sw['new'][-1]}; цели и доли — "
+                     "запись прежних скаляров пути на весах окна нового якоря, а не на снимке его даты")
     if omega["old"]:
         drift = max(abs(omega["new"][b] - omega["old"][b]) for b in omega["old"])
         lines.append("- доли кредитных книг ω в разности опорных ставок X (добавка к стоимости пассивов) — со "
-                     "структуры нового якоря: " + ", ".join(
+                     + ("средних весов окна нового якоря: " if window else "структуры нового якоря: ") + ", ".join(
                          f"{b} {omega['old'][b]:.4f} → {omega['new'][b]:.4f}" for b in omega["old"])
                      + f"; наибольший сдвиг {drift * 100:.3f} п.п. — скаляром не сохраняется, эффект в строке "
                      "«механика»")
@@ -4593,6 +4621,9 @@ def _beyond_anchor(book: Book, facts: Facts) -> dict[str, Any]:
         rows = facts.periods("balance", "history")
         last = sorted(rows, key=pindex)[-5:]
         out["volume_base"] = {p: _fact(rows[p].get(base)) for p in last}
+    if weights_mode(book) == WINDOW_WEIGHTS:              # веса решателя средним окна: доли книг каждого конца окна (М§4.5)
+        w = book_weights(book, facts)
+        out["transmission_window"] = {p: dict(v) for p, v in w.by_quarter.items()}
     return out
 
 

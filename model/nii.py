@@ -20,6 +20,15 @@ LT-спред кредитной книги к опоре мира s_eff,b,W —
 `nii.transmission.level_world`: стационарная маржа названного мира на составе баланса якоря равна
 ключу, а уровень мира-опоры решатель находит сам — той же функцией, что выводит ключ под стационар
 мира (`level_for_stationary`). Без ключа ключ цели — уровень мира-опоры (поведение образца).
+
+На каких весах книг решатель стоит, называет ключ книги `nii.transmission.weights` (М§4.5): `anchor` —
+структура якоря (доли книг в процентных активах на дату якоря, поведение образца), `window` — среднее
+с равным весом тех же долей на концы кварталов окна весов (четыре конца кварталов по квартал якоря
+включительно; остатки книг — `balance.history.<квартал>.books` фактов, у квартала якоря — остатки якоря).
+На выбранных весах — всё, что решатель читает со структуры: стационарная маржа миров, наклоны σ0,
+объём сжатия и его раскладка (A, L, доли ω кредитных книг), кредитная маржа стационара. На якоре
+остаётся только масштаб ROE-эквивалента (IEA_0/BV_0 — печать): капитал окна с собственным капиталом якоря
+несопоставим.
 """
 
 from __future__ import annotations
@@ -27,21 +36,105 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable, Mapping
 
-from model.book import LIQUIDITY, SECURITIES, anchor_facts, book_roles
+from model.book import LIQUIDITY, SECURITIES, FactsError, anchor_facts, book_roles
 from model.book_schema import BookError
 from model.credit import Bridge, cor_to_engine, kappa_gap, kappa_world
 from model.paths import Trajectory, get_path
-from model.timeline import Timeline, parse_period
+from model.timeline import Timeline, parse_period, period_str
 from model.valuation import tax_structure
 from model.worlds import BASE_WORLD, MARKET_WORLD, check_family_worlds
 
 if TYPE_CHECKING:
-    from model.book import Book, Facts
+    from model.book import AnchorFacts, Book, Facts
 
 # Режим, в котором откалиброваны уровни сквозь цикл: передача по клеткам, флаг ni_jump, кредитная маржа (М§4.5).
 REFERENCE_REGIME = "norm"
 # Мир, стационарную маржу которого задаёт ключ цели ЧПМ (М§4.5); нет ключа — мир-опора решателя.
 LEVEL_WORLD = "nii.transmission.level_world"
+# Веса книг решателя передачи (М§4.5): структура якоря или среднее окна; нет ключа — структура якоря.
+WEIGHTS = "nii.transmission.weights"
+ANCHOR_WEIGHTS, WINDOW_WEIGHTS = "anchor", "window"
+# Окно весов `window`: концы кварталов по квартал якоря включительно, равный вес — то же окно, что у отношений прочих
+# активов и прочих обязательств к кредитам книги (решение ведущего Р8, книга ВТБ 1.0: четыре квартала, правило семейства
+# для уровней — среднее окна с равным весом кварталов).
+WINDOW_QUARTERS = 4
+WINDOW_TOL = 1e-6          # остатки квартала якоря в строке истории фактов и остатки якоря — одно число (доля величины)
+
+
+@dataclass(frozen=True)
+class BookWeights:
+    """Веса книг ЧПД решателя передачи: доля остатка книги в процентных активах (Σ по активам = 1; у пассивов — к тем
+    же процентным активам). `periods` — концы кварталов, по которым взято среднее (у `anchor` — квартал якоря)."""
+    mode: str
+    weights: Mapping[str, float]
+    periods: tuple[str, ...]
+    by_quarter: Mapping[str, Mapping[str, float]] = field(default_factory=dict)   # квартал → доли книг этого конца
+
+
+def weights_mode(book: "Book") -> str:
+    """Ключ книги `nii.transmission.weights`; нет ключа — `anchor` (структура якоря, поведение образца)."""
+    mode = str(book.opt(WEIGHTS, ANCHOR_WEIGHTS))
+    if mode not in (ANCHOR_WEIGHTS, WINDOW_WEIGHTS):
+        raise BookError(f"{WEIGHTS} = {mode!r}: известны {ANCHOR_WEIGHTS}, {WINDOW_WEIGHTS} (М§4.5)")
+    return mode
+
+
+def window_periods(anchor: str, n: int = WINDOW_QUARTERS) -> tuple[str, ...]:
+    """Концы кварталов окна весов по возрастанию: n кварталов по квартал якоря включительно."""
+    y, q = parse_period(anchor)
+    k = 4 * y + q - 1
+    return tuple(period_str(i // 4, i % 4 + 1) for i in range(k - n + 1, k + 1))
+
+
+def book_weights(book: "Book", facts: "Facts", af: "AnchorFacts | None" = None) -> BookWeights:
+    """Веса книг ЧПД решателя передачи по ключу `nii.transmission.weights` (М§4.5).
+
+    `anchor`: w_b = E_b,0 / IEA_0 — остатки якоря (`balance.books` фактов). `window`: w_b = (1/n) Σ_q E_b,q / IEA_q по
+    концам кварталов окна (`window_periods`): остаток квартала якоря — остаток якоря, прежних — узлы
+    `balance.history.<квартал>.books.<книга>`; IEA_q — Σ книг активов того же конца. Нет конца или книги — FactsError;
+    строка истории квартала якоря, если несёт остатки книг, обязана с ними совпасть."""
+    books = book.get("nii.books")
+    roles = book_roles(books)
+    af = anchor_facts(facts, books) if af is None else af
+    mode = weights_mode(book)
+
+    def shares(bal: Mapping[str, float]) -> dict[str, float]:
+        iea = sum(bal[b] for b in roles.assets)
+        return {b: bal[b] / iea for b in roles.names}
+
+    if mode == ANCHOR_WEIGHTS:
+        return BookWeights(mode=mode, weights=shares(af.balances), periods=(af.period,))
+    periods = window_periods(af.period)
+    hist = facts.file("balance").get("history")
+    rows = facts.periods("balance", "history") if hist is not None else {}
+    by_q: dict[str, dict[str, float]] = {}
+    for p in periods:
+        row = rows.get(p) or {}
+        node = row.get("books")
+        if p == af.period:
+            if isinstance(node, Mapping):
+                for b in roles.names:
+                    have = node.get(b, {}).get("v") if isinstance(node.get(b), Mapping) else None
+                    if have is None or abs(float(have) - af.balances[b]) > WINDOW_TOL * max(1.0, abs(af.balances[b])):
+                        raise FactsError(f"balance.history.{p}.books.{b} = {have}: квартал якоря — остаток якоря "
+                                         f"{af.balances[b]} (веса решателя средним окна, М§4.5)")
+            by_q[p] = shares(af.balances)
+            continue
+        if not isinstance(node, Mapping):
+            raise FactsError(f"balance.history.{p}.books: нет остатков книг на конец квартала окна весов решателя "
+                             f"передачи ({WEIGHTS}: {WINDOW_WEIGHTS}, окно {periods[0]}–{periods[-1]}, М§4.5)")
+        bal = {}
+        for b in roles.names:
+            got = node.get(b)
+            value = got.get("v") if isinstance(got, Mapping) else None
+            if value is None:
+                raise FactsError(f"balance.history.{p}.books.{b}: нет остатка книги на конец квартала окна весов "
+                                 f"решателя передачи (М§4.5)")
+            bal[b] = float(value)
+        by_q[p] = shares(bal)
+    n = len(periods)
+    weights = {b: sum(by_q[p][b] for p in periods) / n for b in roles.names}
+    return BookWeights(mode=mode, weights=weights, periods=periods, by_quarter=by_q)
 
 
 def current_share_target(key: float, c_ref: float, psi: float, key_ref: float,
@@ -104,10 +197,13 @@ class Transmission:
     x_lt: Mapping[str, float] = field(default_factory=dict)          # мир → X_W в стационаре (last_period)
     level_world: str = ""                  # мир, уровень которого задаёт ключ цели ЧПМ (`target_eng` — его стационар)
     reference_level: float = 0.0           # стационарная ЧПМ мира-опоры, движок: без ключа уровня — сам `target_eng`
+    weights_mode: str = ANCHOR_WEIGHTS     # nii.transmission.weights: на каких весах книг решено (М§4.5)
+    weights_periods: tuple[str, ...] = ()  # концы кварталов весов (у `anchor` — квартал якоря)
+    weights: Mapping[str, float] = field(default_factory=dict)   # книга → вес решателя (доля в процентных активах)
 
 
 class _Stationary:
-    """Стационарный ЧПМ Nss(W, δ) на структуре якоря (М§4.5)."""
+    """Стационарный ЧПМ Nss(W, δ) на весах книг решателя (М§4.5): структура якоря или среднее окна."""
 
     def __init__(self, book: "Book", facts: "Facts"):
         books = book.get("nii.books")
@@ -115,9 +211,10 @@ class _Stationary:
         self.roles = book_roles(books)
         af = anchor_facts(facts, books)
         iea = sum(af.balances[b] for b in self.roles.assets)
-        self.iea0 = iea
+        self.iea0 = iea                    # масштаб ROE-эквивалента — якорь при любых весах (печать)
         self.bv0 = af.bv
-        self.w = {b: af.balances[b] / iea for b in self.roles.names}
+        self.weights = book_weights(book, facts, af)
+        self.w = dict(self.weights.weights)
         self.l_r = sum(self.w[b] for b in self.roles.retail)
         last = str(book.get("meta.last_period"))
         self.last = parse_period(last)
@@ -329,7 +426,8 @@ def solve_transmission(book: "Book", facts: "Facts", bridge: Bridge) -> Transmis
                         phi_split=p_split, phi_weights=omega,
                         loan_margin=_loan_margin(book, st, bridge, sigma0, phi_a, ref_world),
                         x_lt={w: st.compression(w, 0.0, ref_world) / a_phi for w in ids},
-                        level_world=level or ref_world, reference_level=reference_level)
+                        level_world=level or ref_world, reference_level=reference_level,
+                        weights_mode=st.weights.mode, weights_periods=st.weights.periods, weights=dict(st.w))
 
 
 def _loan_margin(book: "Book", st: _Stationary, bridge: Bridge, sigma0: float, phi_assets: float,

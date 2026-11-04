@@ -801,6 +801,10 @@ def c_anchor_state(book: dict, facts: dict) -> dict:
     A["OA_fixed_fact"] = None if oaf is None else _c_nodeval(oaf)
     A["history"] = {str(per): {k: _c_nodeval(v) for k, v in rec.items()}
                     for per, rec in (facts[bal].get("history") or {}).items() if isinstance(rec, dict)}
+    # остатки книг ЧПД на концы кварталов истории — вход весов решателя передачи средним окна (М§4.5)
+    A["history_books"] = {str(per): {b: _c_nodeval(v) for b, v in rec["books"].items()}
+                          for per, rec in (facts[bal].get("history") or {}).items()
+                          if isinstance(rec, dict) and isinstance(rec.get("books"), dict)}
     A["BV"] = c_fnum(facts, bal, "equity.bv_common")
     A["AT1"] = c_fnum(facts, bal, "equity.at1")
     A["NCI"] = c_fnum(facts, bal, "equity.nci")
@@ -1063,6 +1067,41 @@ def c_overlay_growth(book: dict, w: str, group: str, name: str, y: int) -> float
 
 # ============================================================================ передача ставки (М§4.5)
 
+C_WINDOW_QUARTERS = 4      # окно весов решателя `window`: концы кварталов по квартал якоря включительно (М§4.5; решение Р8)
+
+
+def c_solver_weights(book: dict, A: dict) -> tuple[dict[str, float], list[str]]:
+    """Веса книг решателя передачи (М§4.5) — счёт контрольной модели. `nii.transmission.weights`: `anchor` (нет
+    ключа) — E_b,0 / IEA_0 якоря; `window` — среднее с равным весом долей E_b,q / IEA_q на концы четырёх кварталов
+    по квартал якоря включительно: квартал якоря — остатки якоря, прежние — balance.history.<q>.books фактов."""
+    books = c_bget(book, "nii.books")
+    assets = [b for b, s in books.items() if s["side"] == LOANS_SIDE]
+    mode = c_bopt(book, "nii.transmission.weights") or "anchor"
+
+    def c_share(E):
+        tot = sum(E[b] for b in assets)
+        return {b: E[b] / tot for b in books}
+
+    y0, q0 = A["anchor"]
+    anchor = f"{y0}Q{q0}"
+    if mode == "anchor":
+        return c_share(A["E0"]), [anchor]
+    if mode != "window":
+        raise ControlInputError(f"nii.transmission.weights = {mode!r}: известны anchor и window (М§4.5)")
+    k0 = 4 * y0 + q0 - 1
+    quarters = [f"{k // 4}Q{k % 4 + 1}" for k in range(k0 - C_WINDOW_QUARTERS + 1, k0 + 1)]
+    rows = []
+    for per in quarters:
+        if per == anchor:
+            rows.append(c_share(A["E0"]))
+            continue
+        E = A["history_books"].get(per)
+        if E is None or any(E.get(b) is None for b in books):
+            raise ControlInputError(f"balance.history.{per}.books: нет остатков книг конца квартала окна весов (М§4.5)")
+        rows.append(c_share({b: float(E[b]) for b in books}))
+    return {b: sum(r[b] for r in rows) / len(rows) for b in books}, quarters
+
+
 def c_transmission_ctl(book: dict, A: dict) -> dict:
     """σ0_A, σ0_L, φ, φ_A, φ_L, target_eng, T_real, T(W), пары, эффективные LT-спреды кредитных книг и
     кредитная маржа миров — замкнутое решение по стационарному ЧПМ (М§4.5). Сдвиг Δ0 делит
@@ -1071,7 +1110,8 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
     (target_eng) — стационарный ЧПМ мира nii.transmission.level_world (nss_level); без ключа — мира-опоры."""
     books = c_bget(book, "nii.books")
     E0 = A["E0"]
-    iea = sum(E0[b] for b, s in books.items() if s["side"] == LOANS_SIDE)
+    iea = sum(E0[b] for b, s in books.items() if s["side"] == LOANS_SIDE)       # масштаб ROE-эквивалента — якорь
+    Wt, w_quarters = c_solver_weights(book, A)                                  # веса решателя (М§4.5)
     yl, ql = c_per_parse(c_bget(book, "meta.last_period"))
     ref_w = c_bget(book, "nii.transmission.reference_world")
 
@@ -1086,7 +1126,7 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
     psi = c_bnum(book, "nii.retail_current_share.psi")
     lo, hi = (float(x) for x in c_bget(book, "nii.retail_current_share.bounds"))
     dia = c_bnum(book, "nii.dia_rate")
-    l_r = (E0[RETAIL_CURRENT] + E0[RETAIL_TERM]) / iea
+    l_r = Wt[RETAIL_CURRENT] + Wt[RETAIL_TERM]
 
     def c_cstar(key):
         return min(hi, max(lo, c_ref - psi * (key - k_ref)))
@@ -1100,7 +1140,7 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
         key = c_ref_lt(w, "key") + d
         tot = 0.0
         for b, sp in books.items():
-            wgt = E0[b] / iea
+            wgt = Wt[b]
             r_w = c_ref_lt(w, sp["ref"]) + d
             if sp["side"] == LOANS_SIDE:
                 val = r_w + c_s_lt(b) + (sa if sp.get("lt_shift") else 0.0)
@@ -1122,13 +1162,13 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
     # lt_shift, остаток — пассивы с lt_shift. Вес пассива в стационаре мира H: у средств ФЛ —
     # l_R × c*(key_H^LT) (текущие) и l_R × (1 − c*(key_H^LT)) (срочные), у прочих — l_b.
     base_ref = c_nss(ref_w, 0.0, 0.0, 0.0, 0.0)
-    w_assets = sum(E0[b] / iea for b, s in books.items() if s["side"] == LOANS_SIDE and s.get("lt_shift"))
+    w_assets = sum(Wt[b] for b, s in books.items() if s["side"] == LOANS_SIDE and s.get("lt_shift"))
     c_h = c_cstar(c_ref_lt(ref_w, "key"))
     w_liab = 0.0
     for b, s in books.items():
         if s["side"] == LOANS_SIDE or not s.get("lt_shift"):
             continue
-        w_liab += l_r * c_h if b == RETAIL_CURRENT else l_r * (1.0 - c_h) if b == RETAIL_TERM else E0[b] / iea
+        w_liab += l_r * c_h if b == RETAIL_CURRENT else l_r * (1.0 - c_h) if b == RETAIL_TERM else Wt[b]
     if split > 0.0 and w_assets == 0.0:
         raise ControlInputError("nii.sigma0_split > 0 без актива с lt_shift (М§4.5)")
     if split < 1.0 and w_liab == 0.0:
@@ -1136,7 +1176,7 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
     dk = c_ref_lt(W_MKT, "key") - c_ref_lt(W_LOW, "key")
     if dk == 0.0:
         raise ControlInputError("передача не определена: key_M^LT = key_N^LT")
-    dphi = sum(E0[b] / iea * (c_ref_lt(W_MKT, s["ref"]) - c_ref_lt(W_LOW, s["ref"]))
+    dphi = sum(Wt[b] * (c_ref_lt(W_MKT, s["ref"]) - c_ref_lt(W_LOW, s["ref"]))
                for b, s in books.items() if s["side"] == LOANS_SIDE and s.get("phi")) / dk
     if dphi == 0.0:
         raise ControlInputError("передача не определена: D = 0")
@@ -1184,9 +1224,9 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
         raise ControlInputError("nii.phi_split вне [0; 1] (М прил. A)")
     if bool(books[RETAIL_CURRENT].get("phi")) != bool(books[RETAIL_TERM].get("phi")):
         raise ControlInputError("флаг phi у книг средств ФЛ разный (М§4.5)")
-    phi_a_w = {b: E0[b] / iea for b, s in books.items() if s["side"] == LOANS_SIDE and s.get("phi")}
+    phi_a_w = {b: Wt[b] for b, s in books.items() if s["side"] == LOANS_SIDE and s.get("phi")}
     a_sum = sum(phi_a_w.values())
-    l_sum = sum(E0[b] / iea for b, s in books.items() if s["side"] != LOANS_SIDE and s.get("phi"))
+    l_sum = sum(Wt[b] for b, s in books.items() if s["side"] != LOANS_SIDE and s.get("phi"))
     if p_split > 0.0 and a_sum == 0.0:
         raise ControlInputError("nii.phi_split > 0 без актива с phi (М§4.5)")
     if p_split < 1.0 and l_sum == 0.0:
@@ -1218,9 +1258,9 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
                 val = r_w + c_s_lt(b) + (sigma0 if sp.get("lt_shift") else 0.0)
                 if sp.get("phi"):
                     val -= phi_a * (r_w - c_ref_lt(ref_w, sp["ref"]))
-                tot += E0[b] / iea * val
+                tot += Wt[b] * val
                 continue
-            wgt = l_r * c if b == RETAIL_CURRENT else l_r * (1.0 - c) if b == RETAIL_TERM else E0[b] / iea
+            wgt = l_r * c if b == RETAIL_CURRENT else l_r * (1.0 - c) if b == RETAIL_TERM else Wt[b]
             tot -= wgt * (c_cost_lt(b, r_w, sigma0_l) + (phi_l * x_lt[w] if sp.get("phi") else 0.0))
         return tot - dia * l_r
 
@@ -1234,8 +1274,8 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
     sec = c_bnum(book, "volumes.securities_share_of_liquid")
     margin = {}
     for w in ids:
-        yld = (sum(E0[b] * (c_ref_lt(w, books[b]["ref"]) + lt_spread[b][w]) for b in credit)
-               / sum(E0[b] for b in credit))
+        yld = (sum(Wt[b] * (c_ref_lt(w, books[b]["ref"]) + lt_spread[b][w]) for b in credit)
+               / sum(Wt[b] for b in credit))
         risk = cor_norm + kap * c_kappa_spread(book, w, yl, ql)
         bal = (sec * (c_ref_lt(w, books[SECURITIES]["ref"]) + c_s_lt(SECURITIES))
                + (1.0 - sec) * (c_ref_lt(w, books[LIQUIDITY]["ref"]) + c_s_lt(LIQUIDITY)))
@@ -1259,6 +1299,7 @@ def c_transmission_ctl(book: dict, A: dict) -> dict:
             "target_eng": target, "t_real": t_real, "t_local": t_loc,
             "level_world": level_w or ref_w, "nss_level": nss0[level_w or ref_w],
             "nss_ref": nss0[ref_w], "nss": nss0, "key_lt": key_lt, "iea0": iea,
+            "weights": Wt, "weights_quarters": w_quarters,
             "d_phi": dphi, "t_real_phi0": t0, "pairs": pairs, "roe_equiv": t_star * scale,
             "roe_equiv_pairs": {k: None if v is None else v * scale for k, v in pairs.items()}}
 

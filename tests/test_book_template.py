@@ -415,10 +415,12 @@ def test_lead_decisions_on_margin_volumes_and_capital_are_in_the_book(book):
     клетки, надбавка T2 и распределения акционеру за концом сетки."""
     nii = book["nii"]
     # книга 1.0: доля сжатия и её ось — запись переноса на якорь 3К (решение ведущего Р4: 0,38 / 0,76 на структуре 2К);
-    # реализованная передача −0,0115 (№ 5, п. 3.4) — на средних весах окна Р8, ключ книги — на весах якоря (Р13: запись листа)
+    # реализованная передача −0,0115 (№ 5, п. 3.4) — на средних весах окна Р8; книга 1.1: решатель стоит на тех же весах
+    # (nii.transmission.weights: window), ключ книги — сама реализованная передача (обход Р13 снят: сдвиг ноль)
     realized = _derive_record()["realized"]
     assert nii["phi_split"] == 0.376982 and realized["centre"] == -0.0115
-    assert nii["transmission"]["target"] == realized["target"] == -0.030828
+    assert nii["transmission"]["weights"] == "window" and realized["weights_mode"] == "window" and realized["shift"] == 0.0
+    assert nii["transmission"]["target"] == realized["target"] == -0.0115
     axes = {a["paths"][0]: a for a in book["valuation"]["uncertainty"]["axes"]}
     assert (axes["nii.phi_split"]["low"], axes["nii.phi_split"]["high"]) == (0.0, 0.756982)
     v = book["volumes"]

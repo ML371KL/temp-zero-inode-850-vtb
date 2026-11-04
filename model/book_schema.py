@@ -721,9 +721,10 @@ SPEC = Obj({
     }, optional=("kappa_reference_world",)),
     "nii": Obj({
         "books": MapOf("<b>", NII_BOOK),
-        # `level_world` — мир, стационарную маржу которого задаёт ключ цели ЧПМ; нет ключа — мир-опора решателя
+        # `level_world` — мир, стационарную маржу которого задаёт ключ цели ЧПМ; нет ключа — мир-опора решателя;
+        # `weights` — веса книг решателя: структура якоря (`anchor`) или среднее окна четырёх концов кварталов (`window`, М§4.5)
         "transmission": Obj({"target": NUM, "reference_world": STR, "fd_step": NUM,
-                             "weights": Enum("anchor"), "level_world": STR}, optional=("level_world",)),
+                             "weights": Enum("anchor", "window"), "level_world": STR}, optional=("level_world",)),
         "nim_lt_target_mgmt": NUM,
         "sigma0_split": NUM,
         "phi_split": NUM,

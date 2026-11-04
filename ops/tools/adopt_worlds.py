@@ -856,7 +856,9 @@ def write_report(rep: dict, path: Path) -> None:
     md += ["## Шаги", ""] + [f"- {s['id']}: {s['status']} ({s.get('seconds', '?')} с)"
                              + (f" — {s['reason'].splitlines()[0]}" if s.get("reason") else "")
                              + (f"; {'; '.join(x[5:].strip() for x in s['said'])}" if s.get("said") else "")
-                             for s in rep["steps"]]
+                             + "".join(f"; круг {r['round']}, {r['id']}: {'; '.join(x[5:].strip() for x in r['said'])}"
+                                       for r in s.get("steps") or [] if isinstance(r, dict) and r.get("said"))
+                             for s in rep["steps"]]                  # у цикла (loop) — строки ИТОГ шагов тела по кругам
     if "tree_changes" in (rep.get("git") or {}):
         ch = rep["git"]["tree_changes"]
         md += ["", "## Дерево после прогона", ""] + ([f"- {p}" for p in ch] or ["- без изменений"])

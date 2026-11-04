@@ -32,7 +32,9 @@
 1. **Шаблон.** Правка `assumptions_template.yaml`; в шаблоне поднять `meta.version`. `meta.date` — дата книги: день
    цены, кривых и оценки (вместе с ней — `meta.valuation_date`, `meta.market_price` и зерно полосы). При
    перезаякоривании — `meta.facts_date`, `anchor_period`, `first_period` вместе с фактами `data/facts/`.
-2. **Миры и надстройка.** Миры пересобираются только вместе с книгой-источником семейства: новая запись
+2. **Миры и надстройка** — одной командой `python -B ops/tools/adopt_worlds.py --version <v>` по манифесту
+   `worlds_dependents.yaml` (всё ниже она делает сама; руками — тексты гейтов, пороги и проза). Миры пересобираются
+   только вместе с книгой-источником семейства: новая запись
    `worlds_source.json` (+ `.csv`) — побайтово, `worlds_recipe.py --check` обязан её воспроизводить. Надстройка —
    `python -B data/assumptions/evidence/worlds_bank/build_overlay.py`.
 3. **Сборка.** `python -B data/assumptions/build_assumptions.py` — пишет `assumptions.yaml` и `assumptions.json`.
